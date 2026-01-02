@@ -1,0 +1,23 @@
+{ "frames": [
+   {
+    "filename": "player_bigger.ase",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 2, "w": 8, "h": 10 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.x-dev",
+  "image": "player_bigger.png",
+  "format": "RGBA8888",
+  "size": { "w": 10, "h": 12 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" }
+  ]
+ }
+}

@@ -115,6 +115,7 @@ end
 
 MOUSE_X = 0
 MOUSE_Y = 0
+GAME_FRAME = 0
 
 Debug = {
     enabled = false,

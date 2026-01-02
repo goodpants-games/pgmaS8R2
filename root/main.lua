@@ -63,6 +63,7 @@ local function update_display_fit()
 end
 
 local update_frametime = 0.0
+local dt_accum = 00.
 
 function love.update(dt)
     local start = love.timer.getTime()
@@ -76,6 +77,40 @@ function love.update(dt)
     
     Input.update()
     sceneman.update(dt)
+
+    -- dt snap calculation
+    -- https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
+    local dt_to_accum = dt
+    local DT_SNAP_EPSILON = 0.002
+    local tick_len = GAME_TICK_LENGTH
+
+    if math.abs(dt - tick_len) < DT_SNAP_EPSILON then -- 60 fps?
+        dt_to_accum = tick_len
+    elseif math.abs(dt - tick_len * 2.0) < DT_SNAP_EPSILON then -- 30 fps?
+        dt_to_accum = tick_len * 2.0
+    elseif math.abs(dt - tick_len * 0.5) < DT_SNAP_EPSILON then -- 120 fps?
+        dt_to_accum = tick_len * 0.5
+    elseif math.abs(dt - tick_len * 0.25) < DT_SNAP_EPSILON then -- 240 fps?
+        dt_to_accum = tick_len * 0.25
+    end
+
+    local iter = 1
+    dt_accum = dt_accum + dt_to_accum
+    while dt_accum >= tick_len do
+        if iter > 8 then
+            print("too many ticks in one frame!")
+            dt_accum = dt_accum % tick_len
+            break
+        end
+        
+        sceneman.dispatch("tick")
+
+        dt_accum = dt_accum - tick_len
+        iter=iter+1
+        GAME_FRAME = GAME_FRAME + 1
+    end
+
+    sceneman.dispatch("post_tick")
 
     update_frametime = love.timer.getTime() - start
 end

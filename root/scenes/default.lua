@@ -1,10 +1,36 @@
 local scene = require("sceneman").scene()
 local fontres = require("fontres")
+local Sprite = require("sprite")
+local Game = require("game")
+local tiled = require("tiled")
+
+local self
+
+function scene.load()
+    self = {}
+    self.game = Game()
+
+    self.player = self.game:new_entity()
+        :give("position", 12.0, 12.0)
+        :give("sprite", self.game.res:new_sprite("player"))
+end
+
+function scene.unload()
+    self.game:release()
+    self = nil
+end
+
+function scene.update(dt)
+    self.game:update(dt)
+end
+
+---@diagnostic disable-next-line: inject-field
+function scene.tick()
+    self.game:tick()
+end
 
 function scene.draw()
-    Lg.setFont(fontres.monogram)
-    Lg.setColor(1, 1, 1)
-    Lg.print("Hello, world!")
+    self.game:draw()
 end
 
 return scene
