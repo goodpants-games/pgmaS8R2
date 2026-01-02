@@ -10,7 +10,52 @@ local display_ox = 0.0
 local display_oy = 0.0
 local display_scale = 1.0
 
-local font = Lg.newFont()
+local font = Lg.newFont("res/fonts/monogram.ttf", 16, "mono", 1.0)
+
+local WindowedAnalyzer = batteries.class()
+function WindowedAnalyzer:new()
+    ---@private
+    self._time_passed = 0.0
+    ---@private
+    self._dt_accum = 0.0
+    ---@private
+    self._dt_max = 0.0
+    ---@private
+    self._samples = 0
+
+    self.dt_max = 0.0
+    self.dt_avg = 0.0
+end
+
+---@param elapsed number
+function WindowedAnalyzer:add_sample(elapsed)
+    self._dt_accum = self._dt_accum + elapsed
+    if elapsed > self._dt_max then
+        self._dt_max = elapsed
+    end
+
+    self._samples = self._samples + 1.0
+end
+
+---@param dt number
+function WindowedAnalyzer:update(dt)
+    self._time_passed = self._time_passed + dt
+    if self._time_passed > 0.5 then
+        self._time_passed = self._time_passed % 0.5
+
+        self.dt_max = self._dt_max
+        self.dt_avg = self._dt_accum / self._samples
+
+        self._dt_accum = 0.0
+        self._dt_max = 0.0
+        self._samples = 0
+    end
+end
+
+local anl_update = WindowedAnalyzer()
+local anl_draw = WindowedAnalyzer()
+local anl_total = WindowedAnalyzer()
+local anl_mem = WindowedAnalyzer()
 
 function love.load(args)
     love.keyboard.setTextInput(false)
@@ -62,13 +107,14 @@ local function update_display_fit()
     -- print(display_ox, display_oy, display_scale)
 end
 
-local update_frametime = 0.0
-local dt_accum = 00.
+local dt_accum = 0.0
 
 function love.update(dt)
     local start = love.timer.getTime()
 
     batteries.manual_gc(1e-1)
+    anl_mem:add_sample(collectgarbage("count"))
+
     Debug.draw.enabled = Debug.enabled
 
     update_display_fit()
@@ -86,12 +132,8 @@ function love.update(dt)
 
     if math.abs(dt - tick_len) < DT_SNAP_EPSILON then -- 60 fps?
         dt_to_accum = tick_len
-    elseif math.abs(dt - tick_len * 2.0) < DT_SNAP_EPSILON then -- 30 fps?
-        dt_to_accum = tick_len * 2.0
     elseif math.abs(dt - tick_len * 0.5) < DT_SNAP_EPSILON then -- 120 fps?
         dt_to_accum = tick_len * 0.5
-    elseif math.abs(dt - tick_len * 0.25) < DT_SNAP_EPSILON then -- 240 fps?
-        dt_to_accum = tick_len * 0.25
     end
 
     local iter = 1
@@ -112,7 +154,13 @@ function love.update(dt)
 
     sceneman.dispatch("post_tick")
 
-    update_frametime = love.timer.getTime() - start
+    anl_update:update(dt)
+    anl_draw:update(dt)
+    anl_total:update(dt)
+    anl_mem:update(dt)
+
+    anl_update:add_sample(love.timer.getTime() - start)
+    anl_total:add_sample(dt)
 end
 
 function love.draw()
@@ -133,15 +181,17 @@ function love.draw()
     Lg.draw(display_canvas, display_ox, display_oy, 0, display_scale, display_scale)
 
     local draw_frametime = love.timer.getTime() - draw_ts
+    anl_draw:add_sample(draw_frametime)
 
     -- debug text
     if Debug.enabled then
         Lg.push("all")
         Lg.setColor(1, 1, 1)
         Lg.setFont(font)
-        Lg.print(("%.1f Kb"):format(collectgarbage("count")), 1, 1)
-        Lg.print(("update: %.1f ms"):format(update_frametime * 1000), 1, 11)
-        Lg.print(("draw: %.1f ms"):format(draw_frametime * 1000), 1, 21)
+        Lg.print(("mem: %.2f MiB / %.2f MiB"):format(anl_mem.dt_avg / 1000, anl_mem.dt_max / 1000), 1, 1)
+        Lg.print(("update: %.1f ms / %.1f ms"):format(anl_update.dt_avg * 1000, anl_update.dt_max * 1000), 1, 11)
+        Lg.print(("draw: %.1f ms / %.1f ms"):format(anl_draw.dt_avg * 1000, anl_draw.dt_max * 1000), 1, 21)
+        Lg.print(("frame: %.1f ms / %.1f ms"):format(anl_total.dt_avg * 1000, anl_total.dt_max * 1000), 1, 31)
         Lg.pop()
     end
 end

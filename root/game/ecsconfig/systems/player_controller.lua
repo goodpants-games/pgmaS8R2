@@ -13,7 +13,10 @@ function system:update(dt)
 
         local move_x, move_y = input:get("move")
         player_control.move_x = move_x
-        player_control.jump_trigger = input:pressed("player_jump")
+
+        if input:pressed("player_jump") then
+            player_control.jump_trigger = true
+        end
     end
 end
 
@@ -27,7 +30,7 @@ function system:tick()
 
             if player_control.jump_trigger then
                 player_control.jump_trigger = false
-                actor.jump_trigger = 10
+                actor.jump_trigger = 6
             end
         end
     end
