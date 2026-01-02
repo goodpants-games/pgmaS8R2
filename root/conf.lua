@@ -54,8 +54,8 @@ GAME_TICK_LENGTH = 1.0 / 60.0
 function love.conf(t)
     t.version = "11.4"
     t.identity = "pkhead_pgmaS8R2"
-    t.window.width = DISPLAY_WIDTH * 4
-    t.window.height = DISPLAY_HEIGHT * 4
+    t.window.width = DISPLAY_WIDTH * 6
+    t.window.height = DISPLAY_HEIGHT * 6
     t.window.resizable = true
     t.window.vsync = 1
     t.window.highdpi = true

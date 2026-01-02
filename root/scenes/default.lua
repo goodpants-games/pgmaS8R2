@@ -12,7 +12,14 @@ function scene.load()
 
     self.player = self.game:new_entity()
         :give("position", 12.0, 12.0)
+        :give("velocity")
         :give("sprite", self.game.res:new_sprite("player"))
+        :give("collision", 6.0, 8.0)
+        :give("actor")
+        :give("player_control")
+    
+    self.player.sprite.ox = -1
+    self.player.sprite.oy = -1
 end
 
 function scene.unload()
@@ -27,6 +34,8 @@ end
 ---@diagnostic disable-next-line: inject-field
 function scene.tick()
     self.game:tick()
+    self.game.cam.x = self.player.position.x
+    self.game.cam.y = self.player.position.y
 end
 
 function scene.draw()

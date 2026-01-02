@@ -65,7 +65,14 @@ function Game:new()
 
     self.ecs_world = Concord.world()
     self.ecs_world.game = self
-    self.ecs_world:addSystems(ecsconfig.systems.render)
+    self.ecs_world:addSystems(
+        ecsconfig.systems.player_controller,
+        ecsconfig.systems.actor,
+        ecsconfig.systems.physics,
+        ecsconfig.systems.render)
+
+    -- px/ticks^2
+    self.gravity = 0.1
 
     self.cam = {
         x = 0.0,
@@ -84,24 +91,42 @@ end
 
 ---@param dt number
 function Game:update(dt)
+    local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
+    local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
+    Debug.draw:push()
+    Debug.draw:translate(-cam_x, -cam_y)
+
     self.ecs_world:emit("update", dt)
+
+    Debug.draw:pop()
 end
 
 function Game:tick()
+    local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
+    local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
+    Debug.draw:push()
+    Debug.draw:translate(-cam_x, -cam_y)
+
     self.ecs_world:emit("tick")
+
+    Debug.draw:pop()
 end
 
 function Game:draw()
-    local cam_x = math.round(self.cam.x)
-    local cam_y = math.round(self.cam.y)
+    local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
+    local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
 
     Lg.push()
     Lg.translate(-cam_x, -cam_y)
+
+    Debug.draw:push()
+    Debug.draw:translate(-cam_x, -cam_y)
 
     self.room:draw()
     self.ecs_world:emit("draw")
 
     Lg.pop()
+    Debug.draw:pop()
 end
 
 return Game

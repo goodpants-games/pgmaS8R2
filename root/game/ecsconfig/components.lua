@@ -24,18 +24,20 @@ end)
 
 Concord.component("actor", function(cmp)
     cmp.move_x = 0
+
+    cmp.jump_trigger = 0
     
     -- px/tick
-    cmp.move_speed = 1.4
-    cmp.velocity_damp = 0.9
+    cmp.move_speed = 0.3
+    cmp.velocity_damp = 0.8
+    cmp.jump_velocity = 2.0
+
+    cmp.grounded = false
 end)
 
 Concord.component("player_control", function(cmp)
     cmp.move_x = 0.0
-
-    cmp.trigger_jump = 0
-    -- cmp.trigger_attack = false
-
+    cmp.jump_trigger = false
     cmp.state = "move"
 end)
 

@@ -9,7 +9,7 @@
             "type": "lua-local",
             "request": "launch",
             "program": {
-                "command": "lovec_l52"
+                "command": "lovec"
             },
             "cwd": "${workspaceFolder}/root",
             "args": [".", "--debug"],

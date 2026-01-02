@@ -28,35 +28,35 @@ end
 function DebugDraw:translate(x, y)
     if not self.enabled then return end
     table.insert(self._draw_list, function()
-        Lg.translate(x, y)
+        Lg.translate(math.round(x), math.round(y))
     end)
 end
 
 function DebugDraw:point(x, y)
     if not self.enabled then return end
     table.insert(self._draw_list, function()
-        Lg.points(x + 0.5, y + 0.5)
+        Lg.points(math.round(x) + 0.5, math.round(y) + 0.5)
     end)
 end
 
 function DebugDraw:rect_lines(x, y, w, h)
     if not self.enabled then return end
     table.insert(self._draw_list, function()
-        Lg.rectangle("line", x + 0.5, y + 0.5, w, h)
+        Lg.rectangle("line", math.round(x) + 0.5, math.round(y) + 0.5, math.round(w), math.round(h))
     end)
 end
 
 function DebugDraw:line(x0, y0, x1, y1)
     if not self.enabled then return end
     table.insert(self._draw_list, function()
-        Lg.line(x0 + 0.5, y0 + 0.5, x1 + 0.5, y1 + 0.5)
+        Lg.line(math.round(x0) + 0.5, math.round(y0) + 0.5, math.round(x1) + 0.5, math.round(y1) + 0.5)
     end)
 end
 
 function DebugDraw:circle_lines(x, y, r)
     if not self.enabled then return end
     table.insert(self._draw_list, function()
-        Lg.circle("line", math.floor(x), math.floor(y), r)
+        Lg.circle("line", math.round(x), math.round(y), r)
     end)
 end
 
