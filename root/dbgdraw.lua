@@ -2,6 +2,7 @@
 ---@field private _draw_list function[]
 ---@overload fun():DebugDraw
 local DebugDraw = batteries.class({ name = "DebugDraw" })
+local fontres = require("fontres")
 
 function DebugDraw:new()
     self.enabled = true
@@ -60,10 +61,19 @@ function DebugDraw:circle_lines(x, y, r)
     end)
 end
 
+function DebugDraw:text(text, x, y)
+    if not self.enabled then return end
+    text = tostring(text)
+    table.insert(self._draw_list, function()
+        Lg.print(text, math.round(x), math.round(y))
+    end)
+end
+
 function DebugDraw:flush()
-    Lg.push()
+    Lg.push("all")
     Lg.origin()
     Lg.setColor(1, 1, 1)
+    Lg.setFont(fontres.monogram)
     for _, v in ipairs(self._draw_list) do
         v()
     end

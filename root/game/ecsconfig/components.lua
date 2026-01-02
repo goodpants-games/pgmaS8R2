@@ -20,6 +20,7 @@ Concord.component("collision", function(cmp, w, h)
     cmp.w = w
     cmp.h = h
     cmp.group = consts.COLGROUP_DEFAULT
+    cmp.mask = consts.COLGROUP_ALL
 end)
 
 Concord.component("actor", function(cmp)

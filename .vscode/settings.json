@@ -1,7 +1,7 @@
 {
     "Lua.workspace.library": [
         "${addons}/love2d/module/library",
-        "${workspaceFolder}/batteriesdef"
+        "${workspaceFolder}/luals_def"
     ],
     "Lua.runtime.path": [
         "root/?.lua",

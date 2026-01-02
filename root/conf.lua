@@ -48,7 +48,7 @@ if setfenv == nil then
 end
 
 DISPLAY_WIDTH = 120
-DISPLAY_HEIGHT = 90
+DISPLAY_HEIGHT = 88
 GAME_TICK_LENGTH = 1.0 / 60.0
 
 function love.conf(t)
