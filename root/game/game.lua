@@ -1,6 +1,7 @@
 local Room = require("game.room")
 local Sprite = require("sprite")
 local Concord = require("concord")
+local fontres = require("fontres")
 
 local ecsconfig = require("game.ecsconfig")
 
@@ -78,6 +79,13 @@ function Game:new()
         x = 0.0,
         y = 0.0
     }
+
+    self.player =
+        self:new_entity()
+        :assemble(ecsconfig.asm.entity.player, 12.0, 12.0,
+                  self.res:new_sprite("player"))
+    self.player.sprite.ox = -1
+    self.player.sprite.oy = -1
 end
 
 function Game:release()
@@ -108,6 +116,8 @@ function Game:tick()
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.ecs_world:emit("tick")
+    self.cam.x = math.floor(self.player.position.x / 120) * 120 + DISPLAY_WIDTH / 2.0
+    self.cam.y = math.floor(self.player.position.y / 88) * 88 + DISPLAY_HEIGHT / 2.0
 
     Debug.draw:pop()
 end
@@ -127,6 +137,19 @@ function Game:draw()
 
     Lg.pop()
     Debug.draw:pop()
+
+    self:_draw_ui()
+end
+
+---@private
+function Game:_draw_ui()
+    local mana_percent = self.player.mana.value / self.player.mana.max
+    Lg.setColor(1, 0, 0)
+    Lg.rectangle("fill", 0, 0, math.round(DISPLAY_WIDTH * mana_percent), 1)
+
+    Lg.setColor(1, 1, 1)
+    Lg.setFont(fontres.retro8x8)
+    Lg.print("Hi")
 end
 
 return Game

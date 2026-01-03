@@ -44,10 +44,14 @@ function system:tick()
         if player_control.action_trigger then
             player_control.action_trigger = false
 
-            game:new_entity()
-                :give("position", position.x, position.y - 6)
-                :give("collision", 16, 4)
-                :give("sprite")
+            local mana = assert(ent.mana, "no 'mana' component")
+            if mana.value > 0 then
+                mana.value = mana.value - 1
+                game:new_entity()
+                    :give("position", position.x, position.y - 6)
+                    :give("collision", 16, 4)
+                    :give("sprite")
+            end
         end
     end
 end

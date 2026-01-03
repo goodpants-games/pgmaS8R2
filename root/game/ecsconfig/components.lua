@@ -43,6 +43,11 @@ Concord.component("player_control", function(cmp)
     cmp.state = "move"
 end)
 
+Concord.component("mana", function(cmp, max, init)
+    cmp.value = max
+    cmp.max = init or max
+end)
+
 Concord.component("health", function(cmp, max, init)
     cmp.value = max
     cmp.max = init or max
