@@ -29,9 +29,9 @@ Concord.component("actor", function(cmp)
     cmp.jump_trigger = 0
     
     -- px/tick
-    cmp.move_speed = 0.3
+    cmp.move_speed = 0.5
     cmp.velocity_damp = 0.8
-    cmp.jump_velocity = 2.0
+    cmp.jump_velocity = 3.3
 
     cmp.grounded = false
 end)

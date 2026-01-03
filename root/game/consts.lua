@@ -1,7 +1,7 @@
 local consts = {}
 
-consts.TILE_WIDTH = 8
-consts.TILE_HEIGHT = 8
+consts.TILE_WIDTH = 16
+consts.TILE_HEIGHT = 16
 
 consts.COLGROUP_DEFAULT = 0x1
 consts.COLGROUP_ACTOR   = 0x2

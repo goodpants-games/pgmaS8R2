@@ -73,7 +73,7 @@ function Game:new()
         ecsconfig.systems.render)
 
     -- px/ticks^2
-    self.gravity = 0.1
+    self.gravity = 0.14
 
     self.cam = {
         x = 0.0,
@@ -82,10 +82,15 @@ function Game:new()
 
     self.player =
         self:new_entity()
-        :assemble(ecsconfig.asm.entity.player, 12.0, 12.0,
-                  self.res:new_sprite("player"))
+        :assemble(ecsconfig.asm.entity.player, 24.0, 24.0)
+        :give("sprite", self.res:new_sprite("player"))
+
     self.player.sprite.ox = -1
     self.player.sprite.oy = -1
+
+    self:new_entity()
+        :assemble(ecsconfig.asm.pushable_block, 40, 24)
+        :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
 end
 
 function Game:release()
@@ -116,8 +121,8 @@ function Game:tick()
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.ecs_world:emit("tick")
-    self.cam.x = math.floor(self.player.position.x / 120) * 120 + DISPLAY_WIDTH / 2.0
-    self.cam.y = math.floor(self.player.position.y / 88) * 88 + DISPLAY_HEIGHT / 2.0
+    self.cam.x = math.floor(self.player.position.x / 240) * 240 + DISPLAY_WIDTH / 2.0
+    self.cam.y = math.floor(self.player.position.y / 176) * 176 + DISPLAY_HEIGHT / 2.0
 
     Debug.draw:pop()
 end
@@ -147,9 +152,16 @@ function Game:_draw_ui()
     Lg.setColor(1, 0, 0)
     Lg.rectangle("fill", 0, 0, math.round(DISPLAY_WIDTH * mana_percent), 1)
 
+    Lg.push()
+    Lg.translate(0, DISPLAY_HEIGHT - 8)
+
+    Lg.setColor(0, 0, 0)
+    Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 8)
     Lg.setColor(1, 1, 1)
     Lg.setFont(fontres.retro8x8)
     Lg.print("Hi")
+
+    Lg.pop()
 end
 
 return Game

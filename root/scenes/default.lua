@@ -7,6 +7,7 @@ local tiled = require("tiled")
 local self
 
 function scene.load()
+    Lg.setBackgroundColor(batteries.colour.unpack_rgb(0x0c0525))
     self = {}
     self.game = Game()
 end

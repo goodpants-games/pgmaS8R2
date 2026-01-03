@@ -33,7 +33,9 @@ function system:draw()
             drawable:draw(draw_x, draw_y, rotv, sprite.sx, sprite.sy)
         else
             ---@cast drawable love.Image
-            Lg.draw(drawable, draw_x, draw_y, rotv, sprite.sx, sprite.sy)
+            Lg.draw(drawable, draw_x, draw_y, rotv, sprite.sx, sprite.sy,
+                    math.round(drawable:getWidth() / 2.0),
+                    math.round(drawable:getHeight() / 2.0))
         end
     end
 end

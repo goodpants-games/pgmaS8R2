@@ -371,10 +371,10 @@ function system:tick()
         end
 
         col._col_proc = true
-        col._substeps = math.ceil(math.sqrt(vel.x * vel.x + vel.y * vel.y) / 1.0)
+        col._substeps = math.ceil(math.sqrt(vel.x * vel.x + vel.y * vel.y) / 3.0)
         col._substep_idx = 1
         col._iter = 0
-
+        
         if col._substeps > 10 then
             print("entity exceeded substep limit!")
             col._substeps = 10
