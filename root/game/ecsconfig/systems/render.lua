@@ -20,7 +20,15 @@ function system:draw()
         local draw_x = math.round(position.x + sprite.ox)
         local draw_y = math.round(position.y + sprite.oy)
 
-        if Sprite.isSprite(drawable) then
+        Lg.setColor(sprite.r, sprite.g, sprite.b, sprite.a)
+
+        if not drawable then
+            local collision = assert(ent.collision, "expected collision component")
+            Lg.rectangle("fill",
+                         draw_x - collision.w / 2.0,
+                         draw_y - collision.h / 2.0,
+                         collision.w, collision.h)
+        elseif Sprite.isSprite(drawable) then
             ---@cast drawable pklove.Sprite
             drawable:draw(draw_x, draw_y, rotv, sprite.sx, sprite.sy)
         else

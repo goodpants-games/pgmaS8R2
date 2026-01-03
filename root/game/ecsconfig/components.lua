@@ -39,6 +39,7 @@ end)
 Concord.component("player_control", function(cmp)
     cmp.move_x = 0.0
     cmp.jump_trigger = false
+    cmp.action_trigger = false
     cmp.state = "move"
 end)
 

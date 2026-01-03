@@ -17,13 +17,20 @@ function system:update(dt)
         if input:pressed("player_jump") then
             player_control.jump_trigger = true
         end
+
+        if input:pressed("player_action") then
+            player_control.action_trigger = true
+        end
     end
 end
 
 function system:tick()
+    local game = self:getWorld().game --[[@as game.Game]]
+
     for _, ent in ipairs(self.pool) do
         local player_control = ent.player_control
         local actor = ent.actor
+        local position = assert(ent.position, "player_control has no position component")
 
         if actor then
             actor.move_x = player_control.move_x
@@ -32,6 +39,15 @@ function system:tick()
                 player_control.jump_trigger = false
                 actor.jump_trigger = 6
             end
+        end
+
+        if player_control.action_trigger then
+            player_control.action_trigger = false
+
+            game:new_entity()
+                :give("position", position.x, position.y + 4)
+                :give("collision", 16, 4)
+                :give("sprite")
         end
     end
 end
