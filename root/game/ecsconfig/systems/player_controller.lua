@@ -45,7 +45,7 @@ function system:tick()
             player_control.action_trigger = false
 
             game:new_entity()
-                :give("position", position.x, position.y + 4)
+                :give("position", position.x, position.y - 6)
                 :give("collision", 16, 4)
                 :give("sprite")
         end

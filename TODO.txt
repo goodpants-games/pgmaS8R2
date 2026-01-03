@@ -1,0 +1,3 @@
+- limited water supply?
+- also i guess there's "safe points" scattered frequently across the world,
+  which resets your freeze meter.
