@@ -20,6 +20,10 @@ Concord.component("damping", function(cmp, xf, yf)
     cmp.y = yf or 1.0
 end)
 
+Concord.component("gmult", function(cmp, mult)
+    cmp.value = mult or 1.0
+end)
+
 Concord.component("mass", function(cmp, v)
     cmp.value = v or 1.0
 end)
@@ -35,6 +39,7 @@ end)
 
 Concord.component("actor", function(cmp)
     cmp.move_x = 0
+    cmp.face_dir = 1
 
     cmp.jump_trigger = 0
     
@@ -48,7 +53,8 @@ end)
 Concord.component("player_control", function(cmp)
     cmp.move_x = 0.0
     cmp.jump_trigger = false
-    cmp.action_trigger = false
+    cmp.up_drop_trigger = false
+    cmp.side_drop_trigger = false
     cmp.state = "move"
 end)
 

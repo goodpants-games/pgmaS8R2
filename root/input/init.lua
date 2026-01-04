@@ -11,7 +11,10 @@ local base_controls = {
     down = {'axis:lefty+', 'button:dpdown'},
 
     player_jump = {'button:a'},
-    player_action = {'button:b'},
+    player_action1 = {'button:b'},
+    player_action2 = {'button:x'},
+    player_lb = {"button:leftshoulder"},
+    player_rb = {"button:rightshoulder"}
 }
 
 local function get_new_baton_config()
@@ -26,6 +29,7 @@ local function get_new_baton_config()
     tinsert(controls.down, "key:down")
 
     if input_mode == "wasd" then
+        error("wasd not supported yet")
         tinsert(controls.left, "key:a")
         tinsert(controls.right, "key:d")
         tinsert(controls.up, "key:w")
@@ -34,7 +38,10 @@ local function get_new_baton_config()
         tinsert(controls.player_action, "key:;")
     elseif input_mode == "arrow" then
         tinsert(controls.player_jump, "key:z")
-        tinsert(controls.player_action, "key:x")
+        tinsert(controls.player_action1, "key:x")
+        tinsert(controls.player_action2, "key:c")
+        tinsert(controls.player_lb, "key:a")
+        tinsert(controls.player_rb, "key:s")
     else
         error("invalid input mode " .. input_mode)
     end

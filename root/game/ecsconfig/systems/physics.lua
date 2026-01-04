@@ -390,8 +390,15 @@ function system:tick()
         local pos = ent.position
         local vel = ent.velocity
         local damping = ent.damping
+        local gmult = ent.gmult
 
-        vel.y = vel.y + game.gravity
+        local gmult_v = 1.0
+        if gmult then
+            gmult_v = gmult.value
+        end
+
+        vel.y = vel.y + game.gravity * gmult_v
+        
         if damping then
             vel.x = vel.x * damping.x
             vel.y = vel.y * damping.y

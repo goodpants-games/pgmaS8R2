@@ -8,6 +8,10 @@ function system:tick()
         local velocity = ent.velocity
         local actor = ent.actor
 
+        if actor.move_x ~= 0.0 then
+            actor.face_dir = math.sign(actor.move_x)
+        end
+
         velocity.x = velocity.x + actor.move_x * actor.move_speed
 
         if actor.jump_trigger > 0 then

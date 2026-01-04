@@ -47,15 +47,15 @@ if setfenv == nil then
     end
 end
 
-DISPLAY_WIDTH = 240
-DISPLAY_HEIGHT = 184
+DISPLAY_WIDTH = 120
+DISPLAY_HEIGHT = 93
 GAME_TICK_LENGTH = 1.0 / 60.0
 
 function love.conf(t)
     t.version = "11.4"
     t.identity = "pkhead_pgmaS8R2"
-    t.window.width = DISPLAY_WIDTH * 3
-    t.window.height = DISPLAY_HEIGHT * 3
+    t.window.width = DISPLAY_WIDTH * 5
+    t.window.height = DISPLAY_HEIGHT * 5
     t.window.resizable = true
     t.window.vsync = 1
     t.window.highdpi = true

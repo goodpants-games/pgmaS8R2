@@ -18,8 +18,12 @@ function system:update(dt)
             player_control.jump_trigger = true
         end
 
-        if input:pressed("player_action") then
-            player_control.action_trigger = true
+        if input:pressed("player_lb") then
+            player_control.up_drop_trigger = true
+        end
+
+        if input:pressed("player_rb") then
+            player_control.side_drop_trigger = true
         end
     end
 end
@@ -41,21 +45,32 @@ function system:tick()
             end
         end
 
-        if player_control.action_trigger then
-            player_control.action_trigger = false
-
-            local mana = assert(ent.mana, "no 'mana' component")
-            if mana.value > 0 then
+        local mana = assert(ent.mana, "no 'mana' component")
+        if mana.value > 0 then
+            if player_control.side_drop_trigger then
                 mana.value = mana.value - 1
-                local platform =
+                local droplet =
                     game:new_entity()
-                        :give("position", math.round(position.x),
-                              math.round(position.y - 8))
-                        :give("collision", 8, 2)
-                        :give("sprite")
-                platform.collision.floor_only = true
+                        :give("position", position.x, position.y)
+                        :give("velocity", actor.face_dir * 1.0, -3.0)
+                        :give("gmult", 2)
+                        :give("behavior", "builder_droplet", position.y + 4.5)
+                        :give("sprite", game.res:get_image("res/graphics/waterdroplet.png"))
+            
+            elseif player_control.up_drop_trigger then
+                mana.value = mana.value - 1
+                local droplet =
+                    game:new_entity()
+                        :give("position", position.x, position.y)
+                        :give("velocity", 0, -3.0)
+                        :give("gmult", 2)
+                        :give("behavior", "builder_droplet", position.y - 8)
+                        :give("sprite", game.res:get_image("res/graphics/waterdroplet.png"))
             end
         end
+
+        player_control.side_drop_trigger = false
+        player_control.up_drop_trigger = false
     end
 end
 

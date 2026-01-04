@@ -68,6 +68,7 @@ function Game:new()
     self.ecs_world.game = self
     self.ecs_world:addSystems(
         ecsconfig.systems.player_controller,
+        ecsconfig.systems.behavior,
         ecsconfig.systems.actor,
         ecsconfig.systems.physics,
         ecsconfig.systems.render)
@@ -142,11 +143,9 @@ function Game:draw()
     local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
 
     Lg.push()
-    Lg.scale(2.0, 2.0)
     Lg.translate(-cam_x, -cam_y)
 
     Debug.draw:push()
-    Debug.draw:scale(2.0, 2.0)
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.room:draw()
@@ -160,18 +159,18 @@ end
 
 ---@private
 function Game:_draw_ui()
-    local mana_percent = self.player.mana.value / self.player.mana.max
-    Lg.setColor(1, 0, 0)
-    Lg.rectangle("fill", 0, 0, math.round(DISPLAY_WIDTH * mana_percent), 1)
+    -- local mana_percent = self.player.mana.value / self.player.mana.max
+    -- Lg.setColor(1, 0, 0)
+    -- Lg.rectangle("fill", 0, 0, math.round(DISPLAY_WIDTH * mana_percent), 1)
 
     Lg.push()
-    Lg.translate(0, DISPLAY_HEIGHT - 8)
+    Lg.translate(0, math.floor(DISPLAY_HEIGHT) - 5)
 
     Lg.setColor(0, 0, 0)
-    Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 8)
+    Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 5)
     Lg.setColor(1, 1, 1)
-    Lg.setFont(fontres.retrocaps8x8)
-    Lg.print("HP   WTR")
+    Lg.setFont(fontres.quinque)
+    Lg.print(("WTR:%i"):format(self.player.mana.value), 0, -1)
 
     Lg.pop()
 end
