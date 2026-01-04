@@ -671,12 +671,26 @@ function system:tick()
                 --     vel.y = vel.y + ny * pdot
                 -- end
 
-                if actor and ny < -FLOOR_ANGLE then
-                    actor.grounded = true
+                if ny < -FLOOR_ANGLE then
+                    if actor then
+                        actor.grounded = true
+                    end
+
+                    if e2 and e2.spring then
+                        print("spring A")
+                        vel.y = -e2.spring.yv
+                    end
                 end
 
-                if o_actor and ny > FLOOR_ANGLE then
-                    o_actor.grounded = true
+                if ny > FLOOR_ANGLE then
+                    if o_actor then
+                        o_actor.grounded = true
+                    end
+
+                    if e1.spring and o_vel then
+                        print("spring B")
+                        o_vel.y = -e1.spring.yv
+                    end
                 end
 
                 ::continue::

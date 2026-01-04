@@ -6,6 +6,8 @@ local BuilderDroplet = batteries.class {
 
 ---@param target_y number
 function BuilderDroplet:new(target_y)
+    self:super()
+    
     if not target_y then
         error("must provide target y position to droplet when constructing!")
     end

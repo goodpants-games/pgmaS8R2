@@ -1,10 +1,12 @@
 ---@class game.Room: batteries.Class
----@overload fun():game.Room
+---@overload fun(game:game.Game):game.Room
 local Room = batteries.class({ name = "game.Room" })
 local Tiled = require("tiled")
 local consts = require("game.consts")
+local ecsconfig = require("game.ecsconfig")
 
-function Room:new()
+---@param game game.Game
+function Room:new(game)
     self.tiled = Tiled.loadMap("res/maps/testmap.lua")
     assert(self.tiled.tilewidth == consts.TILE_WIDTH)
     assert(self.tiled.tileheight == consts.TILE_HEIGHT)
@@ -28,6 +30,28 @@ function Room:new()
             end
             i=i+1
         end
+    end
+
+    local obj_layer = self.tiled:getLayerByName("Objects")
+    if obj_layer and obj_layer.type ~= "objectgroup" then
+        obj_layer = nil
+    end
+    ---@cast obj_layer pklove.tiled.ObjectLayer?
+
+    if obj_layer then
+        for _, obj in ipairs(obj_layer.objects) do
+            if obj.type == "entity" then
+                assert(obj.shape == "rectangle")
+
+                local x = math.round(obj.x + obj.width / 2.0)
+                local y = math.round(obj.y + obj.height / 2.0)
+
+                game:new_entity()
+                    :assemble(ecsconfig.asm.entity[obj.name], game, x, y)
+            end
+        end
+    else
+        print("no objects")
     end
 end
 

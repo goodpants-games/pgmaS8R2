@@ -28,6 +28,10 @@ Concord.component("mass", function(cmp, v)
     cmp.value = v or 1.0
 end)
 
+Concord.component("spring", function(cmp, yv)
+    cmp.yv = assert(yv, "spring component must be initialized with a y-vel")
+end)
+
 -- collision hitbox
 Concord.component("collision", function(cmp, w, h)
     cmp.w = w

@@ -1,7 +1,7 @@
 ---@meta
 
 ---@class batteries.Class
----@field protected __super batteries.Class
+---@field protected __super batteries.Class|any
 local bclass = {}
 
 ---@param class any

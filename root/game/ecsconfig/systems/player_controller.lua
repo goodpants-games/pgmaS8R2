@@ -45,9 +45,12 @@ function system:tick()
             end
         end
 
+        player_control.did_spit = false
+
         local mana = assert(ent.mana, "no 'mana' component")
         if mana.value > 0 then
             if player_control.side_drop_trigger then
+                player_control.did_spit = true
                 mana.value = mana.value - 1
                 local droplet =
                     game:new_entity()
@@ -55,9 +58,10 @@ function system:tick()
                         :give("velocity", actor.face_dir * 1.0, -3.0)
                         :give("gmult", 2)
                         :give("behavior", "builder_droplet", position.y + 4.5)
-                        :give("sprite", game.res:get_image("res/graphics/waterdroplet.png"))
+                        :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
             
             elseif player_control.up_drop_trigger then
+                player_control.did_spit = true
                 mana.value = mana.value - 1
                 local droplet =
                     game:new_entity()
@@ -65,7 +69,7 @@ function system:tick()
                         :give("velocity", 0, -3.0)
                         :give("gmult", 2)
                         :give("behavior", "builder_droplet", position.y - 8)
-                        :give("sprite", game.res:get_image("res/graphics/waterdroplet.png"))
+                        :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
             end
         end
 

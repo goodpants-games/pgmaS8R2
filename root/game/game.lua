@@ -57,11 +57,11 @@ end
 
 
 ---@class game.Game: batteries.Class
+---@field player any
 ---@overload fun():game.Game
 local Game = batteries.class({ name = "game.Game" })
 
 function Game:new()
-    self.room = Room()
     self.res = ResourceManager()
 
     self.ecs_world = Concord.world()
@@ -81,25 +81,13 @@ function Game:new()
         y = 0.0
     }
 
-    self.player =
-        self:new_entity()
-        :assemble(ecsconfig.asm.entity.player, 12.0, 12.0)
-        :give("sprite", self.res:new_sprite("player"))
+    self.room = Room(self)
 
-    self.player.sprite.ox = -1
-    self.player.sprite.oy = -1
-
-    self:new_entity()
-        :assemble(ecsconfig.asm.pushable_block, 35.5, 44)
-        :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
-
-    self:new_entity()
-        :assemble(ecsconfig.asm.pushable_block, 35.5, 52)
-        :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
-
-    self:new_entity()
-        :assemble(ecsconfig.asm.pushable_block, 35.5, 60)
-        :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
+    if not self.player then
+        self.player =
+            self:new_entity()
+            :assemble(ecsconfig.asm.entity.player, self, 12.0, 12.0)
+    end
 end
 
 function Game:release()
