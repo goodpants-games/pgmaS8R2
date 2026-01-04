@@ -9,6 +9,8 @@ function asm.actor(e, x, y, w, h)
      :give("velocity")
      :give("collision", w, h)
      :give("actor")
+     :give("damping")
+     :give("mass", 1.0)
 
     e.collision.group = consts.COLGROUP_ACTOR
 end
@@ -17,6 +19,8 @@ function asm.pushable_block(e, x, y)
     e:give("position", x, y)
      :give("velocity")
      :give("collision", 8.0, 8.0)
+     :give("mass", 2.0)
+     :give("damping", 0.9)
 end
 
 function asm.entity.player(e, x, y)

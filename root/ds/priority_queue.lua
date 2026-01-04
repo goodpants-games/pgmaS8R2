@@ -103,10 +103,14 @@ local function heap_shift_down(heap, heap_count, cmp, idx)
 end
 
 ---@param value any
----@param priority integer
-function PriorityQueue:push(value, priority)
+---@param priority any
+function PriorityQueue:enqueue(value, priority)
     if value == nil then
-        error("bad argument #2 for 'push': value cannot be nil")
+        error("bad argument #2 for 'enqueue': value cannot be nil")
+    end
+
+    if priority == nil then
+        error("bad argument #3 for 'enqueue': priority cannot be nil")
     end
 
     local heap = self._heap
@@ -115,7 +119,8 @@ function PriorityQueue:push(value, priority)
     heap_shift_up(heap, self._cmp, #heap / 2 - 1)
 end
 
-function PriorityQueue:pop()
+---@return nil|any
+function PriorityQueue:dequeue()
     local heap = self._heap
     if heap[1] == nil then return nil end
     local value = heap[2]
@@ -135,7 +140,25 @@ end
 
 function PriorityQueue:is_empty()
     local heap = self._heap
-    return heap[1] ~= nil
+    return heap[1] == nil
+end
+
+---@param clear_existing_table boolean?
+function PriorityQueue:clear(clear_existing_table)
+    if clear_existing_table then
+        table.clear(self._heap) 
+    else
+        self._heap = {}
+    end
+end
+
+---@return integer
+function PriorityQueue:len()
+    return #self._heap / 2
+end
+
+function PriorityQueue:iter()
+    return self.dequeue, self
 end
 
 -- test
@@ -168,16 +191,16 @@ if false then
     for _, t in ipairs(permutations({1, 2, 3, 4, 5, 6, 7})) do
         local q = PriorityQueue("min")
         for _, v in ipairs(t) do
-            q:push(chars[v], v)
+            q:enqueue(chars[v], v)
         end
 
         local has_error = false
         for i=1, #t do
-            if chars[i] ~= q:pop() then
+            if chars[i] ~= q:dequeue() then
                 has_error = true
             end
         end
-        if q:pop() ~= nil then
+        if q:dequeue() ~= nil then
             has_error = true
         end
 
@@ -186,13 +209,13 @@ if false then
             q = PriorityQueue("min")
             for _, v in ipairs(t) do
                 print("push", chars[v], v)
-                q:push(chars[v], v)
+                q:enqueue(chars[v], v)
             end
 
             print("===")
 
             while true do
-                local v = q:pop()
+                local v = q:dequeue()
                 if v == nil then break end
                 print("pop", v)
             end

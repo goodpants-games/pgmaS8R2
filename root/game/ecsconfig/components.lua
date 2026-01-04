@@ -15,6 +15,15 @@ Concord.component("velocity", function(cmp, xv, yv)
     cmp.y = yv or 0.0
 end)
 
+Concord.component("damping", function(cmp, xf, yf)
+    cmp.x = xf or 0.8
+    cmp.y = yf or 1.0
+end)
+
+Concord.component("mass", function(cmp, v)
+    cmp.value = v or 1.0
+end)
+
 -- collision hitbox
 Concord.component("collision", function(cmp, w, h)
     cmp.w = w
@@ -30,7 +39,6 @@ Concord.component("actor", function(cmp)
     
     -- px/tick
     cmp.move_speed = 0.28
-    cmp.velocity_damp = 0.8
     cmp.jump_velocity = 2.0
 
     cmp.grounded = false

@@ -9,7 +9,6 @@ function system:tick()
         local actor = ent.actor
 
         velocity.x = velocity.x + actor.move_x * actor.move_speed
-        velocity.x = velocity.x * actor.velocity_damp
 
         if actor.jump_trigger > 0 then
             if actor.grounded then

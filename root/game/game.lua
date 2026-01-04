@@ -89,7 +89,15 @@ function Game:new()
     self.player.sprite.oy = -1
 
     self:new_entity()
-        :assemble(ecsconfig.asm.pushable_block, 20, 12)
+        :assemble(ecsconfig.asm.pushable_block, 35.5, 44)
+        :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
+
+    self:new_entity()
+        :assemble(ecsconfig.asm.pushable_block, 35.5, 52)
+        :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
+
+    self:new_entity()
+        :assemble(ecsconfig.asm.pushable_block, 35.5, 60)
         :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
 end
 

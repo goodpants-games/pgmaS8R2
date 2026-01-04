@@ -2,6 +2,7 @@ local Concord = require("concord")
 local collision = require("game.collision")
 local consts = require("game.consts")
 local bit = require("bit")
+local PriorityQueue = require("ds.priority_queue")
 
 local system = Concord.system({
     pv_pool = {"position", "velocity"},
@@ -173,7 +174,6 @@ function system:_update_edge_lists()
     self:_sort_edge_list(yedges, self.y_overlaps)
 end
 
----@param max_pn number?
 ---@param pos {x: number, y: number}
 ---@param collider table
 ---@param vel {x: number, y: number}
@@ -181,24 +181,49 @@ end
 ---@param coly number
 ---@param colw number
 ---@param colh number
+---@param colvx number
+---@param colvy number
 ---@return number? pn, number? nx, number? ny
-local function test_collision(max_pn, pos, collider, vel, colx, coly, colw, colh)
+local function test_collision(pos, collider, vel, colx, coly, colw, colh, colvx, colvy)
     local pn, nx, ny =
         collision.rect_rect_intersection(
             pos.x, pos.y, collider.w, collider.h,
             colx, coly, colw, colh)
 
-    if pn
-        and (max_pn == nil or pn > max_pn)
-        and vel.x * nx + vel.y * ny < 1e-5
-    then
+    if pn and (vel.x - colvx) * nx + (vel.y - colvy) * ny < 1e-5 then
         return pn, nx, ny
-
         -- Debug.draw:color(1, 1, 1)
         -- Debug.draw:rect_lines(colx - colw / 2.0,
         --                         coly - colh / 2.0,
         --                         colw, colh)
     end
+end
+
+local function entity_new_substep(ent)
+    local pos = ent.position
+    local vel = ent.velocity
+    local collider = ent.collision
+
+    if collider._substep_idx > collider._substeps then
+        collider._mvx = 0
+        collider._mvy = 0
+        return false
+    end
+
+    -- begin substep
+    local s_vx = vel.x / collider._substeps
+    local s_vy = vel.y / collider._substeps
+
+    pos.x = pos.x + s_vx
+    pos.y = pos.y + s_vy
+
+    collider._mvx = s_vx
+    collider._mvy = s_vy
+
+    collider._substep_idx = collider._substep_idx + 1
+    collider._iter = 1
+    collider._had_collision = false
+    return true
 end
 
 ---@param game game.Game
@@ -240,7 +265,7 @@ local function collision_atom(game, ent, pos, collider, intersecting)
         -- find collision with largest penetration
         local cx = -1
         local cy = -1
-        local col_pn, col_nx, col_ny
+        local col_pn, col_nx, col_ny, col_ent
 
         -- first, scan tiles
         if bit.band(collider.mask, 1) ~= 0 then
@@ -259,7 +284,7 @@ local function collision_atom(game, ent, pos, collider, intersecting)
                         local pn, nx, ny =
                             test_collision(
                                 col_pn, pos, collider, vel,
-                                colx, coly, colw, colh)
+                                colx, coly, colw, colh, 0, 0)
                         if pn then
                             col_pn, col_nx, col_ny = pn, nx, ny
                         end
@@ -284,6 +309,7 @@ local function collision_atom(game, ent, pos, collider, intersecting)
                     colx, coly, colw, colh)
                 if pn then
                     col_pn, col_nx, col_ny = pn, nx, ny
+                    col_ent = other_ent
                     Debug.draw:color(1, 0, 0)
                     Debug.draw:point(pos.x, pos.y)
                 end
@@ -298,8 +324,17 @@ local function collision_atom(game, ent, pos, collider, intersecting)
             Debug.draw:rect_lines(cx * tw, cy * th, tw, th)
             
             local nx, ny = col_nx, col_ny
-            pos.x = pos.x + nx * col_pn
-            pos.y = pos.y + ny * col_pn
+            if col_ent and col_ent.velocity then
+                local other_pos = col_ent.position
+                
+                other_pos.x = other_pos.x - nx * col_pn / 2.0
+                other_pos.y = other_pos.y - ny * col_pn / 2.0
+                pos.x = pos.x + nx * col_pn / 2.0
+                pos.y = pos.y + ny * col_pn / 2.0
+            else
+                pos.x = pos.x + nx * col_pn
+                pos.y = pos.y + ny * col_pn
+            end
 
             local pdot = -nx * vel.x + -ny * vel.y
             vel.x = vel.x + nx * pdot
@@ -348,11 +383,17 @@ function system:tick()
         end
     end
 
-    -- apply gravity and perform movement for non-colliding entities
+    -- apply gravity, damping, and perform movement for non-colliding entities
     for _, ent in ipairs(self.pv_pool) do
         local pos = ent.position
         local vel = ent.velocity
+        local damping = ent.damping
+
         vel.y = vel.y + game.gravity
+        if damping then
+            vel.x = vel.x * damping.x
+            vel.y = vel.y * damping.y
+        end
 
         if not ent.collision then
             pos.x = pos.x + vel.x
@@ -380,86 +421,288 @@ function system:tick()
             col._substeps = 10
         end
 
-        if not col._ix then
-            col._ix = {}
-        end
+        -- if not col._ix then
+        --     col._ix = {}
+        -- end
 
-        if not col._iy then
-            col._iy = {}
-        end
+        -- if not col._iy then
+        --     col._iy = {}
+        -- end
 
         -- begin initialization of first substep
-        collision_atom(game, ent, pos, col)
-        assert(col._iter == 1 and col._substep_idx == 1)
+        entity_new_substep(ent)
+        -- assert(col._iter == 1 and col._substep_idx == 1)
     end
 
-    local ilist = {}
+    -- local ilist = {}
     local ents_to_proc = table.copy(self.pvc_pool) --[[@as (table[])]]
+    local col_queue = PriorityQueue("max")
+    local moved = {}
+
+    local tw, th = consts.TILE_WIDTH, consts.TILE_HEIGHT
+    local margin = collision.margin
+
     repeat
-        self:_update_edge_lists()
-
-        -- reset collision pass data
-        for _, ent in ipairs(ents_to_proc) do
-            table.clear(ent.collision._ix)
-            table.clear(ent.collision._iy)
-        end
-
-        for _, dat in pairs(self.x_overlaps) do
-            if dat[1].velocity then
-                table.insert(dat[1].collision._ix, dat[2])
-            end
-
-            if dat[2].velocity then
-                table.insert(dat[2].collision._ix, dat[1])
-            end
-        end
-
-        for _, dat in pairs(self.y_overlaps) do
-            if dat[1].velocity then
-                table.insert(dat[1].collision._iy, dat[2])
-            end
-
-            if dat[2].velocity then
-                table.insert(dat[2].collision._iy, dat[1])
-            end
-        end
-
         local is_done = true
+
         for i=#ents_to_proc, 1, -1 do
             local ent = ents_to_proc[i]
-            local pos = ent.position
-            local col = ent.collision
-
-            if not col._col_proc then
+            if entity_new_substep(ent) then
+                is_done = false
+            else
                 table.remove(ents_to_proc, i)
-                goto continue
+            end
+        end
+
+        for _=1, 8 do
+            self:_update_edge_lists()
+
+            -- reset collision pass data
+            -- for _, ent in ipairs(ents_to_proc) do
+            --     table.clear(ent.collision._ix)
+            --     table.clear(ent.collision._iy)
+            -- end
+
+            col_queue:clear()
+            table.clear(moved)
+
+            -- collect entity/entity collisions
+            for k, dat in pairs(self.x_overlaps) do
+                if self.y_overlaps[k] then
+                    local e1, e2 = dat[1], dat[2]
+                    if not e1.velocity then
+                        e1, e2 = e2, e1
+
+                        -- collisions between static objects are not meaningful
+                        -- so don't bother
+                        if not e1.velocity then
+                            goto continue
+                        end
+                    end
+
+                    local pos1, pos2 = e1.position, e2.position
+                    local col1, col2 = e1.collision, e2.collision
+                    local vel1, vel2 = e1.velocity, e2.velocity
+
+                    local cx2 = pos2.x
+                    local cy2 = pos2.y
+                    local cw2 = col2.w
+                    local ch2 = col2.h
+
+                    local v2x, v2y = 0, 0
+                    if vel2 then
+                        v2x, v2y = vel2.x, vel2.y
+                    end
+                    
+                    local pn, nx, ny = test_collision(
+                        pos1, col1, vel1,
+                        cx2, cy2, cw2, ch2, v2x, v2y)
+                    if pn then
+                        col_queue:enqueue({
+                            e1, e2, pn, nx, ny
+                        }, math.abs(pn))
+                        -- col_pn, col_nx, col_ny = pn, nx, ny
+                        -- col_ent = other_ent
+                        -- Debug.draw:color(1, 0, 0)
+                        -- Debug.draw:point(pos.x, pos.y)
+                    end
+                    -- table.insert(bp_overlaps, dat[1], dat[2])
+                end
+
+                ::continue::
             end
 
-            table.clear(ilist)
-            for _, e in ipairs(col._ix) do
-                if table.index_of(col._iy, e) then
-                    table.insert(ilist, e)
+            -- collect entity/tile collisions
+            for _, ent in ipairs(self.pvc_pool) do
+                local pos = ent.position
+                local collider = ent.collision
+                local vel = ent.velocity
+
+                local cxe = collider.w / 2 -- collider x extents
+                local cye = collider.h / 2 -- collider y extents
+
+                local minx = math.floor((pos.x - cxe + margin) / tw)
+                local maxx = math.ceil((pos.x + cxe - margin) / th)
+                local miny = math.floor((pos.y - cye + margin) / tw)
+                local maxy = math.ceil((pos.y + cye - margin) / th)
+
+                for y=miny, maxy-1 do
+                    for x=minx, maxx-1 do
+                        local v = game.room:get_col(x, y)
+                        if v ~= 0 then
+                            local colx, coly, colw, colh =
+                                get_tile_collision_bounds(x, y, tw, th, v)
+                            
+                            local pn, nx, ny =
+                                test_collision(pos, collider, vel,
+                                               colx, coly, colw, colh, 0, 0)
+                            if pn then
+                                col_queue:enqueue({
+                                    ent, nil, pn, nx, ny
+                                }, math.abs(pn) + 1000)
+                            end
+                        end
+                    end
                 end
             end
 
-            -- Debug.draw:color(0, 0, 1)
-            -- Debug.draw:text(#ilist, pos.x, pos.y)
-
-            if collision_atom(game, ent, pos, col, ilist) then
-                is_done = false 
-            else
-                ent._col_proc = false
-                table.remove(ents_to_proc, i)
+            if col_queue:is_empty() then
+                break
             end
 
-            ::continue::
+            for item in col_queue:iter() do
+                local e1, e2, pn, nx, ny = item[1], item[2], item[3], item[4], item[5]
+                if moved[e1] or (e2 and moved[e2]) then
+                    goto continue
+                end
+
+                moved[e1] = true
+                if e2 and e2.velocity then
+                    moved[e2] = true
+                end
+
+                local pos = e1.position
+                local vel = e1.velocity
+                local actor = e1.actor
+                local col = e1.collision
+
+                local mass = 0
+                if e1.mass then
+                    mass = e1.mass.value
+                end
+
+                local o_pos, o_vel, o_col, o_actor
+                if e2 then
+                    o_pos = e2.position
+                    o_vel = e2.velocity
+                    o_col = e2.collision
+                    o_actor = e2.actor
+                end
+
+                local o_mass = 0
+                if not o_vel then
+                    o_mass = math.huge
+                elseif e2.mass then
+                    o_mass = e2.mass.value
+                end
+
+                local mvx1, mvy1 = col._mvx, col._mvy
+                local mvx2, mvy2
+                if o_col then
+                    mvx2, mvy2 = o_col._mvx, o_col._mvy
+                end
+
+                local mdir = (mvx1 * -nx + mvy1 * -ny) * mass + mass
+                local o_mdir
+                if mvx2 then
+                    o_mdir = (mvx2 * nx + mvy2 * ny) * o_mass + o_mass
+                else
+                    o_mdir = math.huge
+                end
+
+                if mdir == o_mdir then
+                    o_pos.x = o_pos.x - nx * pn / 2.0
+                    o_pos.y = o_pos.y - ny * pn / 2.0
+                    pos.x = pos.x + nx * pn / 2.0
+                    pos.y = pos.y + ny * pn / 2.0
+                elseif mdir > o_mdir then
+                    o_pos.x = o_pos.x - nx * pn
+                    o_pos.y = o_pos.y - ny * pn
+
+                    if o_col then
+                        o_col._mvx = o_col._mvx - nx * mdir
+                        o_col._mvy = o_col._mvy - ny * mdir
+                    end
+                else
+                    pos.x = pos.x + nx * pn
+                    pos.y = pos.y + ny * pn
+
+                    col._mvx = col._mvx + nx * math.min(1000, o_mdir)
+                    col._mvy = col._mvy + ny * math.min(1000, o_mdir)
+                end
+
+                if o_vel then
+                    local pdot = nx * vel.x + ny * vel.y
+                    local o_pdot = nx * o_vel.x + ny * o_vel.y
+
+                    local mto1 = ((o_pdot * o_mass - pdot * mass) / mass)
+                    local mto2 = ((pdot * mass - o_pdot * o_mass) / o_mass)
+
+                    if mto1 < 0.0 then mto1 = 0.0 end
+                    if mto2 > 0.0 then mto2 = 0.0 end
+
+                    vel.x = vel.x + nx * mto1
+                    vel.y = vel.y + ny * mto1
+                    o_vel.x = o_vel.x + nx * mto2
+                    o_vel.y = o_vel.y + ny * mto2
+                else
+                    local pdot = -nx * vel.x + -ny * vel.y
+                    vel.x = vel.x + nx * pdot
+                    vel.y = vel.y + ny * pdot
+                end
+
+                    -- local pdot = nx * other_vel.x + ny * other_vel.y
+                    -- other_vel.x = other_vel.x + -nx * pdot
+                    -- other_vel.y = other_vel.y + -ny * pdot
+                -- else
+                --     pos.x = pos.x + nx * pn
+                --     pos.y = pos.y + ny * pn
+
+                --     local pdot = -nx * vel.x + -ny * vel.y
+                --     vel.x = vel.x + nx * pdot
+                --     vel.y = vel.y + ny * pdot
+                -- end
+
+                if actor and ny < -math.sqrt(2) / 2 then
+                    actor.grounded = true
+                end
+
+                if o_actor and ny > math.sqrt(2) / 2 then
+                    o_actor.grounded = true
+                end
+
+                ::continue::
+            end
         end
+
+        -- print(entity_col_queue:len() + tile_col_queue:len())
+
+        -- local is_done = true
+        -- for i=#ents_to_proc, 1, -1 do
+        --     local ent = ents_to_proc[i]
+        --     local pos = ent.position
+        --     local col = ent.collision
+
+        --     if not col._col_proc then
+        --         table.remove(ents_to_proc, i)
+        --         goto continue
+        --     end
+
+        --     table.clear(ilist)
+        --     for _, e in ipairs(col._ix) do
+        --         if table.index_of(col._iy, e) then
+        --             table.insert(ilist, e)
+        --         end
+        --     end
+
+        --     -- Debug.draw:color(0, 0, 1)
+        --     -- Debug.draw:text(#ilist, pos.x, pos.y)
+
+        --     if collision_atom(game, ent, pos, col, ilist) then
+        --         is_done = false 
+        --     else
+        --         ent._col_proc = false
+        --         table.remove(ents_to_proc, i)
+        --     end
+
+        --     ::continue::
+        -- end
     until is_done
 
-    for _, ent in ipairs(self.pvc_pool) do
-        table.clear(ent.collision._ix)
-        table.clear(ent.collision._iy)
-    end
+    -- for _, ent in ipairs(self.pvc_pool) do
+    --     table.clear(ent.collision._ix)
+    --     table.clear(ent.collision._iy)
+    -- end
 
     -- handle newly removed entities
     for ent, _ in pairs(removed_entities) do
