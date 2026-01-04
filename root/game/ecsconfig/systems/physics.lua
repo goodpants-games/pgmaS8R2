@@ -4,6 +4,8 @@ local consts = require("game.consts")
 local bit = require("bit")
 local PriorityQueue = require("ds.priority_queue")
 
+local FLOOR_ANGLE = math.sqrt(2) / 2
+
 local system = Concord.system({
     pv_pool = {"position", "velocity"},
     pvc_pool = {"position", "velocity", "collision"},
@@ -484,29 +486,38 @@ function system:tick()
                     local col1, col2 = e1.collision, e2.collision
                     local vel1, vel2 = e1.velocity, e2.velocity
 
-                    local cx2 = pos2.x
-                    local cy2 = pos2.y
-                    local cw2 = col2.w
-                    local ch2 = col2.h
+                    if    bit.band(col1.mask, col2.group) ~= 0
+                       or bit.band(col2.mask, col1.group) ~= 0
+                    then
+                        local cx2 = pos2.x
+                        local cy2 = pos2.y
+                        local cw2 = col2.w
+                        local ch2 = col2.h
 
-                    local v2x, v2y = 0, 0
-                    if vel2 then
-                        v2x, v2y = vel2.x, vel2.y
+                        local v2x, v2y = 0, 0
+                        if vel2 then
+                            v2x, v2y = vel2.x, vel2.y
+                        end
+                        
+                        local pn, nx, ny = test_collision(
+                            pos1, col1, vel1,
+                            cx2, cy2, cw2, ch2, v2x, v2y)
+                        if pn then
+                            local ent1_is_floor = ny < -FLOOR_ANGLE
+                            local ent2_is_floor = ny > FLOOR_ANGLE
+                            if not ent1_is_floor and col2.floor_only then
+                                goto continue
+                            end
+
+                            if not ent2_is_floor and col1.floor_only then
+                                goto continue
+                            end
+
+                            col_queue:enqueue({
+                                e1, e2, pn, nx, ny
+                            }, math.abs(pn))
+                        end
                     end
-                    
-                    local pn, nx, ny = test_collision(
-                        pos1, col1, vel1,
-                        cx2, cy2, cw2, ch2, v2x, v2y)
-                    if pn then
-                        col_queue:enqueue({
-                            e1, e2, pn, nx, ny
-                        }, math.abs(pn))
-                        -- col_pn, col_nx, col_ny = pn, nx, ny
-                        -- col_ent = other_ent
-                        -- Debug.draw:color(1, 0, 0)
-                        -- Debug.draw:point(pos.x, pos.y)
-                    end
-                    -- table.insert(bp_overlaps, dat[1], dat[2])
                 end
 
                 ::continue::
@@ -566,17 +577,17 @@ function system:tick()
                 local actor = e1.actor
                 local col = e1.collision
 
-                local mass = 0
-                if e1.mass then
-                    mass = e1.mass.value
-                end
-
                 local o_pos, o_vel, o_col, o_actor
                 if e2 then
                     o_pos = e2.position
                     o_vel = e2.velocity
                     o_col = e2.collision
                     o_actor = e2.actor
+                end
+
+                local mass = 0
+                if e1.mass then
+                    mass = e1.mass.value
                 end
 
                 local o_mass = 0
@@ -653,11 +664,11 @@ function system:tick()
                 --     vel.y = vel.y + ny * pdot
                 -- end
 
-                if actor and ny < -math.sqrt(2) / 2 then
+                if actor and ny < -FLOOR_ANGLE then
                     actor.grounded = true
                 end
 
-                if o_actor and ny > math.sqrt(2) / 2 then
+                if o_actor and ny > FLOOR_ANGLE then
                     o_actor.grounded = true
                 end
 
