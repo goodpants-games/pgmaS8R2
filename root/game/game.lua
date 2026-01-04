@@ -73,7 +73,7 @@ function Game:new()
         ecsconfig.systems.render)
 
     -- px/ticks^2
-    self.gravity = 0.14
+    self.gravity = 0.1
 
     self.cam = {
         x = 0.0,
@@ -82,14 +82,14 @@ function Game:new()
 
     self.player =
         self:new_entity()
-        :assemble(ecsconfig.asm.entity.player, 24.0, 24.0)
+        :assemble(ecsconfig.asm.entity.player, 12.0, 12.0)
         :give("sprite", self.res:new_sprite("player"))
 
     self.player.sprite.ox = -1
     self.player.sprite.oy = -1
 
     self:new_entity()
-        :assemble(ecsconfig.asm.pushable_block, 40, 24)
+        :assemble(ecsconfig.asm.pushable_block, 20, 12)
         :give("sprite", self.res:get_image("res/graphics/iceblock.png"))
 end
 
@@ -107,6 +107,7 @@ function Game:update(dt)
     local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
     local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
     Debug.draw:push()
+    Debug.draw:scale(2.0, 2.0)
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.ecs_world:emit("update", dt)
@@ -118,11 +119,12 @@ function Game:tick()
     local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
     local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
     Debug.draw:push()
+    Debug.draw:scale(2.0, 2.0)
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.ecs_world:emit("tick")
-    self.cam.x = math.floor(self.player.position.x / 240) * 240 + DISPLAY_WIDTH / 2.0
-    self.cam.y = math.floor(self.player.position.y / 176) * 176 + DISPLAY_HEIGHT / 2.0
+    self.cam.x = math.floor(self.player.position.x / 120) * 120 + DISPLAY_WIDTH / 2.0
+    self.cam.y = math.floor(self.player.position.y / 88) * 88 + DISPLAY_HEIGHT / 2.0
 
     Debug.draw:pop()
 end
@@ -132,9 +134,11 @@ function Game:draw()
     local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
 
     Lg.push()
+    Lg.scale(2.0, 2.0)
     Lg.translate(-cam_x, -cam_y)
 
     Debug.draw:push()
+    Debug.draw:scale(2.0, 2.0)
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.room:draw()
@@ -158,8 +162,8 @@ function Game:_draw_ui()
     Lg.setColor(0, 0, 0)
     Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 8)
     Lg.setColor(1, 1, 1)
-    Lg.setFont(fontres.retro8x8)
-    Lg.print("Hi")
+    Lg.setFont(fontres.retrocaps8x8)
+    Lg.print("HP   WTR")
 
     Lg.pop()
 end

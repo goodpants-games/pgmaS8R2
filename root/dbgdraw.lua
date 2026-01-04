@@ -33,6 +33,13 @@ function DebugDraw:translate(x, y)
     end)
 end
 
+function DebugDraw:scale(x, y)
+    if not self.enabled then return end
+    table.insert(self._draw_list, function()
+        Lg.scale(x, y)
+    end)
+end
+
 function DebugDraw:point(x, y)
     if not self.enabled then return end
     table.insert(self._draw_list, function()

@@ -48,8 +48,9 @@ function system:tick()
             if mana.value > 0 then
                 mana.value = mana.value - 1
                 game:new_entity()
-                    :give("position", position.x, position.y - 12)
-                    :give("collision", 16, 4)
+                    :give("position", math.round(position.x),
+                          math.round(position.y - 8))
+                    :give("collision", 8, 2)
                     :give("sprite")
             end
         end

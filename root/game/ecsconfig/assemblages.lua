@@ -16,11 +16,11 @@ end
 function asm.pushable_block(e, x, y)
     e:give("position", x, y)
      :give("velocity")
-     :give("collision", 16.0, 16.0)
+     :give("collision", 8.0, 8.0)
 end
 
 function asm.entity.player(e, x, y)
-    e:assemble(asm.actor, x, y, 12, 16)
+    e:assemble(asm.actor, x, y, 6, 8)
      :give("player_control")
      :give("mana", 10)
     
