@@ -70,6 +70,19 @@ if LOVEJS then
     end
 end
 
+IS_PACKAGED = true
+if not LOVEJS then
+    -- it seems the only 100% accurate way to check if love is running an
+    -- archive or a folder, without the ability to check using ffi'd system
+    -- calls, is to attempt to open a file that should exist using the io
+    -- module.
+    local f = io.open(love.filesystem.getSource() .. "/main.lua", "r")
+    IS_PACKAGED = f == nil
+    if f then
+        f:close()
+    end
+end
+
 
 
 

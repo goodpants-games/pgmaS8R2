@@ -57,16 +57,55 @@ local anl_draw = WindowedAnalyzer()
 local anl_total = WindowedAnalyzer()
 local anl_mem = WindowedAnalyzer()
 
+local palette_map ---@type love.Image
+
+local palette_reduction_shader = Lg.newShader([[
+uniform Image PaletteMap;
+
+vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords)
+{
+    vec4 output_color = Texel(tex, texture_coords) * color;
+    vec2 palette_uv = vec2(
+        output_color.r,
+        (output_color.g / 8.0) + floor(output_color.b * 8.0) / 8.0
+    );
+
+    vec3 palettized_rgb = Texel(PaletteMap, palette_uv).rgb;
+    return vec4(palettized_rgb, output_color.a);
+}
+]])
+
 function love.load(args)
     love.keyboard.setTextInput(false)
     -- love.mouse.setVisible(false)
+
+    local preproc = false
+    local preproc_force = false
 
     for _, arg in ipairs(args) do
         if arg == "--debug" then
             Debug.enabled = true
             print("enable debug")
+        
+        elseif arg == "--preproc" then
+            preproc = true
+        
+        elseif arg == "--preproc-force" then
+            preproc_force = true
         end
     end
+
+    if not IS_PACKAGED and preproc then
+        ---@diagnostic disable-next-line
+        assert(jit, "please run preprocessor with LuaJIT!")
+
+        if preproc_force or not love.filesystem.getInfo("res/pico8_palette_map.png") then
+            print("GENERATE PALETTE MAP!")
+            require("palette_map_gen")
+        end
+    end
+
+    palette_map = Lg.newImage("res/pico8_palette_map.png")
 
     Lg.setFont(fontres.monogram)
 
@@ -178,7 +217,12 @@ function love.draw()
     Lg.clear(0, 0, 0, 1)
     Lg.setColor(1, 1, 1)
     Lg.origin()
+    Lg.setShader(palette_reduction_shader)
+    if palette_reduction_shader:hasUniform("PaletteMap") then
+        palette_reduction_shader:send("PaletteMap", palette_map)
+    end
     Lg.draw(display_canvas, display_ox, display_oy, 0, display_scale, display_scale)
+    Lg.setShader()
 
     local draw_frametime = love.timer.getTime() - draw_ts
     anl_draw:add_sample(draw_frametime)
