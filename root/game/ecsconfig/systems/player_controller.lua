@@ -23,11 +23,11 @@ function system:update(dt)
         end
 
         if input:pressed("player_lb") then
-            player_control.up_drop_trigger = true
+            player_control.up_drop_trigger = 8
         end
 
         if input:pressed("player_rb") then
-            player_control.side_drop_trigger = true
+            player_control.side_drop_trigger = 8
         end
     end
 end
@@ -45,17 +45,19 @@ function system:tick()
 
             if player_control.jump_trigger then
                 player_control.jump_trigger = false
-                actor.jump_trigger = 6
+                actor.jump_trigger = 8
             end
         end
 
         player_control.did_spit = false
 
         local mana = assert(ent.mana, "no 'mana' component")
-        if mana.value > 0 then
-            if player_control.side_drop_trigger then
+        if mana.value > 0 and actor.grounded then
+            if player_control.side_drop_trigger > 0 then
                 player_control.did_spit = true
                 mana.value = mana.value - 1
+                player_control.side_drop_trigger = 0
+
                 local droplet =
                     game:new_entity()
                         :give("position", position.x, position.y)
@@ -64,9 +66,11 @@ function system:tick()
                         :give("behavior", "builder_droplet", position.y + 4.5)
                         :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
             
-            elseif player_control.up_drop_trigger then
+            elseif player_control.up_drop_trigger > 0 then
                 player_control.did_spit = true
                 mana.value = mana.value - 1
+                player_control.up_drop_trigger = 0
+                
                 local droplet =
                     game:new_entity()
                         :give("position", position.x, position.y)
@@ -77,8 +81,16 @@ function system:tick()
             end
         end
 
-        player_control.side_drop_trigger = false
-        player_control.up_drop_trigger = false
+        player_control.side_drop_trigger = player_control.side_drop_trigger - 1
+        player_control.up_drop_trigger = player_control.up_drop_trigger - 1
+
+        if player_control.side_drop_trigger < 0 then
+            player_control.side_drop_trigger = 0
+        end
+
+        if player_control.up_drop_trigger < 0 then
+            player_control.up_drop_trigger = 0
+        end
 
         local room_trans = game._room_transition
         if room_trans and room_trans.phase == 0 then

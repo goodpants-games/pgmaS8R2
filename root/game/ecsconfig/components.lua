@@ -57,8 +57,8 @@ end)
 Concord.component("player_control", function(cmp)
     cmp.move_x = 0.0
     cmp.jump_trigger = false
-    cmp.up_drop_trigger = false
-    cmp.side_drop_trigger = false
+    cmp.up_drop_trigger = 0
+    cmp.side_drop_trigger = 0
     cmp.state = "move"
 end)
 
