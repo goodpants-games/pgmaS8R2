@@ -65,3 +65,65 @@ function love.conf(t)
     t.modules.video = false
     t.modules.physics = false
 end
+
+---@diagnostic disable lowercase-global
+
+---@param err any
+---@param level integer?
+function softerror(err, level)
+    if level == nil then
+        level = 1
+    end
+
+    err = tostring(err)
+
+    local info = debug.getinfo(level + 1, "Sl")
+    local errstr
+    print(info.short_src)
+    if info and info.short_src and info.currentline then
+        errstr = ("%s:%i: %s"):format(info.short_src, info.currentline, err)
+    else
+        errstr = err
+    end
+
+    print("[ERR] " .. errstr .. "\n" .. debug.traceback())
+
+    if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+        require("lldebugger").requestBreak()
+    end
+end
+
+---@generic T
+---@param v T
+---@param message? any
+---@param ... any
+---@return T, any ...
+function softassert(v, message, ...)
+    if not v then
+        if message == nil then
+            message = "assertion failed!"
+        end
+
+        message = tostring(message)
+        softerror(message, 2)
+    end
+
+    return v, ...
+end
+
+local enable_warnings = true
+
+---@param msg1 string
+---@param ... string?
+function warn(msg1, ...)
+    if string.byte(msg1, 1) == 0x40 and select("#", ...) == 0 then
+        if msg1 == "@on" then
+            enable_warnings = true
+        elseif msg1 == "@off" then
+            enable_warnings = false
+        end
+    elseif enable_warnings then
+        local msg = table.concat({msg1, ...})
+        print("[WRN] " .. msg)
+    end
+end
