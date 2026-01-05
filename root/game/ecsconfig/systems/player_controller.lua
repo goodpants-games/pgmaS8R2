@@ -6,12 +6,16 @@ local system = Concord.system({
 })
 
 function system:update(dt)
+    local game = self:getWorld().game --[[@as game.Game]]
     local input = Input.players[1]
 
     for _, ent in ipairs(self.pool) do
         local player_control = ent.player_control
 
         local move_x, move_y = input:get("move")
+        if game._room_transition and game._room_transition.ticks < 15 then
+            move_x = game._room_transition.pmv
+        end
         player_control.move_x = move_x
 
         if input:pressed("player_jump") then
@@ -75,6 +79,15 @@ function system:tick()
 
         player_control.side_drop_trigger = false
         player_control.up_drop_trigger = false
+
+        local room_trans = game._room_transition
+        if room_trans and room_trans.phase == 0 then
+            if room_trans.dir == "u" then
+                ent.velocity.y = -1.0    
+            elseif room_trans.dir == "l" or room_trans.dir == "r" then
+                ent.velocity.y = -game.gravity
+            end
+        end
     end
 end
 

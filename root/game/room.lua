@@ -1,13 +1,19 @@
 ---@class game.Room: batteries.Class
----@overload fun(game:game.Game):game.Room
+---@field tiled_obj_layer pklove.tiled.ObjectLayer?
+---@overload fun(game:game.Game, map_path:string, tex_load_cb:nil|fun(path:string):love.Image):game.Room
 local Room = batteries.class({ name = "game.Room" })
 local Tiled = require("tiled")
 local consts = require("game.consts")
 local ecsconfig = require("game.ecsconfig")
 
 ---@param game game.Game
-function Room:new(game)
-    self.tiled = Tiled.loadMap("res/maps/testmap2.lua")
+---@param map_path string
+---@param tex_load_cb nil|fun(path:string):love.Image
+function Room:new(game, map_path, tex_load_cb)
+    self.tiled = Tiled.loadMap(map_path, {
+        loadTexture = tex_load_cb
+    })
+
     assert(self.tiled.tilewidth == consts.TILE_WIDTH)
     assert(self.tiled.tileheight == consts.TILE_HEIGHT)
 
@@ -32,16 +38,21 @@ function Room:new(game)
         end
     end
 
-    local obj_layer = self.tiled:getLayerByName("Objects")
-    if obj_layer and obj_layer.type ~= "objectgroup" then
-        obj_layer = nil
+    for _, layer in ipairs(self.tiled.layers) do
+        if layer.type == "objectgroup" then
+            self.tiled_obj_layer = layer --[[@as pklove.tiled.ObjectLayer]]
+            break
+        end
     end
-    ---@cast obj_layer pklove.tiled.ObjectLayer?
 
-    if obj_layer then
-        for _, obj in ipairs(obj_layer.objects) do
+    if self.tiled_obj_layer then
+        for _, obj in ipairs(self.tiled_obj_layer.objects) do
             if obj.type == "entity" then
-                assert(obj.shape == "rectangle")
+                assert(obj.shape == "rectangle", "entity object is not a rect")
+
+                if obj.name == "player" then
+                    goto continue
+                end
 
                 local x = math.round(obj.x + obj.width / 2.0)
                 local y = math.round(obj.y + obj.height / 2.0)
@@ -49,6 +60,8 @@ function Room:new(game)
                 game:new_entity()
                     :assemble(ecsconfig.asm.entity[obj.name], game, x, y)
             end
+
+            ::continue::
         end
     else
         print("no objects")
