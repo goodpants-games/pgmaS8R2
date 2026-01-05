@@ -7,7 +7,7 @@ local ecsconfig = require("game.ecsconfig")
 
 ---@param game game.Game
 function Room:new(game)
-    self.tiled = Tiled.loadMap("res/maps/testmap.lua")
+    self.tiled = Tiled.loadMap("res/maps/testmap2.lua")
     assert(self.tiled.tilewidth == consts.TILE_WIDTH)
     assert(self.tiled.tileheight == consts.TILE_HEIGHT)
 

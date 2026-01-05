@@ -121,6 +121,44 @@ Debug = {
     enabled = false,
 }
 
+-- pico-8 palette
+-- i don't have a pico-8 but i really like how stuff in it looks
+P8_PAL = {
+    { batteries.colour.unpack_rgb(0x000000) }, -- black
+    { batteries.colour.unpack_rgb(0x1d2b53) }, -- dark_blue
+    { batteries.colour.unpack_rgb(0x7e2553) }, -- dark_purple
+    { batteries.colour.unpack_rgb(0x008751) }, -- dark_green
+    { batteries.colour.unpack_rgb(0xab5236) }, -- brown
+    { batteries.colour.unpack_rgb(0x5f574f) }, -- dark_gray
+    { batteries.colour.unpack_rgb(0xc2c3c7) }, -- light_gray
+    { batteries.colour.unpack_rgb(0xfff1e8) }, -- white
+    { batteries.colour.unpack_rgb(0xff004d) }, -- red
+    { batteries.colour.unpack_rgb(0xffa300) }, -- orange
+    { batteries.colour.unpack_rgb(0xffec27) }, -- yellow
+    { batteries.colour.unpack_rgb(0x00e436) }, -- green
+    { batteries.colour.unpack_rgb(0x29adff) }, -- blue
+    { batteries.colour.unpack_rgb(0x83769c) }, -- indigo
+    { batteries.colour.unpack_rgb(0xff77a8) }, -- pink
+    { batteries.colour.unpack_rgb(0xffccaa) }, -- peach
+}
+
+P8_PAL.black       = P8_PAL[ 1]
+P8_PAL.dark_blue   = P8_PAL[ 2]
+P8_PAL.dark_purple = P8_PAL[ 3]
+P8_PAL.dark_green  = P8_PAL[ 4]
+P8_PAL.brown       = P8_PAL[ 5]
+P8_PAL.dark_gray   = P8_PAL[ 6]
+P8_PAL.light_gray  = P8_PAL[ 7]
+P8_PAL.white       = P8_PAL[ 8]
+P8_PAL.red         = P8_PAL[ 9]
+P8_PAL.orange      = P8_PAL[10]
+P8_PAL.yellow      = P8_PAL[11]
+P8_PAL.green       = P8_PAL[12]
+P8_PAL.blue        = P8_PAL[13]
+P8_PAL.indigo      = P8_PAL[14]
+P8_PAL.pink        = P8_PAL[15]
+P8_PAL.peach       = P8_PAL[16]
+
 require("dbgdraw")
 
 -- What the fuck.

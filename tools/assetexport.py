@@ -7,12 +7,14 @@ import sys
 ASEPRITE = os.environ.get('ASEPRITE', 'aseprite')
 TILED = os.environ.get('TILED', 'tiled')
 
-TMX_BASE_DIRECTORY = os.path.join(os.curdir, 'assets/tiled/maps')
-TSX_BASE_DIRECTORY = os.path.join(os.curdir, 'assets/tiled/tilesets')
-ASE_BASE_DIRECTORY = os.path.join(os.curdir, 'assets/sprites')
+ASE_BASE_DIRECTORY   = os.path.join(os.curdir, 'assets/sprites')
+TILED_BASE_DIRECTORY = os.path.join(os.curdir, 'assets/tiled')
+TMX_BASE_DIRECTORY   = os.path.join(TILED_BASE_DIRECTORY, 'maps')
+TSX_BASE_DIRECTORY   = os.path.join(TILED_BASE_DIRECTORY, 'tilesets')
 
 ASEPRITE_ARGS = ['--sheet-pack', '--inner-padding', '1', '--trim',
                  '--merge-duplicates', '--format', 'json-array', '--list-tags']
+
 
 def needs_update(src_path: str, dst_path: str) -> bool:
     # first, determine if out_path is out of date
@@ -25,6 +27,20 @@ def needs_update(src_path: str, dst_path: str) -> bool:
         return os.path.getmtime(src_path) > out_mtime
     else:
         return True
+
+
+def copy_file(src_path: str, dst_path: str) -> bool:
+    src_path = os.path.normpath(src_path)
+    dst_path = os.path.normpath(dst_path)
+
+    if needs_update(src_path, dst_path):
+        print(f"[CPY] {src_path} => {dst_path}")
+        os.makedirs(os.path.dirname(dst_path), exist_ok=True)
+        shutil.copy(src_path, dst_path)
+        return True
+    else:
+        return False
+
 
 def process_tmx(src_path: str) -> bool:
     (filename, _) = os.path.splitext(os.path.basename(src_path))
@@ -47,6 +63,7 @@ def process_tmx(src_path: str) -> bool:
     os.replace(intermediate_path, dst_path)
     return True
 
+
 def process_tsx(src_path: str) -> bool:
     (filename, _) = os.path.splitext(os.path.basename(src_path))
     intermediate_path = os.path.join(os.path.dirname(src_path), filename + '.lua')
@@ -67,6 +84,7 @@ def process_tsx(src_path: str) -> bool:
     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
     os.replace(intermediate_path, dst_path)
     return True
+
 
 def process_ase(src_path: str) -> bool:
     (filename, _) = os.path.splitext(os.path.basename(src_path))
@@ -92,6 +110,7 @@ def process_ase(src_path: str) -> bool:
     
     return True
 
+
 def scan_tileset_directory(dirpath: str) -> bool:
     for basename in os.listdir(dirpath):
         path = os.path.join(dirpath, basename)
@@ -105,18 +124,15 @@ def scan_tileset_directory(dirpath: str) -> bool:
             if fileext == '.png':
                 dst_path = os.path.join('root/res/tilesets',
                                         os.path.relpath(path, TSX_BASE_DIRECTORY))
-                dst_path = os.path.normpath(dst_path)
-
-                if needs_update(path, dst_path):
-                    print(f"[CPY] {path} => {dst_path}")
-                    os.makedirs(os.path.dirname(dst_path), exist_ok=True)
-                    shutil.copy(path, dst_path)
+                
+                copy_file(path, dst_path)
             
             elif fileext == '.tsx':
                 if not process_tsx(path):
                     return False
     
     return True
+
 
 def scan_tiled_directory(dirpath: str) -> bool:
     for basename in os.listdir(dirpath):
@@ -135,6 +151,19 @@ def scan_tiled_directory(dirpath: str) -> bool:
     
     return True
 
+
+def scan_tiled_worlds(dirpath: str) -> bool:
+    for basename in os.listdir(dirpath):
+        path = os.path.join(dirpath, basename)
+        (_, fileext) = os.path.splitext(basename)
+
+        if fileext == ".world":
+            s = copy_file(path,
+                          os.path.join("root/res/", basename))
+
+    return True
+
+
 def scan_ase_directory(dirpath: str) -> bool:
     for basename in os.listdir(dirpath):
         path = os.path.join(dirpath, basename)
@@ -148,9 +177,13 @@ def scan_ase_directory(dirpath: str) -> bool:
     
     return True
 
+
 def main():
     s = False
     while True:
+        if not scan_tiled_worlds(TILED_BASE_DIRECTORY):
+            break
+
         if not scan_tiled_directory(TMX_BASE_DIRECTORY):
             break
 
@@ -164,5 +197,6 @@ def main():
         break
     
     if not s: sys.exit(1)
+
 
 if __name__ == '__main__': main()

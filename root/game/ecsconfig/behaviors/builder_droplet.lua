@@ -34,6 +34,10 @@ function BuilderDroplet:tick()
                 :give("sprite")
         platform.collision.floor_only = true
 
+        -- TODO: make platform have sprite
+        platform.sprite.r, platform.sprite.g, platform.sprite.b =
+            unpack(P8_PAL.white)
+
         ent:destroy()
     end
 end

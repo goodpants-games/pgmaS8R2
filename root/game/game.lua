@@ -154,9 +154,9 @@ function Game:_draw_ui()
     Lg.push()
     Lg.translate(0, math.floor(DISPLAY_HEIGHT) - 5)
 
-    Lg.setColor(0, 0, 0)
+    Lg.setColor(P8_PAL.black)
     Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 5)
-    Lg.setColor(1, 1, 1)
+    Lg.setColor(P8_PAL.white)
     Lg.setFont(fontres.quinque)
     Lg.print(("WTR:%i"):format(self.player.mana.value), 0, -1)
 
