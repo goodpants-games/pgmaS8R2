@@ -271,7 +271,8 @@ function Game:draw()
     Debug.draw:pop()
 
     if self._room_transition then
-        local a = self._room_transition.ticks / 30
+        local a = self._room_transition.ticks / 20
+        a = math.clamp01(a)
         if self._room_transition.phase == 0 then
             a = 1.0 - a
         end
