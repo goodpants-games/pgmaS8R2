@@ -65,11 +65,13 @@ uniform Image PaletteMap;
 vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords)
 {
     vec4 output_color = Texel(tex, texture_coords) * color;
-    vec2 palette_uv = vec2(
-        output_color.r,
-        (output_color.g / 8.0) + floor(output_color.b * 8.0) / 8.0
-    );
+    vec3 col = clamp(output_color.rgb, 0.001, 0.999);
 
+    float cell = floor(col.b * 63.0);
+    float cx = mod(cell, 8.0);
+    float cy = floor(cell / 8.0);
+
+    vec2 palette_uv = col.rg / 8.0 + vec2(cx, cy) / 8.0;
     vec3 palettized_rgb = Texel(PaletteMap, palette_uv).rgb;
     return vec4(palettized_rgb, output_color.a);
 }
@@ -77,7 +79,7 @@ vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords)
 
 function love.load(args)
     love.keyboard.setTextInput(false)
-    -- love.mouse.setVisible(false)
+    love.mouse.setVisible(false)
 
     local preproc = false
     local preproc_force = false
@@ -92,6 +94,7 @@ function love.load(args)
         
         elseif arg == "--preproc-force" then
             preproc_force = true
+            preproc = true
         end
     end
 
@@ -106,6 +109,7 @@ function love.load(args)
     end
 
     palette_map = Lg.newImage("res/pico8_palette_map.png")
+    palette_map:setFilter("nearest", "nearest")
 
     Lg.setFont(fontres.monogram)
 

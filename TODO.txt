@@ -2,4 +2,6 @@
 - also i guess there's "safe points" scattered frequently across the world,
   which resets your freeze meter.
 - grapple hook?
-- https://gamedev.stackexchange.com/questions/80577/palette-reduction-to-pre-defined-palette
+- if you enter down transition while a bit clipped inside the edge (because of
+  collision "lee-way"), then the transition bugs out a little. fix: scan
+  geometry to position player correctly in the middle of the hole.
