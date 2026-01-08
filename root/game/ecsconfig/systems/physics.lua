@@ -451,6 +451,14 @@ function system:tick()
     local tw, th = consts.TILE_WIDTH, consts.TILE_HEIGHT
     local margin = collision.margin
 
+    -- clear touch monitors
+    for _, ent in ipairs(self.pc_pool) do
+        local touch_monitor = ent.touch_monitor
+        if touch_monitor then
+            table.clear(touch_monitor.touching)
+        end
+    end
+
     repeat
         local is_done = true
 
@@ -493,36 +501,48 @@ function system:tick()
                     local col1, col2 = e1.collision, e2.collision
                     local vel1, vel2 = e1.velocity, e2.velocity
 
-                    if    bit.band(col1.mask, col2.group) ~= 0
-                       or bit.band(col2.mask, col1.group) ~= 0
+                    if     bit.band(col1.mask, col2.group) ~= 0
+                       or  bit.band(col2.mask, col1.group) ~= 0
                     then
-                        local cx2 = pos2.x
-                        local cy2 = pos2.y
-                        local cw2 = col2.w
-                        local ch2 = col2.h
+                        local tm1, tm2 = e1.touch_monitor, e2.touch_monitor
 
-                        local v2x, v2y = 0, 0
-                        if vel2 then
-                            v2x, v2y = vel2.x, vel2.y
+                        if tm1 and not table.index_of(tm1.touching, e2) then
+                            table.insert(tm1.touching, e2)
                         end
-                        
-                        local pn, nx, ny = test_collision(
-                            pos1, col1, vel1,
-                            cx2, cy2, cw2, ch2, v2x, v2y)
-                        if pn then
-                            local ent1_is_floor = ny < -FLOOR_ANGLE
-                            local ent2_is_floor = ny > FLOOR_ANGLE
-                            if not ent1_is_floor and col2.floor_only then
-                                goto continue
-                            end
 
-                            if not ent2_is_floor and col1.floor_only then
-                                goto continue
-                            end
+                        if tm2 and not table.index_of(tm2.touching, e1) then
+                            table.insert(tm2.touching, e1)
+                        end
 
-                            col_queue:enqueue({
-                                e1, e2, pn, nx, ny
-                            }, math.abs(pn))
+                        if not (col1.monitor_only or col2.monitor_only) then
+                            local cx2 = pos2.x
+                            local cy2 = pos2.y
+                            local cw2 = col2.w
+                            local ch2 = col2.h
+
+                            local v2x, v2y = 0, 0
+                            if vel2 then
+                                v2x, v2y = vel2.x, vel2.y
+                            end
+                            
+                            local pn, nx, ny = test_collision(
+                                pos1, col1, vel1,
+                                cx2, cy2, cw2, ch2, v2x, v2y)
+                            if pn then
+                                local ent1_is_floor = ny < -FLOOR_ANGLE
+                                local ent2_is_floor = ny > FLOOR_ANGLE
+                                if not ent1_is_floor and col2.floor_only then
+                                    goto continue
+                                end
+
+                                if not ent2_is_floor and col1.floor_only then
+                                    goto continue
+                                end
+
+                                col_queue:enqueue({
+                                    e1, e2, pn, nx, ny
+                                }, math.abs(pn))
+                            end
                         end
                     end
                 end
@@ -547,7 +567,7 @@ function system:tick()
                 for y=miny, maxy-1 do
                     for x=minx, maxx-1 do
                         local v = game.room:get_col(x, y)
-                        if v ~= 0 then
+                        if v ~= 0 and v ~= 2 then
                             local colx, coly, colw, colh =
                                 get_tile_collision_bounds(x, y, tw, th, v)
                             
@@ -659,18 +679,6 @@ function system:tick()
                     vel.y = vel.y + ny * pdot
                 end
 
-                    -- local pdot = nx * other_vel.x + ny * other_vel.y
-                    -- other_vel.x = other_vel.x + -nx * pdot
-                    -- other_vel.y = other_vel.y + -ny * pdot
-                -- else
-                --     pos.x = pos.x + nx * pn
-                --     pos.y = pos.y + ny * pn
-
-                --     local pdot = -nx * vel.x + -ny * vel.y
-                --     vel.x = vel.x + nx * pdot
-                --     vel.y = vel.y + ny * pdot
-                -- end
-
                 if ny < -FLOOR_ANGLE then
                     if actor then
                         actor.grounded = true
@@ -696,40 +704,36 @@ function system:tick()
                 ::continue::
             end
         end
-
-        -- print(entity_col_queue:len() + tile_col_queue:len())
-
-        -- local is_done = true
-        -- for i=#ents_to_proc, 1, -1 do
-        --     local ent = ents_to_proc[i]
-        --     local pos = ent.position
-        --     local col = ent.collision
-
-        --     if not col._col_proc then
-        --         table.remove(ents_to_proc, i)
-        --         goto continue
-        --     end
-
-        --     table.clear(ilist)
-        --     for _, e in ipairs(col._ix) do
-        --         if table.index_of(col._iy, e) then
-        --             table.insert(ilist, e)
-        --         end
-        --     end
-
-        --     -- Debug.draw:color(0, 0, 1)
-        --     -- Debug.draw:text(#ilist, pos.x, pos.y)
-
-        --     if collision_atom(game, ent, pos, col, ilist) then
-        --         is_done = false 
-        --     else
-        --         ent._col_proc = false
-        --         table.remove(ents_to_proc, i)
-        --     end
-
-        --     ::continue::
-        -- end
     until is_done
+
+    -- set in water status
+    for _, ent in ipairs(self.pc_pool) do
+        local position = ent.position
+        local velocity = ent.velocity
+        local col = ent.collision
+        local tx = math.floor(position.x / consts.TILE_WIDTH)
+        local ty = math.floor(position.y / consts.TILE_HEIGHT)
+
+        local col_type = game.room:get_col(tx, ty)
+        col.in_water = col_type and col_type == 2
+    end
+
+    -- water buoyancy
+    for _, ent in ipairs(self.pvc_pool) do
+        local vel = ent.velocity
+        local col = ent.collision
+
+        if col.in_water then
+            local mass = 1.0
+            local mass_c = ent.mass
+            if mass_c then
+                mass = mass_c.value
+            end
+
+            vel.y = vel.y * 0.8
+            vel.y = vel.y - game.gravity - 0.06 / mass
+        end
+    end
 
     -- for _, ent in ipairs(self.pvc_pool) do
     --     table.clear(ent.collision._ix)

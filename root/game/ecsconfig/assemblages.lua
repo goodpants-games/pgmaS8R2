@@ -60,4 +60,18 @@ function asm.entity.player(e, game, x, y)
     game.player = e
 end
 
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+function asm.entity.water_tank(e, game, x, y)
+    e:give("position", x, y)
+     :give("collision", 8.0, 8.0)
+     :give("sprite", game.res:get_image("res/graphics/game/water_tank.png"))
+     :give("touch_monitor")
+     :give("behavior", "water_tank")
+    e.collision.monitor_only = true
+    e.sprite.oy = -4
+end
+
 return asm

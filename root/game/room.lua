@@ -25,15 +25,42 @@ function Room:new(game, map_path, tex_load_cb)
     self.height = h
     self.col_map = {}
 
+    local base_tileset ---@type pklove.tiled.Tileset
+    for _, tileset in ipairs(self.tiled.tilesets) do
+        if tileset.name == "tileset" then
+            base_tileset = tileset
+            break
+        end
+    end
+
+    if not base_tileset then
+        error(("level '%s' does not use base tileset!"):format(map_path))
+    end
+
+    local tile_info = {}
+    for _, v in ipairs(base_tileset.tiles) do
+        tile_info[v.id + 1] = v
+    end
+
     local i=1
     for y=0, h-1 do
         for x=0, w-1 do
             local v = col_layer:get(x, y)
-            if v > 0 then
-                self.col_map[i] = 1
+            if v and v > 0 then
+                local ginfo = self.tiled:getTileInfo(v)
+                assert(self.tiled.tilesets[ginfo.tilesetId] == base_tileset,
+                       "tile in collision layer does not use base tileset!")
+
+                local tinfo = tile_info[ginfo.id]
+                if tinfo and tinfo.type == "water" then
+                    self.col_map[i] = 2
+                else
+                    self.col_map[i] = 1
+                end
             else
                 self.col_map[i] = 0
             end
+
             i=i+1
         end
     end

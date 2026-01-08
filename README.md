@@ -3,6 +3,13 @@ level sizes must be multiples of:
 - X: 15
 - Y: 11
 
+map collision types:
+| id | name  |
+|----|-------|
+| 0  | air   |
+| 1  | solid |
+| 2  | water |
+
 ## preprocessing
 prerequisites:
 - Python

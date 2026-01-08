@@ -39,6 +39,12 @@ Concord.component("collision", function(cmp, w, h)
     cmp.group = consts.COLGROUP_DEFAULT
     cmp.mask = consts.COLGROUP_ALL
     cmp.floor_only = false
+    cmp.monitor_only = false
+    cmp.in_water = false
+end)
+
+Concord.component("touch_monitor", function(cmp)
+    cmp.touching = {}
 end)
 
 Concord.component("actor", function(cmp)

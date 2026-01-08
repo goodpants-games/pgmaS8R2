@@ -4,6 +4,10 @@ local BuilderDroplet = batteries.class {
     extends = require("game.ecsconfig.behaviors.base")
 }
 
+local consts = require("game.consts")
+local TILE_WIDTH = consts.TILE_WIDTH
+local TILE_HEIGHT = consts.TILE_HEIGHT
+
 ---@param target_y number
 function BuilderDroplet:new(target_y)
     self:super()
@@ -12,7 +16,7 @@ function BuilderDroplet:new(target_y)
         error("must provide target y position to droplet when constructing!")
     end
 
-    self.target_y = target_y
+    self.target_y = math.floor(target_y / TILE_HEIGHT) * TILE_HEIGHT + 1
 end
 
 function BuilderDroplet:tick()
@@ -25,10 +29,12 @@ function BuilderDroplet:tick()
     if velocity.y > 0 and position.y >= self.target_y then
         print("droplet is done")
 
+        local x_snap = TILE_WIDTH
+
         local platform =
             game:new_entity()
                 :give("position",
-                      math.round(position.x),
+                      math.round((position.x + 4.0) / x_snap) * x_snap - 4.0,
                       math.round(self.target_y))
                 :give("collision", 8, 2)
                 :give("sprite")
