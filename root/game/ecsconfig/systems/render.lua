@@ -5,8 +5,47 @@ local system = Concord.system({
     sprite_pool = {"position", "sprite"}
 })
 
+function system:init()
+    self._prev_entities = {}
+    self._render_list = {}
+end
+
+function system:_entity_added(ent)
+    table.insert(self._render_list, ent)
+end
+
+function system:_entity_removed(ent)
+    table.remove_value(self._render_list, ent)
+end
+
+local function z_index_sort_less(a, b)
+    return a.sprite.z_index < b.sprite.z_index
+end
+
 function system:tick()
+    local removed_entities = {}
+    for k, _ in pairs(self._prev_entities) do
+        removed_entities[k] = true
+    end
+
+    -- handle newly added entities
     for _, ent in ipairs(self.sprite_pool) do
+        removed_entities[ent] = nil
+        if not self._prev_entities[ent] then
+            self._prev_entities[ent] = true
+            self:_entity_added(ent)
+        end
+    end
+
+    -- handle newly removed entities
+    for ent, _ in pairs(removed_entities) do
+        self._prev_entities[ent] = nil
+        self:_entity_removed(ent)
+    end
+
+    table.insertion_sort(self._render_list, z_index_sort_less)
+
+    for _, ent in ipairs(self._render_list) do
         local sprite = ent.sprite
         local drawable = sprite.obj
 
@@ -18,8 +57,11 @@ function system:tick()
 end
 
 function system:draw()
-    for _, ent in ipairs(self.sprite_pool) do
+    for _, ent in ipairs(self._render_list) do
         local sprite = ent.sprite
+        if not sprite.visible then
+            goto continue
+        end
         local position = ent.position --[[@as {x:number, y:number}]]
         local rotation = ent.rotation
 
@@ -40,15 +82,26 @@ function system:draw()
                          draw_x - collision.w / 2.0,
                          draw_y - collision.h / 2.0,
                          collision.w, collision.h)
+        elseif type(drawable) == "function" then
+            ---@cast drawable function
+            Lg.push()
+            Lg.translate(draw_x, draw_y)
+            Lg.rotate(rotv)
+            drawable(ent, sprite)
+            Lg.pop()
         elseif Sprite.isSprite(drawable) then
             ---@cast drawable pklove.Sprite
             drawable:draw(draw_x, draw_y, rotv, sprite.sx, sprite.sy)
-        else
-            ---@cast drawable love.Image
+        elseif drawable.typeOf and drawable:typeOf("Texture") then
+            ---@cast drawable love.Texture
             Lg.draw(drawable, draw_x, draw_y, rotv, sprite.sx, sprite.sy,
                     math.round(drawable:getWidth() / 2.0),
                     math.round(drawable:getHeight() / 2.0))
+        else
+            softerror("sprite component's drawable object is not a sprite, texture, or function!")
         end
+        
+        ::continue::
     end
 end
 

@@ -10,24 +10,25 @@ function system:update(dt)
     local input = Input.players[1]
 
     for _, ent in ipairs(self.pool) do
-        local player_control = ent.player_control
+        local pctl = ent.player_control
 
         local move_x, move_y = input:get("move")
         if game._room_transition and game._room_transition.ticks < 15 then
             move_x = game._room_transition.pmv
         end
-        player_control.move_x = move_x
+        pctl.move_x = move_x
 
         if input:pressed("player_jump") then
-            player_control.jump_trigger = true
+            pctl.jump_trigger = true
         end
 
-        if input:pressed("player_lb") then
-            player_control.up_drop_trigger = 8
+        if input:pressed("player_action2") then
+            pctl.selected_tool = pctl.selected_tool + 1
+            pctl.selected_tool = (pctl.selected_tool - 1) % 2 + 1
         end
 
-        if input:pressed("player_rb") then
-            player_control.side_drop_trigger = 8
+        if input:pressed("player_action1") then
+            pctl.drop_trigger = 8
         end
     end
 end
@@ -52,24 +53,24 @@ function system:tick()
         player_control.did_spit = false
 
         local mana = assert(ent.mana, "no 'mana' component")
-        if mana.value > 0 and actor.grounded then
-            if player_control.side_drop_trigger > 0 then
+        if mana.value > 0 and actor.grounded and player_control.drop_trigger > 0 then
+            if player_control.selected_tool == 1 then
                 player_control.did_spit = true
                 mana.value = mana.value - 1
-                player_control.side_drop_trigger = 0
+                player_control.drop_trigger = 0
 
                 local droplet =
                     game:new_entity()
                         :give("position", position.x, position.y)
                         :give("velocity", actor.face_dir * 1.0, -3.0)
                         :give("gmult", 2)
-                        :give("behavior", "builder_droplet", position.y + 4.5)
+                        :give("behavior", "builder_droplet", position.y + 4)
                         :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
             
-            elseif player_control.up_drop_trigger > 0 then
+            elseif player_control.selected_tool == 2 then
                 player_control.did_spit = true
                 mana.value = mana.value - 1
-                player_control.up_drop_trigger = 0
+                player_control.drop_trigger = 0
                 
                 local droplet =
                     game:new_entity()
@@ -81,15 +82,9 @@ function system:tick()
             end
         end
 
-        player_control.side_drop_trigger = player_control.side_drop_trigger - 1
-        player_control.up_drop_trigger = player_control.up_drop_trigger - 1
-
-        if player_control.side_drop_trigger < 0 then
-            player_control.side_drop_trigger = 0
-        end
-
-        if player_control.up_drop_trigger < 0 then
-            player_control.up_drop_trigger = 0
+        player_control.drop_trigger = player_control.drop_trigger - 1
+        if player_control.drop_trigger < 0 then
+            player_control.drop_trigger = 0
         end
 
         local room_trans = game._room_transition

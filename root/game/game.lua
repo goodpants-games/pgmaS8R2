@@ -172,6 +172,8 @@ function Game:new()
     self.cam.x = self.player.position.x
     self.cam.y = self.player.position.y
 
+    self.frame = 0
+
     -- if not self.player then
     --     self.player =
     --         self:new_entity()
@@ -252,6 +254,8 @@ function Game:tick()
     -- self.cam.y = math.floor(self.player.position.y / 88) * 88 + DISPLAY_HEIGHT / 2.0
 
     Debug.draw:pop()
+
+    self.frame = self.frame + 1
 end
 
 function Game:draw()
@@ -300,6 +304,15 @@ function Game:_draw_ui()
     Lg.setColor(P8_PAL.white)
     Lg.setFont(fontres.quinque)
     Lg.print(("WTR:%i"):format(self.player.mana.value), 0, -1)
+
+    local tool = self.player.player_control.selected_tool
+    Lg.setColor(P8_PAL.blue)
+    Lg.setFont(fontres.quinque)
+    if tool == 1 then
+        Lg.print("S", 40, -1)
+    elseif tool == 2 then
+        Lg.print("U", 40, -1)
+    end
 
     Lg.pop()
 end

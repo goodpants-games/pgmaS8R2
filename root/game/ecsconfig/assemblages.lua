@@ -72,6 +72,7 @@ function asm.entity.water_tank(e, game, x, y)
      :give("behavior", "water_tank")
     e.collision.monitor_only = true
     e.sprite.oy = -4
+    e.sprite.z_index = -100
 end
 
 return asm

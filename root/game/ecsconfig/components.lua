@@ -63,8 +63,8 @@ end)
 Concord.component("player_control", function(cmp)
     cmp.move_x = 0.0
     cmp.jump_trigger = false
-    cmp.up_drop_trigger = 0
-    cmp.side_drop_trigger = 0
+    cmp.drop_trigger = 0
+    cmp.selected_tool = 1
     cmp.state = "move"
 end)
 
@@ -89,6 +89,7 @@ Concord.component("sprite", function(cmp, obj)
     cmp.ox = 0
     cmp.oy = 0
     cmp.visible = true
+    cmp.z_index = 0
 end)
 
 Concord.component("behavior", function(cmp, behav_name, ...)
