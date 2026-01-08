@@ -80,6 +80,8 @@ function DebugDraw:flush()
     Lg.push("all")
     Lg.origin()
     Lg.setColor(1, 1, 1)
+    Lg.setLineWidth(1)
+    Lg.setLineStyle("rough")
     Lg.setFont(fontres.monogram)
     for _, v in ipairs(self._draw_list) do
         v()

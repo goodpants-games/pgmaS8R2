@@ -5,7 +5,8 @@ local Player = batteries.class {
     extends = require("game.ecsconfig.behaviors.base")
 }
 
-local TILE_SIZE = require("game.consts").TILE_WIDTH
+local consts = require("game.consts")
+local TILE_SIZE = consts.TILE_SIZE
 local RAINBOW = {
     P8_PAL.red, P8_PAL.orange, P8_PAL.yellow, P8_PAL.green, P8_PAL.blue,
     P8_PAL.pink
@@ -26,7 +27,7 @@ function Player:init(ent, game)
     end
 
     self.vis_ent =
-        game:new_entity()
+        game:new_entity(true)
             :give("position", 0.0, 0.0)
             :give("sprite", draw_func)
 end
@@ -36,6 +37,7 @@ function Player:removed()
 end
 
 function Player:tick()
+    local game = self.game
     local ent = self.entity
     local csprite = ent.sprite
     local control = ent.player_control
@@ -65,8 +67,17 @@ function Player:tick()
         local vis_ty = 0
 
         if control.selected_tool == 1 then
-            vis_tx = math.round((ent.position.x + 28 * actor.face_dir) / TILE_SIZE)
-            vis_ty = math.floor(ent.position.y / TILE_SIZE + 1)
+            local vy = consts.PLAYER_SIDE_SPIT_VY
+            local g = game.gravity * consts.PLAYER_SPIT_G_MULT
+            local y0 = -consts.PLAYER_SIDE_SPIT_TARGET_Y_OFF
+
+            local t = math.ceil((-vy + math.sqrt(vy * vy + 2.0 * g * y0)) / g)
+            -- oh my god what the hell. why so precise. maybe fp error
+            -- accumulation?
+            local dx = math.ceil(consts.PLAYER_SIDE_SPIT_VX * t + 1.0001) * math.sign(actor.face_dir)
+            
+            vis_tx = math.floor((ent.position.x + dx) / TILE_SIZE)
+            vis_ty = math.floor((ent.position.y - y0) / TILE_SIZE)
         elseif control.selected_tool == 2 then
             vis_tx = math.floor((ent.position.x) / TILE_SIZE)
             vis_ty = math.floor(ent.position.y / TILE_SIZE - 1.0)

@@ -228,146 +228,6 @@ local function entity_new_substep(ent)
     return true
 end
 
----@param game game.Game
----@param ent table
----@param pos {x: number, y: number}
----@param collider table
----@param intersecting table[]?
----@return boolean
-local function collision_atom(game, ent, pos, collider, intersecting)
-    if collider._substep_idx > collider._substeps then
-        return false
-    end
-
-    local vel = ent.velocity
-
-    -- begin substep
-    if collider._iter == 0 then
-        local s_vx = vel.x / collider._substeps
-        local s_vy = vel.y / collider._substeps
-
-        pos.x = pos.x + s_vx
-        pos.y = pos.y + s_vy
-
-        collider._iter = 1
-        collider._had_collision = false
-        return true
-    end
-
-    if collider._iter <= 4 then
-        assert(intersecting, "intersecting is nil")
-
-        -- begin iteration within substep
-        local cxe = collider.w / 2 -- collider x extents
-        local cye = collider.h / 2 -- collider y extents
-
-        local tw, th = consts.TILE_WIDTH, consts.TILE_HEIGHT
-        local margin = collision.margin
-
-        -- find collision with largest penetration
-        local cx = -1
-        local cy = -1
-        local col_pn, col_nx, col_ny, col_ent
-
-        -- first, scan tiles
-        if bit.band(collider.mask, 1) ~= 0 then
-            local minx = math.floor((pos.x - cxe + margin) / tw)
-            local maxx = math.ceil((pos.x + cxe - margin) / th)
-            local miny = math.floor((pos.y - cye + margin) / tw)
-            local maxy = math.ceil((pos.y + cye - margin) / th)
-
-            for y=miny, maxy-1 do
-                for x=minx, maxx-1 do
-                    local v = game.room:get_col(x, y)
-                    if v ~= 0 then
-                        local colx, coly, colw, colh =
-                            get_tile_collision_bounds(x, y, tw, th, v)
-                        
-                        local pn, nx, ny =
-                            test_collision(
-                                col_pn, pos, collider, vel,
-                                colx, coly, colw, colh, 0, 0)
-                        if pn then
-                            col_pn, col_nx, col_ny = pn, nx, ny
-                        end
-                    end
-                end
-            end
-        end
-
-        -- scan for entity collisions
-        for _, other_ent in ipairs(intersecting) do
-            local other_pos = other_ent.position
-            local other_col = other_ent.collision
-
-            if bit.band(collider.mask, other_col.group) ~= 0 then
-                local colx = other_pos.x
-                local coly = other_pos.y
-                local colw = other_col.w
-                local colh = other_col.h
-                
-                local pn, nx, ny = test_collision(
-                    col_pn, pos, collider, vel,
-                    colx, coly, colw, colh)
-                if pn then
-                    col_pn, col_nx, col_ny = pn, nx, ny
-                    col_ent = other_ent
-                    Debug.draw:color(1, 0, 0)
-                    Debug.draw:point(pos.x, pos.y)
-                end
-
-            end
-        end
-
-        if col_pn then
-            collider._had_collision = true
-
-            Debug.draw:color(1, 0, 0)
-            Debug.draw:rect_lines(cx * tw, cy * th, tw, th)
-            
-            local nx, ny = col_nx, col_ny
-            if col_ent and col_ent.velocity then
-                local other_pos = col_ent.position
-                
-                other_pos.x = other_pos.x - nx * col_pn / 2.0
-                other_pos.y = other_pos.y - ny * col_pn / 2.0
-                pos.x = pos.x + nx * col_pn / 2.0
-                pos.y = pos.y + ny * col_pn / 2.0
-            else
-                pos.x = pos.x + nx * col_pn
-                pos.y = pos.y + ny * col_pn
-            end
-
-            local pdot = -nx * vel.x + -ny * vel.y
-            vel.x = vel.x + nx * pdot
-            vel.y = vel.y + ny * pdot
-
-            local actor = ent.actor
-            if actor and ny < -math.sqrt(2) / 2 then
-                actor.grounded = true
-            end
-        else
-            goto post_substep
-        end
-
-        collider._iter = collider._iter + 1
-        return true
-    end
-
-    ::post_substep::
-    if collider._had_collision
-        and math.abs(vel.x) < 1e-4
-        and math.abs(vel.y) < 1e-4
-    then
-        return false
-    end
-
-    collider._iter = 0
-    collider._substep_idx = collider._substep_idx + 1
-
-    return collider._substep_idx <= collider._substeps
-end
-
 function system:tick()
     local game = self:getWorld().game --[[@as game.Game]]
 
@@ -448,7 +308,7 @@ function system:tick()
     local col_queue = PriorityQueue("max")
     local moved = {}
 
-    local tw, th = consts.TILE_WIDTH, consts.TILE_HEIGHT
+    local tsz = consts.TILE_SIZE
     local margin = collision.margin
 
     -- clear touch monitors
@@ -559,17 +419,17 @@ function system:tick()
                 local cxe = collider.w / 2 -- collider x extents
                 local cye = collider.h / 2 -- collider y extents
 
-                local minx = math.floor((pos.x - cxe + margin) / tw)
-                local maxx = math.ceil((pos.x + cxe - margin) / th)
-                local miny = math.floor((pos.y - cye + margin) / tw)
-                local maxy = math.ceil((pos.y + cye - margin) / th)
+                local minx = math.floor((pos.x - cxe + margin) / tsz)
+                local maxx = math.ceil((pos.x + cxe - margin) / tsz)
+                local miny = math.floor((pos.y - cye + margin) / tsz)
+                local maxy = math.ceil((pos.y + cye - margin) / tsz)
 
                 for y=miny, maxy-1 do
                     for x=minx, maxx-1 do
                         local v = game.room:get_col(x, y)
                         if v ~= 0 and v ~= 2 then
                             local colx, coly, colw, colh =
-                                get_tile_collision_bounds(x, y, tw, th, v)
+                                get_tile_collision_bounds(x, y, tsz, tsz, v)
                             
                             local pn, nx, ny =
                                 test_collision(pos, collider, vel,
@@ -711,8 +571,8 @@ function system:tick()
         local position = ent.position
         local velocity = ent.velocity
         local col = ent.collision
-        local tx = math.floor(position.x / consts.TILE_WIDTH)
-        local ty = math.floor(position.y / consts.TILE_HEIGHT)
+        local tx = math.floor(position.x / consts.TILE_SIZE)
+        local ty = math.floor(position.y / consts.TILE_SIZE)
 
         local col_type = game.room:get_col(tx, ty)
         col.in_water = col_type and col_type == 2

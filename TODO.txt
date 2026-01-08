@@ -5,3 +5,5 @@
 - if you enter down transition while a bit clipped inside the edge (because of
   collision "lee-way"), then the transition bugs out a little. fix: scan
   geometry to position player correctly in the middle of the hole.
+- stop entity substeps if it collides against a wall (see old collision_atom
+  code)

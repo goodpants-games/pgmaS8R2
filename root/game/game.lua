@@ -120,7 +120,7 @@ function Game:new()
     self.res = ResourceManager()
 
     ---@private
-    self._ecs_ents = {}
+    self._room_ents = {}
 
     self.ecs_world = Concord.world()
     self.ecs_world.game = self
@@ -132,7 +132,7 @@ function Game:new()
         ecsconfig.systems.render)
 
     -- px/ticks^2
-    self.gravity = 0.1
+    self.gravity = consts.GRAVITY
 
     self.cam = {
         x = 0.0,
@@ -163,7 +163,7 @@ function Game:new()
             local x = math.round(obj.x + obj.width / 2.0)
             local y = math.round(obj.y + obj.height / 2.0)
 
-            self:new_entity()
+            self:new_entity(true)
                 :assemble(ecsconfig.asm.entity.player, self, x, y)
         end
     end
@@ -190,9 +190,14 @@ function Game:release()
     end
 end
 
-function Game:new_entity()
+---@param permanent boolean? This entity will not be destroyed when the room is reloaded.
+---@return unknown
+function Game:new_entity(permanent)
     local e = Concord.entity(self.ecs_world)
-    table.insert(self._ecs_ents, e)
+    if not permanent then
+        table.insert(self._room_ents, e)
+    end
+
     return e
 end
 
@@ -201,7 +206,6 @@ function Game:update(dt)
     local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
     local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
     Debug.draw:push()
-    Debug.draw:scale(2.0, 2.0)
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.ecs_world:emit("update", dt)
@@ -214,7 +218,6 @@ function Game:tick()
         local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
         local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
         Debug.draw:push()
-        Debug.draw:scale(2.0, 2.0)
         Debug.draw:translate(-cam_x, -cam_y)
     end
 
@@ -233,8 +236,8 @@ function Game:tick()
     local cam_y = self.cam.y
     local pl_x = self.player.position.x
     local pl_y = self.player.position.y
-    local room_width_px = self.room.width * consts.TILE_WIDTH
-    local room_height_px = self.room.height * consts.TILE_HEIGHT
+    local room_width_px = self.room.width * consts.TILE_SIZE
+    local room_height_px = self.room.height * consts.TILE_SIZE
     local xbound = 8
     local ybound = 8
 
@@ -319,12 +322,10 @@ end
 
 ---@private
 function Game:_unload_room()
-    for i=#self._ecs_ents, 1, -1 do
-        local ent = self._ecs_ents[i]
-        if ent ~= self.player then
-            ent:destroy()
-            table.remove(self._ecs_ents, i)
-        end
+    for i=#self._room_ents, 1, -1 do
+        local ent = self._room_ents[i]
+        ent:destroy()
+        table.remove(self._room_ents, i)
     end
 
     self.room:release()
@@ -362,8 +363,8 @@ function Game:_check_room_transition()
     local pl_pos = player.position
     local pl_vel = player.velocity
 
-    local room_width_px = self.room.width * consts.TILE_WIDTH
-    local room_height_px = self.room.height * consts.TILE_HEIGHT
+    local room_width_px = self.room.width * consts.TILE_SIZE
+    local room_height_px = self.room.height * consts.TILE_SIZE
 
     local did_switch = false
     local old_room = self.room_name
@@ -427,7 +428,7 @@ function Game:_check_room_transition()
             
     --         local old_room_data = assert(self:_get_room_world_data(old_room))
     --         local new_room_data = assert(self:_get_room_world_data(new_room))
-    --         pl_pos.x = self.room.width * consts.TILE_WIDTH - 1
+    --         pl_pos.x = self.room.width * consts.TILE_SIZE - 1
     --         pl_pos.y = pl_pos.y - new_room_data.y + old_room_data.y
     --     end
     
@@ -452,7 +453,7 @@ function Game:_check_room_transition()
     --         local old_room_data = assert(self:_get_room_world_data(old_room))
     --         local new_room_data = assert(self:_get_room_world_data(new_room))
     --         pl_pos.x = pl_pos.x - new_room_data.x + old_room_data.x
-    --         pl_pos.y = self.room.height * consts.TILE_HEIGHT - 1
+    --         pl_pos.y = self.room.height * consts.TILE_SIZE - 1
 
     --         pl_vel.y = -2.0
     --     end
@@ -491,7 +492,7 @@ function Game:_finish_room_transition_phase()
             local old_room_data = assert(self:_get_room_world_data(old_room))
             local new_room_data = assert(self:_get_room_world_data(new_room))
             
-            pl_pos.x = self.room.width * consts.TILE_WIDTH - 1
+            pl_pos.x = self.room.width * consts.TILE_SIZE - 1
             pl_pos.y = py - new_room_data.y + old_room_data.y
             pl_vel.x = 0.0
             pl_vel.y = 0.0
@@ -514,7 +515,7 @@ function Game:_finish_room_transition_phase()
             local new_room_data = assert(self:_get_room_world_data(new_room))
 
             pl_pos.x = px - new_room_data.x + old_room_data.x
-            pl_pos.y = self.room.height * consts.TILE_HEIGHT - 1
+            pl_pos.y = self.room.height * consts.TILE_SIZE - 1
             pl_vel.x = 0.0
             pl_vel.y = -2.0
             pmv = data.pdir

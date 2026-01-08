@@ -1,6 +1,8 @@
 local Concord = require("concord")
 local Input = require("input")
 
+local consts = require("game.consts")
+
 local system = Concord.system({
     pool = {"player_control"}
 })
@@ -62,9 +64,12 @@ function system:tick()
                 local droplet =
                     game:new_entity()
                         :give("position", position.x, position.y)
-                        :give("velocity", actor.face_dir * 1.0, -3.0)
-                        :give("gmult", 2)
-                        :give("behavior", "builder_droplet", position.y + 4)
+                        :give("velocity",
+                              actor.face_dir * consts.PLAYER_SIDE_SPIT_VX,
+                              consts.PLAYER_SIDE_SPIT_VY)
+                        :give("gmult", consts.PLAYER_SPIT_G_MULT)
+                        :give("behavior", "builder_droplet",
+                              position.y + consts.PLAYER_SIDE_SPIT_TARGET_Y_OFF)
                         :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
             
             elseif player_control.selected_tool == 2 then

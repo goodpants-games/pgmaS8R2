@@ -14,8 +14,8 @@ function Room:new(game, map_path, tex_load_cb)
         loadTexture = tex_load_cb
     })
 
-    assert(self.tiled.tilewidth == consts.TILE_WIDTH)
-    assert(self.tiled.tileheight == consts.TILE_HEIGHT)
+    assert(self.tiled.tilewidth == consts.TILE_SIZE)
+    assert(self.tiled.tileheight == consts.TILE_SIZE)
 
     local col_layer = self.tiled.layers[1] --[[@as pklove.tiled.TileLayer]]
     local w = self.tiled.width
