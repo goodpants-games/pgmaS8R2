@@ -61,8 +61,6 @@ local function remove_from_overlap_list(list, ent)
 end
 
 function system:init()
-    self.prev_entities = {}
-
     self.edge_list_x = {}
     self.edge_list_y = {}
     self.x_overlaps = {}
@@ -70,6 +68,14 @@ function system:init()
 
     self.ent_ids = {}
     self.next_ent_id = 1
+
+    function self.pc_pool.onAdded(_, ent)
+        self:_entity_added(ent)
+    end
+
+    function self.pc_pool.onRemoved(_, ent)
+        self:_entity_removed(ent)
+    end
 end
 
 function system:_entity_added(ent)
@@ -201,49 +207,37 @@ local function test_collision(pos, collider, vel, colx, coly, colw, colh, colvx,
     end
 end
 
-local function entity_new_substep(ent)
+function system:_entity_new_substep(ent)
     local pos = ent.position
     local vel = ent.velocity
     local collider = ent.collision
+    local proc = self.ent_proc[ent]
 
-    if collider._substep_idx > collider._substeps then
-        collider._mvx = 0
-        collider._mvy = 0
+    if proc._substep_idx > proc._substeps then
+        proc._mvx = 0
+        proc._mvy = 0
         return false
     end
 
     -- begin substep
-    local s_vx = vel.x / collider._substeps
-    local s_vy = vel.y / collider._substeps
+    local s_vx = vel.x / proc._substeps
+    local s_vy = vel.y / proc._substeps
 
     pos.x = pos.x + s_vx
     pos.y = pos.y + s_vy
 
-    collider._mvx = s_vx
-    collider._mvy = s_vy
+    proc._mvx = s_vx
+    proc._mvy = s_vy
 
-    collider._substep_idx = collider._substep_idx + 1
-    collider._iter = 1
-    collider._had_collision = false
+    proc._substep_idx = proc._substep_idx + 1
+    proc._iter = 1
+    proc._had_collision = false
     return true
 end
 
 function system:tick()
     local game = self:getWorld().game --[[@as game.Game]]
-
-    local removed_entities = {}
-    for k, _ in pairs(self.prev_entities) do
-        removed_entities[k] = true
-    end
-
-    -- handle newly added entities
-    for _, ent in ipairs(self.pc_pool) do
-        removed_entities[ent] = nil
-        if not self.prev_entities[ent] then
-            self.prev_entities[ent] = true
-            self:_entity_added(ent)
-        end
-    end
+    self.ent_proc = {}
 
     -- apply gravity, damping, and perform movement for non-colliding entities
     for _, ent in ipairs(self.pv_pool) do
@@ -280,15 +274,19 @@ function system:tick()
             ent.actor.grounded = false
         end
 
-        col._col_proc = true
-        col._substeps = math.ceil(math.sqrt(vel.x * vel.x + vel.y * vel.y) / 1.0)
-        col._substep_idx = 1
-        col._iter = 0
+        local extra = {}
+
+        extra._col_proc = true
+        extra._substeps = math.ceil(math.sqrt(vel.x * vel.x + vel.y * vel.y) / 1.0)
+        extra._substep_idx = 1
+        extra._iter = 0
         
-        if col._substeps > 10 then
+        if extra._substeps > 10 then
             print("entity exceeded substep limit!")
-            col._substeps = 10
+            extra._substeps = 10
         end
+
+        self.ent_proc[ent] = extra
 
         -- if not col._ix then
         --     col._ix = {}
@@ -299,7 +297,7 @@ function system:tick()
         -- end
 
         -- begin initialization of first substep
-        entity_new_substep(ent)
+        self:_entity_new_substep(ent)
         -- assert(col._iter == 1 and col._substep_idx == 1)
     end
 
@@ -324,7 +322,7 @@ function system:tick()
 
         for i=#ents_to_proc, 1, -1 do
             local ent = ents_to_proc[i]
-            if entity_new_substep(ent) then
+            if self:_entity_new_substep(ent) then
                 is_done = false
             else
                 table.remove(ents_to_proc, i)
@@ -462,14 +460,14 @@ function system:tick()
                 local pos = e1.position
                 local vel = e1.velocity
                 local actor = e1.actor
-                local col = e1.collision
+                local proc = self.ent_proc[e1]
 
-                local o_pos, o_vel, o_col, o_actor
+                local o_pos, o_vel, o_actor, o_proc
                 if e2 then
                     o_pos = e2.position
                     o_vel = e2.velocity
-                    o_col = e2.collision
                     o_actor = e2.actor
+                    o_proc = self.ent_proc[e2]
                 end
 
                 local mass = 0
@@ -484,10 +482,10 @@ function system:tick()
                     o_mass = e2.mass.value
                 end
 
-                local mvx1, mvy1 = col._mvx, col._mvy
+                local mvx1, mvy1 = proc._mvx, proc._mvy
                 local mvx2, mvy2
-                if o_col then
-                    mvx2, mvy2 = o_col._mvx, o_col._mvy
+                if o_proc then
+                    mvx2, mvy2 = o_proc._mvx, o_proc._mvy
                 end
 
                 local mdir = (mvx1 * -nx + mvy1 * -ny) * mass + mass
@@ -507,16 +505,16 @@ function system:tick()
                     o_pos.x = o_pos.x - nx * pn
                     o_pos.y = o_pos.y - ny * pn
 
-                    if o_col then
-                        o_col._mvx = o_col._mvx - nx * mdir
-                        o_col._mvy = o_col._mvy - ny * mdir
+                    if o_proc then
+                        o_proc._mvx = o_proc._mvx - nx * mdir
+                        o_proc._mvy = o_proc._mvy - ny * mdir
                     end
                 else
                     pos.x = pos.x + nx * pn
                     pos.y = pos.y + ny * pn
 
-                    col._mvx = col._mvx + nx * math.min(1000, o_mdir)
-                    col._mvy = col._mvy + ny * math.min(1000, o_mdir)
+                    proc._mvx = proc._mvx + nx * math.min(1000, o_mdir)
+                    proc._mvy = proc._mvy + ny * math.min(1000, o_mdir)
                 end
 
                 if o_vel then
@@ -593,17 +591,6 @@ function system:tick()
             vel.y = vel.y * 0.8
             vel.y = vel.y - game.gravity - 0.06 / mass
         end
-    end
-
-    -- for _, ent in ipairs(self.pvc_pool) do
-    --     table.clear(ent.collision._ix)
-    --     table.clear(ent.collision._iy)
-    -- end
-
-    -- handle newly removed entities
-    for ent, _ in pairs(removed_entities) do
-        self.prev_entities[ent] = nil
-        self:_entity_removed(ent)
     end
 end
 

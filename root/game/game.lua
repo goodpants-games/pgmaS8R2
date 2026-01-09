@@ -129,7 +129,7 @@ function Game:new()
         ecsconfig.systems.behavior,
         ecsconfig.systems.actor,
         ecsconfig.systems.physics,
-        ecsconfig.systems.render)
+        ecsconfig.systems.render)    
 
     -- px/ticks^2
     self.gravity = consts.GRAVITY

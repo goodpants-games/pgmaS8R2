@@ -6,16 +6,15 @@ local system = Concord.system({
 })
 
 function system:init()
-    self._prev_entities = {}
     self._render_list = {}
-end
 
-function system:_entity_added(ent)
-    table.insert(self._render_list, ent)
-end
+    function self.sprite_pool.onAdded(_, ent)
+        table.insert(self._render_list, ent)
+    end
 
-function system:_entity_removed(ent)
-    table.remove_value(self._render_list, ent)
+    function self.sprite_pool.onRemoved(_, ent)
+        table.remove_value(self._render_list, ent)
+    end
 end
 
 local function z_index_sort_less(a, b)
@@ -23,26 +22,6 @@ local function z_index_sort_less(a, b)
 end
 
 function system:tick()
-    local removed_entities = {}
-    for k, _ in pairs(self._prev_entities) do
-        removed_entities[k] = true
-    end
-
-    -- handle newly added entities
-    for _, ent in ipairs(self.sprite_pool) do
-        removed_entities[ent] = nil
-        if not self._prev_entities[ent] then
-            self._prev_entities[ent] = true
-            self:_entity_added(ent)
-        end
-    end
-
-    -- handle newly removed entities
-    for ent, _ in pairs(removed_entities) do
-        self._prev_entities[ent] = nil
-        self:_entity_removed(ent)
-    end
-
     table.insertion_sort(self._render_list, z_index_sort_less)
 
     for _, ent in ipairs(self._render_list) do

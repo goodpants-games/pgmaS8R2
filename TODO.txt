@@ -1,4 +1,5 @@
-- limited water supply?
+CURRENTLY: world checkpoints (involves de/serialization)
+
 - also i guess there's "safe points" scattered frequently across the world,
   which resets your freeze meter.
 - grapple hook?

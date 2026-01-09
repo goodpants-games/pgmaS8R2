@@ -30,10 +30,17 @@ function Player:init(ent, game)
         game:new_entity(true)
             :give("position", 0.0, 0.0)
             :give("sprite", draw_func)
+    self.vis_ent:remove("serializable")
 end
 
 function Player:removed()
     self.vis_ent:destroy()
+end
+
+function Player:serialize()
+    local data = self.__super.serialize(self)
+    data.vis_ent = nil
+    return data
 end
 
 function Player:tick()

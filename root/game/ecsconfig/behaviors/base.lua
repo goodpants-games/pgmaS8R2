@@ -16,4 +16,23 @@ end
 function Behavior:tick()
 end
 
+---@return table
+function Behavior:serialize()
+    local data = table.shallow_copy(self) --[[@as table]]
+    data.entity = nil
+    data.game = nil
+    return data
+end
+
+function Behavior:deserialize(data)
+    local ent, game = self.entity, self.game
+    
+    for k, v in pairs(data) do
+        self[k] = v
+    end
+
+    -- just in case?
+    self.entity, self.game = ent, game
+end
+
 return Behavior

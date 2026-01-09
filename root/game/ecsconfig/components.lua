@@ -1,4 +1,5 @@
 local Concord = require("concord")
+local Sprite = require("sprite")
 local consts = require("game.consts")
 
 Concord.component("position", function(cmp, x, y)
@@ -43,9 +44,12 @@ Concord.component("collision", function(cmp, w, h)
     cmp.in_water = false
 end)
 
-Concord.component("touch_monitor", function(cmp)
+local touch_monitor = Concord.component("touch_monitor", function(cmp)
     cmp.touching = {}
 end)
+
+function touch_monitor:serialize() return {} end
+
 
 Concord.component("actor", function(cmp)
     cmp.move_x = 0
@@ -78,7 +82,7 @@ Concord.component("health", function(cmp, max, init)
     cmp.max = init or max
 end)
 
-Concord.component("sprite", function(cmp, obj)
+local sprite = Concord.component("sprite", function(cmp, obj)
     cmp.obj = obj
     cmp.r = 1
     cmp.g = 1
@@ -92,7 +96,53 @@ Concord.component("sprite", function(cmp, obj)
     cmp.z_index = 0
 end)
 
-Concord.component("behavior", function(cmp, behav_name, ...)
+function sprite:serialize()
+    local data = Concord.component.serialize(self)
+
+    if self.obj and Sprite.isSprite(self.obj) then
+        data.obj_type = "sprite"
+        data.obj = table.shallow_copy(self.obj)
+    end
+end
+
+function sprite:deserialize(data)
+    Concord.component.deserialize(self, data)
+
+    if data.obj_type == "sprite" then
+        local spr = Sprite.new(data.obj.res)
+        for k, v in pairs(data.obj) do
+            spr[k] = v
+        end
+    end
+
+    self.obj_type = nil
+end
+
+
+local behavior = Concord.component("behavior", function(cmp, behav_name, ...)
     local behav = require("game.ecsconfig.behaviors." .. behav_name)
     cmp.inst = behav(...)
+    cmp._behav_name = behav_name
 end)
+
+function behavior:serialize()
+    return {
+        name = self._behav_name,
+        data = self.inst:serialize()
+    }
+end
+
+function behavior:deserialize(data)
+    if self._behav_name and self.inst then
+        if self._behav_name ~= data.name then
+            softerror("deserialize behavior type mismatch!")
+        else
+            self.inst:deserialize(data.data)
+        end
+    else
+        self._behav_name = data.name
+        local behav = require("game.ecsconfig.behaviors." .. data.name)
+        self.inst = setmetatable({}, behav)
+        self.inst:deserialize(data.data)
+    end
+end

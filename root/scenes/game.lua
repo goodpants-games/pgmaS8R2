@@ -43,6 +43,14 @@ function scene.unload()
     self = nil
 end
 
+function scene.keypressed(k)
+    if not Debug.enabled then return end
+    if k == "t" then
+        local data = self.game.ecs_world:serialize()
+        batteries.pretty.print(data, { depth = 4 })
+    end
+end
+
 function scene.update(dt)
     if Input.players[1]:pressed("pause") then
         self.paused = not self.paused
