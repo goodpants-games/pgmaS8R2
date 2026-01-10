@@ -37,6 +37,7 @@ function BuilderDroplet:tick()
                       math.floor(self.target_y))
                 :give("collision", 6, 2)
                 :give("sprite")
+                :give("remove_on_checkpoint")
         platform.collision.floor_only = true
 
         -- TODO: make platform have sprite

@@ -17,6 +17,10 @@ function WaterTank:interact(from_ent)
     end
 
     if from_ent == self.game.player then
+        for _, ent in ipairs(self.game.ecs_world:query({"remove_on_checkpoint"})) do
+            ent:destroy()    
+        end
+
         print("save world state!")
         self.game:save_state()
     end

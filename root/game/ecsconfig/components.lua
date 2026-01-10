@@ -4,6 +4,7 @@ local consts = require("game.consts")
 
 Concord.component("room_persistence")
 Concord.component("interactable")
+Concord.component("remove_on_checkpoint")
 
 Concord.component("position", function(cmp, x, y)
     cmp.x = x or 0.0
