@@ -19,7 +19,10 @@ end
 
 function Player:init(ent, game)
     self.__super.init(self, ent, game)
-    ent.sprite.obj:play("idle")
+    
+    if not ent.sprite.obj.curAnim then
+        ent.sprite.obj:play("idle")
+    end
 
     local function draw_func(ent, sprite)
         Lg.setLineWidth(1)

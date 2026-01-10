@@ -2,6 +2,8 @@ local Concord = require("concord")
 local Sprite = require("sprite")
 local consts = require("game.consts")
 
+Concord.component("room_persistence")
+
 Concord.component("position", function(cmp, x, y)
     cmp.x = x or 0.0
     cmp.y = y or 0.0
@@ -49,6 +51,9 @@ local touch_monitor = Concord.component("touch_monitor", function(cmp)
 end)
 
 function touch_monitor:serialize() return {} end
+function touch_monitor:deserialize()
+    self.touching = {}
+end
 
 
 Concord.component("actor", function(cmp)
@@ -103,6 +108,8 @@ function sprite:serialize()
         data.obj_type = "sprite"
         data.obj = table.shallow_copy(self.obj)
     end
+
+    return data
 end
 
 function sprite:deserialize(data)
@@ -113,6 +120,7 @@ function sprite:deserialize(data)
         for k, v in pairs(data.obj) do
             spr[k] = v
         end
+        self.obj = spr
     end
 
     self.obj_type = nil

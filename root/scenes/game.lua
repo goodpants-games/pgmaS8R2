@@ -45,9 +45,11 @@ end
 
 function scene.keypressed(k)
     if not Debug.enabled then return end
-    if k == "t" then
-        local data = self.game.ecs_world:serialize()
-        batteries.pretty.print(data, { depth = 4 })
+
+    if k == "f2" then
+        self.game:save_state()
+    elseif k == "f3" then
+        self.game:restore_state()
     end
 end
 

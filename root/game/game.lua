@@ -119,9 +119,6 @@ function Game:new()
 
     self.res = ResourceManager()
 
-    ---@private
-    self._room_ents = {}
-
     self.ecs_world = Concord.world()
     self.ecs_world.game = self
     self.ecs_world:addSystems(
@@ -129,7 +126,11 @@ function Game:new()
         ecsconfig.systems.behavior,
         ecsconfig.systems.actor,
         ecsconfig.systems.physics,
-        ecsconfig.systems.render)    
+        ecsconfig.systems.render)
+    
+    self.ecs_world:setKeyGenerator(function(state)
+        return tostring(state), state + 1
+    end, 1)
 
     -- px/ticks^2
     self.gravity = consts.GRAVITY
@@ -190,13 +191,15 @@ function Game:release()
     end
 end
 
----@param permanent boolean? This entity will not be destroyed when the room is reloaded.
+---@param persistent boolean? This entity will not be destroyed when the room is reloaded.
 ---@return unknown
-function Game:new_entity(permanent)
+function Game:new_entity(persistent)
     local e = Concord.entity(self.ecs_world)
-    if not permanent then
-        table.insert(self._room_ents, e)
+    if persistent then
+        e:give("room_persistence")
     end
+
+    e:give("key")
 
     return e
 end
@@ -320,12 +323,29 @@ function Game:_draw_ui()
     Lg.pop()
 end
 
+function Game:save_state()
+    self._save_state = {
+        player = self.player:get("key").value,
+        world = self.ecs_world:serialize()
+    }
+
+    batteries.pretty.print(self._save_state, { depth = 5 })
+end
+
+function Game:restore_state()
+    if not self._save_state then
+        warn("no state to restore")
+        return
+    end
+
+    self.ecs_world:deserialize(self._save_state.world, true)
+    self.player = self.ecs_world:getEntityByKey(self._save_state.player)
+end
+
 ---@private
 function Game:_unload_room()
-    for i=#self._room_ents, 1, -1 do
-        local ent = self._room_ents[i]
+    for _, ent in ipairs(self.ecs_world:query({"!room_persistence"})) do
         ent:destroy()
-        table.remove(self._room_ents, i)
     end
 
     self.room:release()
