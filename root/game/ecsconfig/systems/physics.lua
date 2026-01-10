@@ -314,6 +314,7 @@ function system:tick()
         local touch_monitor = ent.touch_monitor
         if touch_monitor then
             table.clear(touch_monitor.touching)
+            touch_monitor.touched_tilemap = false
         end
     end
 
@@ -433,9 +434,15 @@ function system:tick()
                                 test_collision(pos, collider, vel,
                                                colx, coly, colw, colh, 0, 0)
                             if pn then
-                                col_queue:enqueue({
-                                    ent, nil, pn, nx, ny
-                                }, math.abs(pn) + 1000)
+                                if ent.touch_monitor then
+                                    ent.touch_monitor.touched_tilemap = true
+                                end
+                                
+                                if not collider.monitor_only then
+                                    col_queue:enqueue({
+                                        ent, nil, pn, nx, ny
+                                    }, math.abs(pn) + 1000)
+                                end
                             end
                         end
                     end
@@ -563,6 +570,50 @@ function system:tick()
             end
         end
     until is_done
+
+    -- dispatch touch_began/touch_ended events to entity behaviors
+    for _, ent in ipairs(self.pc_pool) do
+        local touch_monitor = ent.touch_monitor
+        local behavior = ent.behavior
+        if touch_monitor and behavior and behavior.inst then
+            local binst = behavior.inst
+            local tilemap_touch_changed = touch_monitor._prev_touched_tilemap ~= touch_monitor.touched_tilemap
+
+            if binst.touch_began then
+                for _, now_touched in ipairs(touch_monitor.touching) do
+                    if not touch_monitor._prev_touching[now_touched] then
+                        print("entity Touch began")
+                        binst:touch_began(now_touched)
+                    end
+                end
+
+                if tilemap_touch_changed and touch_monitor.touched_tilemap then
+                    print("tilemap Touch began")
+                    binst:touch_began(nil)
+                end
+            end
+
+            if binst.touch_ended then
+                for then_touched, _ in pairs(touch_monitor._prev_touching) do
+                    if not table.index_of(touch_monitor.touching, then_touched) then
+                        print("entity Touch ended")
+                        binst:touch_ended(then_touched)
+                    end
+                end
+
+                if tilemap_touch_changed and not touch_monitor.touched_tilemap then
+                    print("tilemap Touch ended")
+                    binst:touch_ended(nil)
+                end
+            end
+
+            touch_monitor._prev_touched_tilemap = touch_monitor.touched_tilemap
+            table.clear(touch_monitor._prev_touching)
+            for _, e in ipairs(touch_monitor.touching) do
+                touch_monitor._prev_touching[e] = true
+            end
+        end
+    end
 
     -- set in water status
     for _, ent in ipairs(self.pc_pool) do

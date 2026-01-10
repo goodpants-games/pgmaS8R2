@@ -49,7 +49,7 @@ end
 function asm.entity.player(e, game, x, y)
     e:assemble(asm.actor, x, y, 6, 8)
      :give("player_control")
-     :give("mana", 10)
+     :give("mana", 100)
      :give("sprite", game.res:new_sprite("player"))
      :give("touch_monitor")
      :give("behavior", "player")

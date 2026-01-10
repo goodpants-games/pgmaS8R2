@@ -48,14 +48,17 @@ Concord.component("collision", function(cmp, w, h)
     cmp.in_water = false
 end)
 
-local touch_monitor = Concord.component("touch_monitor", function(cmp)
+local function touch_monitor_init(cmp)
     cmp.touching = {}
-end)
+    cmp.touched_tilemap = false
 
-function touch_monitor:serialize() return {} end
-function touch_monitor:deserialize()
-    self.touching = {}
+    cmp._prev_touching = {}
+    cmp._prev_touched_tilemap = false
 end
+
+local touch_monitor = Concord.component("touch_monitor", touch_monitor_init)
+function touch_monitor:serialize() return {} end
+touch_monitor = touch_monitor_init
 
 
 Concord.component("actor", function(cmp)
@@ -73,6 +76,7 @@ end)
 
 Concord.component("player_control", function(cmp)
     cmp.move_x = 0.0
+    cmp.move_y = 0.0
     cmp.jump_trigger = false
     cmp.drop_trigger = 0
     cmp.selected_tool = 1
