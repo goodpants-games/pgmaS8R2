@@ -175,6 +175,8 @@ function Game:new()
 
     self.frame = 0
 
+    self:save_state()
+
     -- if not self.player then
     --     self.player =
     --         self:new_entity()
@@ -329,7 +331,11 @@ function Game:save_state()
         world = self.ecs_world:serialize()
     }
 
-    batteries.pretty.print(self._save_state, { depth = 5 })
+    if self._room_transition then
+        self._save_state.room_transition = table.shallow_copy(self._room_transition)
+    end
+
+    -- batteries.pretty.print(self._save_state, { depth = 5 })
 end
 
 function Game:restore_state()
@@ -338,8 +344,14 @@ function Game:restore_state()
         return
     end
 
-    self.ecs_world:deserialize(self._save_state.world, true)
-    self.player = self.ecs_world:getEntityByKey(self._save_state.player)
+    local data = self._save_state
+
+    self.ecs_world:deserialize(data.world, true)
+    self.player = self.ecs_world:getEntityByKey(data.player)
+
+    if data.room_transition then
+        self._room_transition = table.shallow_copy(data.room_transition)
+    end
 end
 
 ---@private
@@ -549,6 +561,8 @@ function Game:_finish_room_transition_phase()
             ticks = 0,
             pmv = pmv
         }
+
+        self:save_state()
     
     elseif data.phase == 1 then
         self._room_transition = nil

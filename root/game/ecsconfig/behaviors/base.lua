@@ -16,6 +16,11 @@ end
 function Behavior:tick()
 end
 
+---@param from_ent any
+---@param ... any
+function Behavior:interact(from_ent, ...)
+end
+
 ---@return table
 function Behavior:serialize()
     local data = table.shallow_copy(self) --[[@as table]]

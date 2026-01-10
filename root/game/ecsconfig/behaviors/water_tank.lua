@@ -7,30 +7,41 @@ local WaterTank = batteries.class {
 
 function WaterTank:new()
     self:super()
+end
 
-    self._was_touching_player = false
+function WaterTank:interact(from_ent)
+    print("water tank interacted")
+
+    if from_ent.mana then
+        from_ent.mana.value = from_ent.mana.max    
+    end
+
+    if from_ent == self.game.player then
+        print("save world state!")
+        self.game:save_state()
+    end
 end
 
 function WaterTank:tick()
-    local ent = self.entity
-    local touching = ent.touch_monitor.touching
+    -- local ent = self.entity
+    -- local touching = ent.touch_monitor.touching
 
-    local is_touching_player = false
-    local player = self.game.player
+    -- local is_touching_player = false
+    -- local player = self.game.player
 
-    for _, e in ipairs(touching) do
-        if e == player then
-            is_touching_player = true
-            break
-        end
-    end
+    -- for _, e in ipairs(touching) do
+    --     if e == player then
+    --         is_touching_player = true
+    --         break
+    --     end
+    -- end
 
-    if is_touching_player and not self._was_touching_player then
-        print("replenish water supply")
-        player.mana.value = player.mana.max
-    end
+    -- if is_touching_player then
+    --     print("replenish water supply")
+    --     player.mana.value = player.mana.max
+    -- end
 
-    self._was_touching_player = is_touching_player
+    -- self._was_touching_player = is_touching_player
 end
 
 return WaterTank

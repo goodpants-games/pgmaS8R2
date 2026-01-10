@@ -54,6 +54,10 @@ function system:tick()
 
         player_control.did_spit = false
 
+        if player_control.action_sink then
+            player_control.drop_trigger = 0
+        end
+
         local mana = assert(ent.mana, "no 'mana' component")
         if mana.value > 0 and actor.grounded and player_control.drop_trigger > 0 then
             if player_control.selected_tool == 1 then

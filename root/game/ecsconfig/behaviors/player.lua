@@ -6,6 +6,9 @@ local Player = batteries.class {
 }
 
 local consts = require("game.consts")
+local ecs_util = require("game.ecs_util")
+local Input = require("input")
+
 local TILE_SIZE = consts.TILE_SIZE
 local RAINBOW = {
     P8_PAL.red, P8_PAL.orange, P8_PAL.yellow, P8_PAL.green, P8_PAL.blue,
@@ -26,7 +29,7 @@ function Player:init(ent, game)
 
     local function draw_func(ent, sprite)
         Lg.setLineWidth(1)
-        Lg.rectangle("line", -3.5, -1.5, 7, 3)
+        Lg.rectangle("line", -2.5, -1.5, 5, 3)
     end
 
     self.vis_ent =
@@ -52,6 +55,7 @@ function Player:tick()
     local csprite = ent.sprite
     local control = ent.player_control
     local actor = ent.actor
+    local touching = ent.touch_monitor.touching
 
     local sprite = csprite.obj --[[@as pklove.Sprite]]
 
@@ -70,9 +74,22 @@ function Player:tick()
         end
     end
 
+    control.action_sink = false
+    for _, other_ent in ipairs(touching) do
+        if other_ent.interactable then
+            control.action_sink = true
+
+            if Input.players[1]:pressed("player_action1") then
+                ecs_util.trigger_interaction(ent, other_ent)    
+            end
+
+            break
+        end
+    end
+
     local vis_ent = self.vis_ent
 
-    if actor.grounded then
+    if actor.grounded and not control.action_sink then
         local vis_tx = 0
         local vis_ty = 0
 
@@ -86,10 +103,10 @@ function Player:tick()
             -- accumulation?
             local dx = math.ceil(consts.PLAYER_SIDE_SPIT_VX * t + 1.0001) * math.sign(actor.face_dir)
             
-            vis_tx = math.floor((ent.position.x + dx) / TILE_SIZE)
+            vis_tx = math.floor((ent.position.x + dx) / TILE_SIZE * 2.0) / 2.0
             vis_ty = math.floor((ent.position.y - y0) / TILE_SIZE)
         elseif control.selected_tool == 2 then
-            vis_tx = math.floor((ent.position.x) / TILE_SIZE)
+            vis_tx = math.floor((ent.position.x) / TILE_SIZE * 2.0) / 2.0
             vis_ty = math.floor(ent.position.y / TILE_SIZE - 1.0)
         end
 

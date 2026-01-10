@@ -18,7 +18,7 @@ local function select_pause_option(opt_idx)
     
     elseif opt_idx == 2 then
         -- respawn
-        self.game:respawn()
+        self.game:restore_state()
         self.paused = false
     
     elseif opt_idx == 3 then

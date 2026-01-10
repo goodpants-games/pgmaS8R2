@@ -51,6 +51,7 @@ function asm.entity.player(e, game, x, y)
      :give("player_control")
      :give("mana", 10)
      :give("sprite", game.res:new_sprite("player"))
+     :give("touch_monitor")
      :give("behavior", "player")
     
     e.sprite.ox = -1
@@ -68,7 +69,7 @@ function asm.entity.water_tank(e, game, x, y)
     e:give("position", x, y)
      :give("collision", 8.0, 8.0)
      :give("sprite", game.res:get_image("res/graphics/game/water_tank.png"))
-     :give("touch_monitor")
+     :give("interactable")
      :give("behavior", "water_tank")
     e.collision.monitor_only = true
     e.sprite.oy = -4

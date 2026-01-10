@@ -28,14 +28,14 @@ function BuilderDroplet:tick()
     if velocity.y > 0 and position.y >= self.target_y then
         print("droplet is done")
 
-        local x_snap = TILE_SIZE
+        local x_snap = TILE_SIZE / 2.0
 
         local platform =
             game:new_entity()
                 :give("position",
                       math.floor((position.x) / x_snap) * x_snap + 4.0,
                       math.floor(self.target_y))
-                :give("collision", 8, 2)
+                :give("collision", 6, 2)
                 :give("sprite")
         platform.collision.floor_only = true
 
