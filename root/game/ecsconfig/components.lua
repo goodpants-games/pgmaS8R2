@@ -3,7 +3,6 @@ local Sprite = require("sprite")
 local consts = require("game.consts")
 
 Concord.component("room_persistence")
-Concord.component("interactable")
 Concord.component("remove_on_checkpoint")
 
 Concord.component("position", function(cmp, x, y)

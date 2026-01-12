@@ -76,11 +76,11 @@ function Player:tick()
 
     control.action_sink = false
     for _, other_ent in ipairs(touching) do
-        if other_ent.interactable then
+        if ecs_util.has_handler(other_ent, "interact") then
             control.action_sink = true
 
             if Input.players[1]:pressed("player_action1") then
-                ecs_util.trigger_interaction(ent, other_ent)    
+                ecs_util.send_message(other_ent, "interact", ent)
             end
 
             break

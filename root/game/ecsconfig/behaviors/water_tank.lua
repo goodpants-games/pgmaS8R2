@@ -9,7 +9,7 @@ function WaterTank:new()
     self:super()
 end
 
-function WaterTank:interact(from_ent)
+function WaterTank:msg_interact(from_ent)
     print("water tank interacted")
 
     if from_ent.mana then

@@ -69,7 +69,6 @@ function asm.entity.water_tank(e, game, x, y)
     e:give("position", x, y)
      :give("collision", 8.0, 8.0)
      :give("sprite", game.res:get_image("res/graphics/game/water_tank.png"))
-     :give("interactable")
      :give("behavior", "water_tank")
     e.collision.monitor_only = true
     e.sprite.oy = -4
