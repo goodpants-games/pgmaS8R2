@@ -74,23 +74,25 @@ function PlayerDroplet:tick()
         end
     elseif self.is_platform then
         if velocity.y > 0 and position.y >= self.target_y then
-            print("droplet is done")
+            local col = game.room:get_col(math.floor(position.x / TILE_SIZE),
+                                          math.floor(position.y / TILE_SIZE))
+            if col ~= 3 then
+                local x_snap = TILE_SIZE / 2.0
 
-            local x_snap = TILE_SIZE / 2.0
+                local platform =
+                    game:new_entity()
+                        :give("position",
+                            math.floor((position.x) / x_snap) * x_snap + 4.0,
+                            math.floor(self.target_y))
+                        :give("collision", 6, 2)
+                        :give("sprite")
+                        :give("remove_on_checkpoint")
+                platform.collision.floor_only = true
 
-            local platform =
-                game:new_entity()
-                    :give("position",
-                        math.floor((position.x) / x_snap) * x_snap + 4.0,
-                        math.floor(self.target_y))
-                    :give("collision", 6, 2)
-                    :give("sprite")
-                    :give("remove_on_checkpoint")
-            platform.collision.floor_only = true
-
-            -- TODO: make platform have sprite
-            platform.sprite.r, platform.sprite.g, platform.sprite.b =
-                unpack(P8_PAL.white)
+                -- TODO: make platform have sprite
+                platform.sprite.r, platform.sprite.g, platform.sprite.b =
+                    unpack(P8_PAL.white)
+            end
 
             ent:destroy()
         end

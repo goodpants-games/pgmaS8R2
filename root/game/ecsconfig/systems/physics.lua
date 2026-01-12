@@ -426,7 +426,7 @@ function system:tick()
                 for y=miny, maxy-1 do
                     for x=minx, maxx-1 do
                         local v = game.room:get_col(x, y)
-                        if v ~= 0 and v ~= 2 then
+                        if v == 1 then
                             local colx, coly, colw, colh =
                                 get_tile_collision_bounds(x, y, tsz, tsz, v)
                             

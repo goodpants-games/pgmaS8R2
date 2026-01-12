@@ -1,3 +1,9 @@
+- enemies. probably just really basic enemies.
+  the idea is that puzzle rooms/level will be broken up by like exploration
+  segments, and really enemies just exist to give you something else to worry/
+  think about, and to make the world less barren. nothing too fancy. i don't
+  think you will have a health system or anything, rather if you get hit by an
+  enemy it will reset you back to the start of the room.
 - also i guess there's "safe points" scattered frequently across the world,
   which resets your freeze meter.
 - grapple hook?

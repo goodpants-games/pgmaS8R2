@@ -2,7 +2,7 @@
 ---@field entity any
 ---@field game game.Game
 ---@overload fun():game.behavior.Base
-local Behavior = batteries.class { name = "game.Behavior" }
+local Behavior = batteries.class { name = "game.behavior.Base" }
 
 function Behavior:new() end
 
@@ -14,11 +14,6 @@ function Behavior:init(ent, game)
 end
 
 function Behavior:tick()
-end
-
----@param from_ent any
----@param ... any
-function Behavior:interact(from_ent, ...)
 end
 
 ---@return table

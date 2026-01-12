@@ -75,4 +75,10 @@ function asm.entity.water_tank(e, game, x, y)
     e.sprite.z_index = -100
 end
 
+function asm.entity.enemy(e, game, x, y)
+    e:assemble(asm.actor, x, y, 6, 8)
+     :give("sprite")
+     :give("behavior", "enemy")
+end
+
 return asm

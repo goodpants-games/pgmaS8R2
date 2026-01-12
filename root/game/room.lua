@@ -54,6 +54,8 @@ function Room:new(game, map_path, tex_load_cb)
                 local tinfo = tile_info[ginfo.id]
                 if tinfo and tinfo.type == "water" then
                     self.col_map[i] = 2
+                elseif tinfo and tinfo.type == "heat" then
+                    self.col_map[i] = 3
                 else
                     self.col_map[i] = 1
                 end

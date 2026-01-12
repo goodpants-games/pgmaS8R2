@@ -57,7 +57,7 @@ end
 
 local touch_monitor = Concord.component("touch_monitor", touch_monitor_init)
 function touch_monitor:serialize() return {} end
-touch_monitor = touch_monitor_init
+touch_monitor.deserialize = touch_monitor_init
 
 
 Concord.component("actor", function(cmp)
