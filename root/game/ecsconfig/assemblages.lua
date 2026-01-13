@@ -1,5 +1,6 @@
-local consts = require("game.consts")
 local bit = require("bit")
+local consts = require("game.consts")
+local GameUtil = require("game.util")
 
 local asm = {}
 asm.entity = {}
@@ -13,6 +14,7 @@ function asm.actor(e, x, y, w, h)
      :give("mass", 1.0)
 
     e.collision.group = consts.COLGROUP_ACTOR
+    e.collision.mask = consts.COLGROUP_DEFAULT
 end
 
 ---@param e any
@@ -79,6 +81,8 @@ function asm.entity.enemy(e, game, x, y)
     e:assemble(asm.actor, x, y, 6, 8)
      :give("sprite")
      :give("behavior", "enemy")
+    
+    e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
 end
 
 return asm

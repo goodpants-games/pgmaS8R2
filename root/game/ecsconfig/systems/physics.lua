@@ -4,7 +4,8 @@ local consts = require("game.consts")
 local bit = require("bit")
 local PriorityQueue = require("ds.priority_queue")
 
-local FLOOR_ANGLE = math.sqrt(2) / 2
+local WALL_ANGLE_COS = math.cos( math.rad(45) )
+local FLOOR_ANGLE_SIN = math.sin( math.rad(45) )
 
 local system = Concord.system({
     pv_pool = {"position", "velocity"},
@@ -272,6 +273,7 @@ function system:tick()
 
         if ent.actor then
             ent.actor.grounded = false
+            ent.actor.touched_wall = false
         end
 
         local extra = {}
@@ -360,48 +362,47 @@ function system:tick()
                     local col1, col2 = e1.collision, e2.collision
                     local vel1, vel2 = e1.velocity, e2.velocity
 
-                    if     bit.band(col1.mask, col2.group) ~= 0
-                       or  bit.band(col2.mask, col1.group) ~= 0
+                    local tm1, tm2 = e1.touch_monitor, e2.touch_monitor
+
+                    if tm1 and not table.index_of(tm1.touching, e2) then
+                        table.insert(tm1.touching, e2)
+                    end
+
+                    if tm2 and not table.index_of(tm2.touching, e1) then
+                        table.insert(tm2.touching, e1)
+                    end
+
+                    if   (bit.band(col1.mask, col2.group) ~= 0
+                       or bit.band(col2.mask, col1.group) ~= 0)
+                       and not (col1.monitor_only or col2.monitor_only)
                     then
-                        local tm1, tm2 = e1.touch_monitor, e2.touch_monitor
+                        local cx2 = pos2.x
+                        local cy2 = pos2.y
+                        local cw2 = col2.w
+                        local ch2 = col2.h
 
-                        if tm1 and not table.index_of(tm1.touching, e2) then
-                            table.insert(tm1.touching, e2)
+                        local v2x, v2y = 0, 0
+                        if vel2 then
+                            v2x, v2y = vel2.x, vel2.y
                         end
-
-                        if tm2 and not table.index_of(tm2.touching, e1) then
-                            table.insert(tm2.touching, e1)
-                        end
-
-                        if not (col1.monitor_only or col2.monitor_only) then
-                            local cx2 = pos2.x
-                            local cy2 = pos2.y
-                            local cw2 = col2.w
-                            local ch2 = col2.h
-
-                            local v2x, v2y = 0, 0
-                            if vel2 then
-                                v2x, v2y = vel2.x, vel2.y
+                        
+                        local pn, nx, ny = test_collision(
+                            pos1, col1, vel1,
+                            cx2, cy2, cw2, ch2, v2x, v2y)
+                        if pn then
+                            local ent1_is_floor = ny < -FLOOR_ANGLE_SIN
+                            local ent2_is_floor = ny > FLOOR_ANGLE_SIN
+                            if not ent1_is_floor and col2.floor_only then
+                                goto continue
                             end
-                            
-                            local pn, nx, ny = test_collision(
-                                pos1, col1, vel1,
-                                cx2, cy2, cw2, ch2, v2x, v2y)
-                            if pn then
-                                local ent1_is_floor = ny < -FLOOR_ANGLE
-                                local ent2_is_floor = ny > FLOOR_ANGLE
-                                if not ent1_is_floor and col2.floor_only then
-                                    goto continue
-                                end
 
-                                if not ent2_is_floor and col1.floor_only then
-                                    goto continue
-                                end
-
-                                col_queue:enqueue({
-                                    e1, e2, pn, nx, ny
-                                }, math.abs(pn))
+                            if not ent2_is_floor and col1.floor_only then
+                                goto continue
                             end
+
+                            col_queue:enqueue({
+                                e1, e2, pn, nx, ny
+                            }, math.abs(pn))
                         end
                     end
                 end
@@ -544,7 +545,17 @@ function system:tick()
                     vel.y = vel.y + ny * pdot
                 end
 
-                if ny < -FLOOR_ANGLE then
+                if math.abs(nx) > WALL_ANGLE_COS then
+                    if actor then
+                        actor.touched_wall = true
+                    end
+
+                    if o_actor then
+                        o_actor.touched_wall = true
+                    end
+                end
+
+                if ny < -FLOOR_ANGLE_SIN then
                     if actor then
                         actor.grounded = true
                     end
@@ -555,7 +566,7 @@ function system:tick()
                     end
                 end
 
-                if ny > FLOOR_ANGLE then
+                if ny > FLOOR_ANGLE_SIN then
                     if o_actor then
                         o_actor.grounded = true
                     end

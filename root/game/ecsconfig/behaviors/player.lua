@@ -6,7 +6,7 @@ local Player = batteries.class {
 }
 
 local consts = require("game.consts")
-local ecs_util = require("game.ecs_util")
+local GameUtil = require("game.util")
 local Input = require("input")
 
 local TILE_SIZE = consts.TILE_SIZE
@@ -76,11 +76,11 @@ function Player:tick()
 
     control.action_sink = false
     for _, other_ent in ipairs(touching) do
-        if ecs_util.has_handler(other_ent, "interact") then
+        if GameUtil.has_handler(other_ent, "interact") then
             control.action_sink = true
 
             if Input.players[1]:pressed("player_action1") then
-                ecs_util.send_message(other_ent, "interact", ent)
+                GameUtil.send_message(other_ent, "interact", ent)
             end
 
             break

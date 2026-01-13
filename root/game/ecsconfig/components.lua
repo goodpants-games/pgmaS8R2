@@ -1,6 +1,7 @@
 local Concord = require("concord")
 local Sprite = require("sprite")
 local consts = require("game.consts")
+local GameUtil = require("game.util")
 
 Concord.component("room_persistence")
 Concord.component("remove_on_checkpoint")
@@ -67,10 +68,11 @@ Concord.component("actor", function(cmp)
     cmp.jump_trigger = 0
     
     -- px/tick
-    cmp.move_speed = 0.28
+    cmp.move_speed = GameUtil.accel_damp_at_speed(1.0, 0.8)
     cmp.jump_velocity = 2.0
 
     cmp.grounded = false
+    cmp.touched_wall = false
 end)
 
 Concord.component("player_control", function(cmp)

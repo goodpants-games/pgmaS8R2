@@ -5,11 +5,23 @@ local Enemy = batteries.class {
     extends = require("game.ecsconfig.behaviors.base")
 }
 
+function Enemy:init(ent, game)
+    self.__super.init(self, ent, game)
+
+    ent.actor.move_x = 1
+end
+
 function Enemy:tick()
     local ent = self.entity
 
     local actor = ent.actor
-    actor.move_x = -1
+    if actor.touched_wall then
+        actor.move_x = -actor.move_x
+    end
+end
+
+function Enemy:msg_attacked()
+    self.entity:destroy()
 end
 
 return Enemy

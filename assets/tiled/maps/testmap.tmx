@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="60" height="22" tilewidth="8" tileheight="8" infinite="0" nextlayerid="4" nextobjectid="18">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="60" height="22" tilewidth="8" tileheight="8" infinite="0" nextlayerid="4" nextobjectid="19">
  <tileset firstgid="1" source="../tilesets/tileset.tsx"/>
  <layer id="1" name="Tiles" width="60" height="22">
   <data encoding="base64">
@@ -13,5 +13,6 @@
   <object id="12" name="spring" type="entity" x="104" y="72" width="8" height="8"/>
   <object id="10" name="player" type="entity" x="168" y="0" width="8" height="8"/>
   <object id="17" name="ice_block" type="entity" x="272" y="0" width="8" height="8"/>
+  <object id="18" name="enemy" type="entity" x="352" y="40" width="8" height="8"/>
  </objectgroup>
 </map>

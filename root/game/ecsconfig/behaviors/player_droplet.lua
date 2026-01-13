@@ -5,7 +5,7 @@ local PlayerDroplet = batteries.class {
 }
 
 local consts = require("game.consts")
-local ecs_util = require("game.ecs_util")
+local GameUtil = require("game.util")
 local TILE_SIZE = consts.TILE_SIZE
 local DROPLET_TYPES = {"side_platform", "up_platform", "bullet"}
 
@@ -50,7 +50,7 @@ function PlayerDroplet:touch_began(ent2)
         if ent2 == self.game.player then return end
 
         if ent2 then
-            ecs_util.send_message(ent2, "attacked", ent1.velocity.x, ent1)
+            GameUtil.send_message(ent2, "attacked", ent1.velocity.x, ent1)
         end
 
         if ent2 ~= self.game.player then
