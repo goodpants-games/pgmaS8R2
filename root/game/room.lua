@@ -52,13 +52,18 @@ function Room:new(game, map_path, tex_load_cb)
                        "tile in collision layer does not use base tileset!")
 
                 local tinfo = tile_info[ginfo.id]
-                if tinfo and tinfo.type == "water" then
-                    self.col_map[i] = 2
-                elseif tinfo and tinfo.type == "heat" then
-                    self.col_map[i] = 3
-                else
-                    self.col_map[i] = 1
+                local col_id = 1
+                if tinfo then
+                    if tinfo.type == "water" then
+                        col_id = 2
+                    elseif tinfo.type == "heat" then
+                        col_id = 3
+                    elseif tinfo.type == "decor" then
+                        col_id = 0
+                    end
                 end
+
+                self.col_map[i] = col_id
             else
                 self.col_map[i] = 0
             end

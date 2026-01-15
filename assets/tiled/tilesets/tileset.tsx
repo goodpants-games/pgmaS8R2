@@ -7,6 +7,10 @@
  <tile id="19" type="heat"/>
  <tile id="20" type="heat"/>
  <tile id="21" type="heat"/>
+ <tile id="22" type="decor"/>
+ <tile id="23" type="decor"/>
+ <tile id="24" type="decor"/>
+ <tile id="32" type="water"/>
  <tile id="34" type="heat"/>
  <tile id="35" type="heat"/>
  <tile id="36" type="heat"/>

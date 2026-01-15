@@ -10,20 +10,23 @@ function WaterTank:new()
 end
 
 function WaterTank:msg_interact(from_ent)
-    print("water tank interacted")
+    local ent = self.entity
+    local game = self.game
 
     if from_ent.mana then
         from_ent.mana.value = from_ent.mana.max    
     end
 
-    if from_ent == self.game.player then
+    if from_ent == game.player then
         local p_pos, p_vel, p_actor = from_ent.position, from_ent.velocity,
                                       from_ent.actor
         assert(p_pos and p_vel, "player did not have position and velocity")
 
-        for _, ent in ipairs(self.game.ecs_world:query({"remove_on_checkpoint"})) do
-            ent:destroy()    
+        for _, e in ipairs(game.ecs_world:query({"remove_on_checkpoint"})) do
+            e:destroy()    
         end
+
+        game.checkpoint_marker = ent
         
         local vx, vy = p_vel.x, p_vel.y
         local px = p_pos.x
@@ -31,7 +34,7 @@ function WaterTank:msg_interact(from_ent)
 
         p_vel.x = 0.0
         p_vel.y = 0.0
-        p_pos.x = self.entity.position.x
+        p_pos.x = ent.position.x
         p_actor.move_x = 0
 
         print("save world state!")
@@ -45,6 +48,16 @@ function WaterTank:msg_interact(from_ent)
 end
 
 function WaterTank:tick()
+    local ent = self.entity
+    local game = self.game
+    local sprite = ent.sprite
+
+    if game.checkpoint_marker == ent then
+        sprite.obj:play("normal_active")
+    else
+        sprite.obj:play("normal_inactive")
+    end
+
     -- local ent = self.entity
     -- local touching = ent.touch_monitor.touching
 

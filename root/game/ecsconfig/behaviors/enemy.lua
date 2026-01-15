@@ -58,7 +58,7 @@ end
 function Enemy:msg_attacked(from, x, y)
     local ent = self.entity
 
-    ent.velocity.x = math.sign(x) * 0.25
+    ent.velocity.x = math.binsign(x) * 0.25
     ent.velocity.y = -0.8
 
     ent:remove("actor")

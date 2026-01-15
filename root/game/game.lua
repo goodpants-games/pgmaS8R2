@@ -178,6 +178,9 @@ function Game:new()
     ---@private
     self._restore_queued = false
 
+    ---@type any?
+    self.checkpoint_marker = nil
+
     self:save_state()
 
     -- if not self.player then
@@ -343,6 +346,10 @@ function Game:save_state()
         self._save_state.room_transition = table.shallow_copy(self._room_transition)
     end
 
+    if self.checkpoint_marker then
+        self._save_state.checkpoint_marker = self.checkpoint_marker:get("key").value
+    end
+
     -- batteries.pretty.print(self._save_state, { depth = 5 })
 end
 
@@ -360,6 +367,10 @@ function Game:restore_state()
     if data.room_transition then
         self._room_transition = table.shallow_copy(data.room_transition)
     end
+
+    if data.checkpoint_marker then
+        self.checkpoint_marker = self.ecs_world:getEntityByKey(data.checkpoint_marker)
+    end
 end
 
 function Game:queue_restore()
@@ -371,6 +382,8 @@ function Game:_unload_room()
     for _, ent in ipairs(self.ecs_world:query({"!room_persistence"})) do
         ent:destroy()
     end
+
+    self.checkpoint_marker = nil
 
     self.room:release()
     self.room = nil

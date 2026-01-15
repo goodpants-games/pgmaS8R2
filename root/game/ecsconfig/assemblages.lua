@@ -70,10 +70,11 @@ end
 function asm.entity.water_tank(e, game, x, y)
     e:give("position", x, y)
      :give("collision", 8.0, 8.0)
-     :give("sprite", game.res:get_image("res/graphics/game/water_tank.png"))
+     :give("sprite", game.res:new_sprite("water_tank"))
      :give("behavior", "water_tank")
+    
     e.collision.monitor_only = true
-    e.sprite.oy = -4
+    e.sprite.oy = -9
     e.sprite.z_index = -100
 end
 

@@ -1,0 +1,53 @@
+{ "frames": [
+   {
+    "filename": "water_tank 0.ase",
+    "frame": { "x": 0, "y": 21, "w": 10, "h": 17 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 9, "w": 8, "h": 15 },
+    "sourceSize": { "w": 8, "h": 24 },
+    "duration": 100
+   },
+   {
+    "filename": "water_tank 1.ase",
+    "frame": { "x": 10, "y": 21, "w": 10, "h": 17 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 9, "w": 8, "h": 15 },
+    "sourceSize": { "w": 8, "h": 24 },
+    "duration": 100
+   },
+   {
+    "filename": "water_tank 2.ase",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 21 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 5, "w": 8, "h": 19 },
+    "sourceSize": { "w": 8, "h": 24 },
+    "duration": 100
+   },
+   {
+    "filename": "water_tank 3.ase",
+    "frame": { "x": 10, "y": 0, "w": 10, "h": 21 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 5, "w": 8, "h": 19 },
+    "sourceSize": { "w": 8, "h": 24 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.x-dev",
+  "image": "water_tank.png",
+  "format": "RGBA8888",
+  "size": { "w": 20, "h": 38 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "normal_inactive", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "normal_active", "from": 1, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "large_inactive", "from": 2, "to": 2, "direction": "forward", "color": "#000000ff" },
+   { "name": "large_active", "from": 3, "to": 3, "direction": "forward", "color": "#000000ff" }
+  ]
+ }
+}
