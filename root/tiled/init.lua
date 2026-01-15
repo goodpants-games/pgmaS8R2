@@ -124,7 +124,7 @@ local readBase64 = require(module_root .. ".base64")
 local table_new = require(module_root .. ".tablecompat").new
 
 local tiled = {}
-tiled._version = "0.2.0"
+tiled._version = "0.2.1"
 
 ---@class pklove.tiled.Layer
 ---@field type string
@@ -453,8 +453,8 @@ local function renderTileLayer(map, tileLayer)
                     x = drawX,
                     y = drawY,
                     r = dFlip and math.pi / 2 or 0,
-                    sx = sx,
-                    sy = sy,
+                    sx = dFlip and sy or sx,
+                    sy = dFlip and sx or sy,
                     ox = tileset.tilewidth / 2,
                     oy = tileset.tileheight / 2,
 
