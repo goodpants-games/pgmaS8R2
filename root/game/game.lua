@@ -175,6 +175,9 @@ function Game:new()
 
     self.frame = 0
 
+    ---@private
+    self._restore_queued = false
+
     self:save_state()
 
     -- if not self.player then
@@ -219,6 +222,11 @@ function Game:update(dt)
 end
 
 function Game:tick()
+    if self._restore_queued then
+        self._restore_queued = false
+        self:restore_state()
+    end
+
     do
         local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
         local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
@@ -352,6 +360,10 @@ function Game:restore_state()
     if data.room_transition then
         self._room_transition = table.shallow_copy(data.room_transition)
     end
+end
+
+function Game:queue_restore()
+    self._restore_queued = true
 end
 
 ---@private

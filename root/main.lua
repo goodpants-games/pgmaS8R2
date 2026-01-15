@@ -251,6 +251,10 @@ function love.run()
 	-- We don't want the first frame's dt to include time taken by love.load.
 	if love.timer then love.timer.step() end
 
+    if love.graphics then
+        print(love.graphics.getRendererInfo())
+    end
+
 	local dt = 0
 
 	-- Main loop time.

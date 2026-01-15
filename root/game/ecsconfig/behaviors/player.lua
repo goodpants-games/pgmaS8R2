@@ -123,4 +123,8 @@ function Player:tick()
         unpack(RAINBOW[vis_color_index])
 end
 
+function Player:msg_attacked(from_ent, x, y)
+    self.game:queue_restore()
+end
+
 return Player

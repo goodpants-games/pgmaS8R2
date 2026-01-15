@@ -46,6 +46,7 @@ Concord.component("collision", function(cmp, w, h)
     cmp.floor_only = false
     cmp.monitor_only = false
     cmp.in_water = false
+    cmp.enabled = true
 end)
 
 local function touch_monitor_init(cmp)

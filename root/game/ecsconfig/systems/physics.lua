@@ -259,7 +259,7 @@ function system:tick()
             vel.y = vel.y * damping.y
         end
 
-        if not ent.collision then
+        if not (ent.collision and ent.collision.enabled) then
             pos.x = pos.x + vel.x
             pos.y = pos.y + vel.y
         end
@@ -267,9 +267,7 @@ function system:tick()
 
     -- begin collision
     for _, ent in ipairs(self.pvc_pool) do
-        local pos = ent.position
         local vel = ent.velocity
-        local col = ent.collision
 
         if ent.actor then
             ent.actor.grounded = false
@@ -361,8 +359,11 @@ function system:tick()
                     local pos1, pos2 = e1.position, e2.position
                     local col1, col2 = e1.collision, e2.collision
                     local vel1, vel2 = e1.velocity, e2.velocity
-
                     local tm1, tm2 = e1.touch_monitor, e2.touch_monitor
+
+                    if not (col1.enabled and col2.enabled) then
+                        goto continue
+                    end
 
                     if tm1 and not table.index_of(tm1.touching, e2) then
                         table.insert(tm1.touching, e2)
@@ -416,6 +417,12 @@ function system:tick()
                 local collider = ent.collision
                 local vel = ent.velocity
 
+                if not collider.enabled
+                   or bit.band(collider.mask, consts.COLGROUP_DEFAULT) == 0
+                then
+                    goto continue
+                end
+
                 local cxe = collider.w / 2 -- collider x extents
                 local cye = collider.h / 2 -- collider y extents
 
@@ -448,6 +455,8 @@ function system:tick()
                         end
                     end
                 end
+
+                ::continue::
             end
 
             if col_queue:is_empty() then
@@ -631,11 +640,16 @@ function system:tick()
         local position = ent.position
         local velocity = ent.velocity
         local col = ent.collision
-        local tx = math.floor(position.x / consts.TILE_SIZE)
-        local ty = math.floor(position.y / consts.TILE_SIZE)
 
-        local col_type = game.room:get_col(tx, ty)
-        col.in_water = col_type and col_type == 2
+        if col.enabled then
+            local tx = math.floor(position.x / consts.TILE_SIZE)
+            local ty = math.floor(position.y / consts.TILE_SIZE)
+
+            local col_type = game.room:get_col(tx, ty)
+            col.in_water = col_type and col_type == 2
+        else
+            col.in_water = false
+        end
     end
 
     -- water buoyancy

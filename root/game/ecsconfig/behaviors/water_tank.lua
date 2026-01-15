@@ -17,12 +17,30 @@ function WaterTank:msg_interact(from_ent)
     end
 
     if from_ent == self.game.player then
+        local p_pos, p_vel, p_actor = from_ent.position, from_ent.velocity,
+                                      from_ent.actor
+        assert(p_pos and p_vel, "player did not have position and velocity")
+
         for _, ent in ipairs(self.game.ecs_world:query({"remove_on_checkpoint"})) do
             ent:destroy()    
         end
+        
+        local vx, vy = p_vel.x, p_vel.y
+        local px = p_pos.x
+        local mvx = p_actor.move_x
+
+        p_vel.x = 0.0
+        p_vel.y = 0.0
+        p_pos.x = self.entity.position.x
+        p_actor.move_x = 0
 
         print("save world state!")
         self.game:save_state()
+
+        p_vel.x = vx
+        p_vel.y = vy
+        p_pos.x = px
+        p_actor.move_x = mvx
     end
 end
 

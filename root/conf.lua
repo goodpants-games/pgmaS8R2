@@ -51,21 +51,6 @@ DISPLAY_WIDTH = 120
 DISPLAY_HEIGHT = 93
 GAME_TICK_LENGTH = 1.0 / 60.0
 
-function love.conf(t)
-    t.version = "11.4"
-    t.identity = "pkhead_pgmaS8R2"
-    t.window.width = DISPLAY_WIDTH * 5
-    t.window.height = DISPLAY_HEIGHT * 5
-    t.window.resizable = true
-    t.window.vsync = 1
-    t.window.highdpi = true
-    t.window.title = "game"
-    
-    t.modules.thread = false
-    t.modules.video = false
-    t.modules.physics = false
-end
-
 ---@diagnostic disable lowercase-global
 
 ---@param err any
@@ -126,4 +111,19 @@ function warn(msg1, ...)
         local msg = table.concat({msg1, ...})
         print("[WRN] " .. msg)
     end
+end
+
+function love.conf(t)
+    t.version = "11.4"
+    t.identity = "pkhead_pgmaS8R2"
+    t.window.width = DISPLAY_WIDTH * 5
+    t.window.height = DISPLAY_HEIGHT * 5
+    t.window.resizable = true
+    t.window.vsync = 1
+    t.window.highdpi = true
+    t.window.title = "game"
+    
+    t.modules.thread = false
+    t.modules.video = false
+    t.modules.physics = false
 end

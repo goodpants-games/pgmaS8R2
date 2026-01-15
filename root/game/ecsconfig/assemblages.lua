@@ -81,6 +81,7 @@ function asm.entity.enemy(e, game, x, y)
     e:assemble(asm.actor, x, y, 6, 8)
      :give("sprite")
      :give("behavior", "enemy")
+     :give("touch_monitor")
     
     e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
 end

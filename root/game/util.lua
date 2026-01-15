@@ -34,17 +34,31 @@ function GameUtil.send_message(ent, msg_name, ...)
     return false
 end
 
----For a sequence `v[i] = k * (a + v[i-1])`, return the `a` that makes the limit
----of the sequence the given value.
+---Calculate the limit of the sequence `x[i] = k * (a + x[i-1])`.
+---@param a number
+---@param k number
+---@return number limit
+function GameUtil.accel_damp_limit(a, k)
+    if not (k >= 0.0 and k < 1.0) then
+        warn("accel_damp_limit: limit does not exist")
+        return 0/0
+    end
+
+    return -(a * k) / (k - 1.0)
+end
+
+---For a sequence `x[i] = k * (a + x[i-1])`, return the `a` that makes the limit
+---of that sequence the given value.
 ---@param max_speed number The desired limit.
 ---@param k number Damping factor, which must be a number in the range [0, 1)
 ---@return number a
 function GameUtil.accel_damp_at_speed(max_speed, k)
     if not (k >= 0.0 and k < 1.0) then
+        warn("accel_damp_limit: limit does not exist")
         return 0/0
     end
 
-    return -max_speed * (k - 1) / k
+    return -max_speed * (k - 1.0) / k
 end
 
 return GameUtil

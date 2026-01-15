@@ -50,7 +50,7 @@ function PlayerDroplet:touch_began(ent2)
         if ent2 == self.game.player then return end
 
         if ent2 then
-            GameUtil.send_message(ent2, "attacked", ent1.velocity.x, ent1)
+            GameUtil.send_message(ent2, "attacked", ent1, ent1.velocity.x, ent1.velocity.y)
         end
 
         if ent2 ~= self.game.player then
