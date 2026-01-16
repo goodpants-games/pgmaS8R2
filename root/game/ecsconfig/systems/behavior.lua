@@ -7,7 +7,8 @@ local system = Concord.system({
 function system:init()    
     function self.pool.onAdded(_, ent)
         local behavior = ent.behavior
-        behavior.inst:init(ent, self:getWorld().game)
+        behavior.inst:init(ent, self:getWorld().game, behavior._soft_init)
+        behavior._soft_init = nil
     end
 
     function self.pool.onRemoved(_, ent)

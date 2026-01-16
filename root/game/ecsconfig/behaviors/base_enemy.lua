@@ -1,15 +1,17 @@
----@class game.behavior.Enemy: game.behavior.Base
----@overload fun(props:table):game.behavior.Enemy
-local Enemy = batteries.class {
-    name = "game.behavior.Enemy",
-    extends = require("game.ecsconfig.behaviors.base")
+local Base = require("game.ecsconfig.behaviors.base")
+
+---@class game.behavior.BaseEnemy: game.behavior.Base
+---@overload fun(props:table):game.behavior.BaseEnemy
+local BaseEnemy = batteries.class {
+    name = "game.behavior.BaseEnemy",
+    extends = Base
 }
 
 local GameUtil = require("game.util")
 local consts = require("game.consts")
 
 ---@param props table
-function Enemy:new(props)
+function BaseEnemy:new(props)
     props = props or {}
 
     self:super()
@@ -17,19 +19,14 @@ function Enemy:new(props)
     self.max_dist = (props.max_dist or math.huge) * consts.TILE_SIZE
 end
 
-function Enemy:init(ent, game)
-    self.__super.init(self, ent, game)
+function BaseEnemy:init(ent, game, soft_init)
+    Base.init(self, ent, game, soft_init)
+    if soft_init then return end
 
-    if ent.actor then
-        ent.actor.move_x = 1
-    end
-
-    if not self.home then
-        self.home = ent.position.x
-    end
+    self.home = ent.position.x
 end
 
-function Enemy:tick()
+function BaseEnemy:tick()
     local ent = self.entity
 
     if self.dead then
@@ -46,7 +43,7 @@ function Enemy:tick()
     end
 end
 
-function Enemy:touch_began(ent2)
+function BaseEnemy:touch_began(ent2)
     local ent = self.entity
     local actor = ent.actor
 
@@ -65,18 +62,26 @@ function Enemy:touch_began(ent2)
     end
 end
 
-function Enemy:msg_attacked(from, x, y)
+function BaseEnemy:msg_attacked(from, x, y)
     local ent = self.entity
 
-    ent.velocity.x = math.binsign(x) * 0.25
-    ent.velocity.y = -0.8
+    ent.velocity.x = 0.0
+    ent.velocity.y = 0.0
 
-    ent:remove("actor")
-       :give("gmult", 0.6)
-       :remove("damping")
-    ent.collision.enabled = false
+    if ent.health then
+        ent.health.value = math.max(0, ent.health.value - 1)
+        if ent.health.value <= 0 then
+            ent.velocity.x = math.binsign(x) * 0.25
+            ent.velocity.y = -0.8
 
-    self.dead = true
+            ent:remove("actor")
+               :give("gmult", 0.6)
+               :remove("damping")
+            ent.collision.enabled = false
+
+            self.dead = true     
+        end
+    end
 end
 
-return Enemy
+return BaseEnemy

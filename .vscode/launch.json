@@ -12,7 +12,7 @@
                 "command": "lovec"
             },
             "cwd": "${workspaceFolder}/root",
-            "args": [".", "--debug"],
+            "args": [".", "--debug", "--room", "maps/d01.tmx"],
             // "preLaunchTask": "Build assets"
         }
     ]

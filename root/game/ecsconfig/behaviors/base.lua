@@ -8,7 +8,8 @@ function Behavior:new() end
 
 ---@param ent any
 ---@param game game.Game
-function Behavior:init(ent, game)
+---@param soft_init boolean True if the component was created from a deserialization.
+function Behavior:init(ent, game, soft_init)
     self.entity = ent
     self.game = game
 end

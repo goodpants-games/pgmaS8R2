@@ -1,8 +1,9 @@
+local Base = require("game.ecsconfig.behaviors.base")
 ---@class game.behavior.Player: game.behavior.Base
 ---@overload fun():game.behavior.Player
 local Player = batteries.class {
     name = "game.behavior.Player",
-    extends = require("game.ecsconfig.behaviors.base")
+    extends = Base
 }
 
 local consts = require("game.consts")
@@ -20,8 +21,8 @@ function Player:new()
     self.is_spitting = false
 end
 
-function Player:init(ent, game)
-    self.__super.init(self, ent, game)
+function Player:init(ent, game, soft_init)
+    Base.init(self, ent, game, soft_init)
     
     if not ent.sprite.obj.curAnim then
         ent.sprite.obj:play("idle")
@@ -44,7 +45,7 @@ function Player:removed()
 end
 
 function Player:serialize()
-    local data = self.__super.serialize(self)
+    local data = Base.serialize(self)
     data.vis_ent = nil
     return data
 end
@@ -111,7 +112,7 @@ function Player:tick()
             local t = math.ceil((-vy + math.sqrt(vy * vy + 2.0 * g * y0)) / g)
             -- oh my god what the hell. why so precise. maybe fp error
             -- accumulation?
-            local dx = math.ceil(consts.PLAYER_SIDE_SPIT_VX * t + 1.0001) * math.sign(actor.face_dir)
+            local dx = math.ceil(consts.PLAYER_SIDE_SPIT_VX * (t + 0.1)) * math.sign(actor.face_dir)
             
             vis_tx = math.floor((ent.position.x + dx) / TILE_SIZE * 2.0) / 2.0
             vis_ty = math.floor((ent.position.y - y0) / TILE_SIZE)

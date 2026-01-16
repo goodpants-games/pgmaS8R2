@@ -78,11 +78,12 @@ function asm.entity.water_tank(e, game, x, y)
     e.sprite.z_index = -100
 end
 
-function asm.entity.enemy(e, game, x, y, props)
+function asm.entity.crawler(e, game, x, y, props)
     e:assemble(asm.actor, x, y, 6, 8)
      :give("sprite")
-     :give("behavior", "enemy", props)
+     :give("behavior", "crawler", props)
      :give("touch_monitor")
+     :give("health", 3)
     
     e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
 end

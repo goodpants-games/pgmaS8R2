@@ -165,6 +165,7 @@ function behavior:deserialize(data)
         local behav = require("game.ecsconfig.behaviors." .. data.name)
         self.inst = setmetatable({}, behav)
         self.inst:deserialize(data.data)
+        self._soft_init = true
     end
 end
 

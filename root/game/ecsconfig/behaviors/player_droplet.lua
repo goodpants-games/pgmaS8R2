@@ -1,7 +1,9 @@
+local Base = require("game.ecsconfig.behaviors.base")
+
 ---@class game.behavior.PlayerDroplet: game.behavior.Base
 local PlayerDroplet = batteries.class {
     name = "game.behavior.PlayerDroplet",
-    extends = require("game.ecsconfig.behaviors.base")
+    extends = Base
 }
 
 local consts = require("game.consts")
@@ -26,8 +28,9 @@ function PlayerDroplet:new(droplet_type)
     end
 end
 
-function PlayerDroplet:init(ent, game)
-    self.__super.init(self, ent, game)
+function PlayerDroplet:init(ent, game, soft_init)
+    Base.init(self, ent, game, soft_init)
+    if soft_init then return end
 
     if (self.droplet_type == "side_platform" or self.droplet_type == "up_platform") and not self.target_y then
         local py = ent.position.y
@@ -59,6 +62,20 @@ function PlayerDroplet:touch_began(ent2)
     end
 end
 
+---@param game game.Game
+---@param x number
+---@param y number
+local function check_tile(game, x, y)
+    local tx = math.floor(x / TILE_SIZE)
+    local ty = math.floor(y / TILE_SIZE)
+    local col = game.room:get_col(tx, ty)
+    if col == 2 then
+        col = game.room:get_col(tx, ty - 1)
+    end
+
+    return col == 0 or col == 2
+end
+
 function PlayerDroplet:tick()
     local game = self.game
     local ent = self.entity
@@ -74,25 +91,21 @@ function PlayerDroplet:tick()
         end
     elseif self.is_platform then
         if velocity.y > 0 and position.y >= self.target_y then
-            local tx = math.floor(position.x / TILE_SIZE)
-            local ty = math.floor(position.y / TILE_SIZE)
-            local col = game.room:get_col(tx, ty)
-            if col == 2 then
-                col = game.room:get_col(tx, ty - 1)
-            end
-            
-            if col ~= 3 then
-                local x_snap = TILE_SIZE / 2.0
-                local offset = 0.0
-                if self.droplet_type == "up_platform" then
-                    offset = -0.5
-                end
+            local x_snap = TILE_SIZE / 2.0
 
+            local offset = 0.0
+            if self.droplet_type == "up_platform" then
+                offset = -0.5
+            end
+
+            local px = math.floor(position.x / x_snap + offset) * x_snap + 4.0
+            local py = math.floor(self.target_y / TILE_SIZE) * TILE_SIZE + 1.0
+            px, py = math.round(px), math.round(py)
+            
+            if check_tile(game, px, py) and check_tile(game, px + 3, py) and check_tile(game, px - 3, py) then
                 local platform =
                     game:new_entity()
-                        :give("position",
-                            math.floor((position.x) / x_snap + offset) * x_snap + 4.0,
-                            math.floor(self.target_y))
+                        :give("position", px, py)
                         :give("collision", 6, 2)
                         :give("sprite")
                         :give("remove_on_checkpoint")

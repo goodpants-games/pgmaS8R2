@@ -1,8 +1,10 @@
+local Base = require("game.ecsconfig.behaviors.base")
+
 ---@class game.behavior.FireOrb: game.behavior.Base
 ---@overload fun():game.behavior.FireOrb
 local FireOrb = batteries.class {
     name = "game.behavior.FireOrb",
-    extends = require("game.ecsconfig.behaviors.base")
+    extends = Base
 }
 
 local game_prog = require("game.progression")
@@ -11,8 +13,10 @@ function FireOrb:new()
     self:super()
 end
 
-function FireOrb:init(ent, game)
-    self.__super.init(self, ent, game)
+function FireOrb:init(ent, game, soft_init)
+    Base.init(self, ent, game, soft_init)
+    if soft_init then return end
+
     local gid = self.entity:get("gid").v
 
     if table.index_of(game_prog.collected_orbs, gid) then
