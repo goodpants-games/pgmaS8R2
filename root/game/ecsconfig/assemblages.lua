@@ -99,6 +99,7 @@ function asm.entity.sign(e, game, x, y, props)
      :give("dialogue", props.text)
      
     e.collision.monitor_only = true
+    e.sprite.z_index = -100
 end
 
 return asm
