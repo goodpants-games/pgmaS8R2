@@ -157,8 +157,20 @@ function Game:new()
         end
         return texture
     end
+    
+    local start_room = consts.START_ROOM
+    if Debug.enabled then
+        local args = love.parsedGameArguments
+        for i=1, #args do
+            local arg = args[i]
+            if arg == "--room" then
+                start_room = args[i+1]
+                break
+            end
+        end
+    end
 
-    self:_load_room(consts.START_ROOM)
+    self:_load_room(start_room)
 
     for _, obj in ipairs(self.room.tiled_obj_layer.objects) do
         if obj.type == "entity" and obj.name == "player" then
