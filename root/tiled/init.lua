@@ -421,8 +421,7 @@ local function renderTileLayer(map, tileLayer)
     for y=0, tileLayer.height - 1 do
         for x=0, tileLayer.width - 1 do
             local tileId = data[dataIndex]
-            
-            if tileId > 0 then
+            if tileId ~= 0 then
                 local hFlip = bit.band(tileId, FLIPPED_HORIZONTALLY_FLAG) ~= 0
                 local vFlip = bit.band(tileId, FLIPPED_VERTICALLY_FLAG) ~= 0
                 local dFlip = bit.band(tileId, FLIPPED_DIAGONALLY_FLAG) ~= 0
