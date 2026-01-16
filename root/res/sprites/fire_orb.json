@@ -1,0 +1,69 @@
+{ "frames": [
+   {
+    "filename": "fire_orb 0.ase",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 166
+   },
+   {
+    "filename": "fire_orb 1.ase",
+    "frame": { "x": 10, "y": 0, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 166
+   },
+   {
+    "filename": "fire_orb 2.ase",
+    "frame": { "x": 20, "y": 0, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 166
+   },
+   {
+    "filename": "fire_orb 3.ase",
+    "frame": { "x": 0, "y": 10, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 166
+   },
+   {
+    "filename": "fire_orb 4.ase",
+    "frame": { "x": 10, "y": 10, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 166
+   },
+   {
+    "filename": "fire_orb 5.ase",
+    "frame": { "x": 20, "y": 10, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 166
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.x-dev",
+  "image": "fire_orb.png",
+  "format": "I8",
+  "size": { "w": 30, "h": 20 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "red", "from": 0, "to": 2, "direction": "forward", "color": "#000000ff" },
+   { "name": "blue", "from": 3, "to": 5, "direction": "forward", "color": "#000000ff" }
+  ]
+ }
+}

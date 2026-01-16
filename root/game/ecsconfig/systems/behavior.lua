@@ -6,13 +6,11 @@ local system = Concord.system({
 
 function system:init()    
     function self.pool.onAdded(_, ent)
-        print("behavior: entity added")
         local behavior = ent.behavior
         behavior.inst:init(ent, self:getWorld().game)
     end
 
     function self.pool.onRemoved(_, ent)
-        print("behavior: entity removed")
         local behavior = ent.behavior
         if behavior.inst.removed then
             behavior.inst:removed()

@@ -80,8 +80,6 @@ function system:init()
 end
 
 function system:_entity_added(ent)
-    print("new entity!")
-
     table.insert(self.edge_list_x, { ent = ent, pos = 0.0, left = true })
     table.insert(self.edge_list_x, { ent = ent, pos = 0.0, left = false })
     table.insert(self.edge_list_y, { ent = ent, pos = 0.0, left = true })
@@ -575,7 +573,6 @@ function system:tick()
                     end
 
                     if e2 and e2.spring then
-                        print("spring A")
                         vel.y = -e2.spring.yv
                     end
                 end
@@ -586,7 +583,6 @@ function system:tick()
                     end
 
                     if e1.spring and o_vel then
-                        print("spring B")
                         o_vel.y = -e1.spring.yv
                     end
                 end
@@ -607,13 +603,11 @@ function system:tick()
             if binst.touch_began then
                 for _, now_touched in ipairs(touch_monitor.touching) do
                     if not touch_monitor._prev_touching[now_touched] then
-                        print("entity Touch began")
                         binst:touch_began(now_touched)
                     end
                 end
 
                 if tilemap_touch_changed and touch_monitor.touched_tilemap then
-                    print("tilemap Touch began")
                     binst:touch_began(nil)
                 end
             end
@@ -621,13 +615,11 @@ function system:tick()
             if binst.touch_ended then
                 for then_touched, _ in pairs(touch_monitor._prev_touching) do
                     if not table.index_of(touch_monitor.touching, then_touched) then
-                        print("entity Touch ended")
                         binst:touch_ended(then_touched)
                     end
                 end
 
                 if tilemap_touch_changed and not touch_monitor.touched_tilemap then
-                    print("tilemap Touch ended")
                     binst:touch_ended(nil)
                 end
             end

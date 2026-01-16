@@ -116,8 +116,6 @@ function Game:new()
     self.tiled_world = Json.decode(love.filesystem.read("res/tiled_world.world"))
     self.room_connections = get_world_room_connections(self.tiled_world)
 
-    batteries.pretty.print(self.room_connections)
-
     self.res = ResourceManager()
     self.dialogue = Dialogue()
 

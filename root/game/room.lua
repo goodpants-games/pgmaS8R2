@@ -94,6 +94,7 @@ function Room:new(game, map_path, tex_load_cb)
                 game:new_entity()
                     :assemble(ecsconfig.asm.entity[obj.name], game, x, y,
                               obj.properties or {})
+                    :give("gid", map_path, obj.id)
             end
 
             ::continue::

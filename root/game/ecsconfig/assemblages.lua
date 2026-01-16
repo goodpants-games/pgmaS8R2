@@ -102,4 +102,39 @@ function asm.entity.sign(e, game, x, y, props)
     e.sprite.z_index = -100
 end
 
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+local function init_orb(e, game, x, y)
+    e:give("position", x, y)
+     :give("collision", 4, 4)
+     :give("touch_monitor")
+     :give("sprite", game.res:new_sprite("fire_orb"))
+
+    e.collision.monitor_only = true
+
+    return e
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+function asm.entity.red_orb(e, game, x, y)
+    init_orb(e, game, x, y)
+        :give("behavior", "fire_orb", "red")    
+    e.sprite.obj:play("red")
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+function asm.entity.blue_orb(e, game, x, y)
+    init_orb(e, game, x, y)
+        :give("behavior", "fire_orb", "blue")
+    e.sprite.obj:play("blue")
+end
+
 return asm

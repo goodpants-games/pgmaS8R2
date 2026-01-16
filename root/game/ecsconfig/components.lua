@@ -6,6 +6,10 @@ local GameUtil = require("game.util")
 Concord.component("room_persistence")
 Concord.component("remove_on_checkpoint")
 
+Concord.component("gid", function(cmp, room_name, object_id)
+    cmp.v = ("%s#obj%03d"):format(room_name, object_id)
+end)
+
 Concord.component("position", function(cmp, x, y)
     cmp.x = x or 0.0
     cmp.y = y or 0.0
