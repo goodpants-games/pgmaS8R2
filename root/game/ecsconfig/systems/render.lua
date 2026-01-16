@@ -22,6 +22,8 @@ local function z_index_sort_less(a, b)
 end
 
 function system:tick()
+    local game = self:getWorld().game --[[@as game.Game]]
+
     table.insertion_sort(self._render_list, z_index_sort_less)
 
     for _, ent in ipairs(self._render_list) do

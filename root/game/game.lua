@@ -6,6 +6,7 @@ local consts = require("game.consts")
 local Json = require("json")
 
 local ecsconfig = require("game.ecsconfig")
+local Dialogue = require("game.dialogue")
 
 ---@class game.ResourceManager: batteries.Class
 ---@overload fun():game.ResourceManager
@@ -118,6 +119,7 @@ function Game:new()
     batteries.pretty.print(self.room_connections)
 
     self.res = ResourceManager()
+    self.dialogue = Dialogue()
 
     self.ecs_world = Concord.world()
     self.ecs_world.game = self
@@ -126,7 +128,8 @@ function Game:new()
         ecsconfig.systems.behavior,
         ecsconfig.systems.actor,
         ecsconfig.systems.physics,
-        ecsconfig.systems.render)
+        ecsconfig.systems.render,
+        ecsconfig.systems.dialogue)
     
     self.ecs_world:setKeyGenerator(function(state)
         return tostring(state), state + 1
@@ -155,7 +158,7 @@ function Game:new()
         return texture
     end
 
-    self:_load_room("maps/testmap.tmx")
+    self:_load_room(consts.START_ROOM)
 
     for _, obj in ipairs(self.room.tiled_obj_layer.objects) do
         if obj.type == "entity" and obj.name == "player" then
@@ -177,7 +180,6 @@ function Game:new()
 
     ---@private
     self._restore_queued = false
-
     ---@type any?
     self.checkpoint_marker = nil
 
@@ -220,6 +222,7 @@ function Game:update(dt)
     Debug.draw:translate(-cam_x, -cam_y)
 
     self.ecs_world:emit("update", dt)
+    self.dialogue:update()
 
     Debug.draw:pop()
 end
@@ -273,7 +276,8 @@ function Game:tick()
     -- self.cam.y = math.floor(self.player.position.y / 88) * 88 + DISPLAY_HEIGHT / 2.0
 
     Debug.draw:pop()
-
+    
+    self.dialogue:tick()
     self.frame = self.frame + 1
 end
 
@@ -307,6 +311,7 @@ function Game:draw()
     end
 
     self:_draw_ui()
+    self.dialogue:draw()
 end
 
 ---@private
@@ -328,9 +333,9 @@ function Game:_draw_ui()
     Lg.setColor(P8_PAL.blue)
     Lg.setFont(fontres.quinque)
     if tool == 1 then
-        Lg.print("S", 40, -1)
+        Lg.print("P", 40, -1)
     elseif tool == 2 then
-        Lg.print("U", 40, -1)
+        Lg.print("G", 40, -1)
     end
 
     Lg.pop()

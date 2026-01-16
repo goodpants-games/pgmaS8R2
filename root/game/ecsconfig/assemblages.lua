@@ -78,13 +78,27 @@ function asm.entity.water_tank(e, game, x, y)
     e.sprite.z_index = -100
 end
 
-function asm.entity.enemy(e, game, x, y)
+function asm.entity.enemy(e, game, x, y, props)
     e:assemble(asm.actor, x, y, 6, 8)
      :give("sprite")
-     :give("behavior", "enemy")
+     :give("behavior", "enemy", props)
      :give("touch_monitor")
     
     e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+---@param props {[string]:any}
+function asm.entity.sign(e, game, x, y, props)
+    e:give("position", x, y)
+     :give("collision", 6, 8)
+     :give("sprite", game.res:get_image("res/graphics/game/sign.png"))
+     :give("dialogue", props.text)
+     
+    e.collision.monitor_only = true
 end
 
 return asm

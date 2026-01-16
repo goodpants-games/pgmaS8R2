@@ -1,15 +1,20 @@
 ---@class game.behavior.Enemy: game.behavior.Base
----@overload fun():game.behavior.Enemy
+---@overload fun(props:table):game.behavior.Enemy
 local Enemy = batteries.class {
     name = "game.behavior.Enemy",
     extends = require("game.ecsconfig.behaviors.base")
 }
 
 local GameUtil = require("game.util")
+local consts = require("game.consts")
 
-function Enemy:new()
+---@param props table
+function Enemy:new(props)
+    props = props or {}
+
     self:super()
     self.dead = false
+    self.max_dist = (props.max_dist or math.huge) * consts.TILE_SIZE
 end
 
 function Enemy:init(ent, game)
@@ -17,6 +22,10 @@ function Enemy:init(ent, game)
 
     if ent.actor then
         ent.actor.move_x = 1
+    end
+
+    if not self.home then
+        self.home = ent.position.x
     end
 end
 
@@ -30,7 +39,8 @@ function Enemy:tick()
         end
     else
         local actor = ent.actor
-        if actor and actor.touched_wall then
+        local dx = ent.position.x - self.home
+        if actor and (actor.touched_wall or dx * actor.move_x > self.max_dist) then
             actor.move_x = -actor.move_x
         end
     end

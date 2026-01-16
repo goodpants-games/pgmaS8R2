@@ -57,6 +57,10 @@ function Player:tick()
     local actor = ent.actor
     local touching = ent.touch_monitor.touching
 
+    if ent.collision.in_water then
+        game:queue_restore()
+    end
+
     local sprite = csprite.obj --[[@as pklove.Sprite]]
 
     if control.did_spit then
@@ -76,7 +80,7 @@ function Player:tick()
 
     control.action_sink = false
     for _, other_ent in ipairs(touching) do
-        if GameUtil.has_handler(other_ent, "interact") then
+        if other_ent.dialogue or GameUtil.has_handler(other_ent, "interact") then
             control.action_sink = true
 
             if Input.players[1]:pressed("player_action1") then
@@ -89,11 +93,17 @@ function Player:tick()
 
     local vis_ent = self.vis_ent
 
-    if actor.grounded and not control.action_sink then
+    if     actor.grounded
+       and not control.action_sink
+       and control.selected_tool == 1
+    then
         local vis_tx = 0
         local vis_ty = 0
 
-        if control.selected_tool == 1 then
+        if control.move_y < 0.0 then
+            vis_tx = math.floor((ent.position.x) / TILE_SIZE * 2.0) / 2.0
+            vis_ty = math.floor(ent.position.y / TILE_SIZE - 1.0)
+        else
             local vy = consts.PLAYER_SIDE_SPIT_VY
             local g = game.gravity * consts.PLAYER_SPIT_G_MULT
             local y0 = -consts.PLAYER_SIDE_SPIT_TARGET_Y_OFF
@@ -105,14 +115,10 @@ function Player:tick()
             
             vis_tx = math.floor((ent.position.x + dx) / TILE_SIZE * 2.0) / 2.0
             vis_ty = math.floor((ent.position.y - y0) / TILE_SIZE)
-        elseif control.selected_tool == 2 then
-            vis_tx = math.floor((ent.position.x) / TILE_SIZE * 2.0) / 2.0
-            vis_ty = math.floor(ent.position.y / TILE_SIZE - 1.0)
         end
 
         vis_ent.position.x = vis_tx * TILE_SIZE + 4
         vis_ent.position.y = vis_ty * TILE_SIZE + 2
-        
         vis_ent.sprite.visible = self.game.frame % 2 == 0
     else
         vis_ent.sprite.visible = false

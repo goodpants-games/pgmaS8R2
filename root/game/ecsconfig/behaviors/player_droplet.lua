@@ -74,8 +74,13 @@ function PlayerDroplet:tick()
         end
     elseif self.is_platform then
         if velocity.y > 0 and position.y >= self.target_y then
-            local col = game.room:get_col(math.floor(position.x / TILE_SIZE),
-                                          math.floor(position.y / TILE_SIZE))
+            local tx = math.floor(position.x / TILE_SIZE)
+            local ty = math.floor(position.y / TILE_SIZE)
+            local col = game.room:get_col(tx, ty)
+            if col == 2 then
+                col = game.room:get_col(tx, ty - 1)
+            end
+            
             if col ~= 3 then
                 local x_snap = TILE_SIZE / 2.0
 

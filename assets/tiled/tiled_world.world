@@ -20,6 +20,27 @@
             "width": 120,
             "x": 120,
             "y": 176
+        },
+        {
+            "fileName": "maps/b01.tmx",
+            "height": 88,
+            "width": 360,
+            "x": -112,
+            "y": -288
+        },
+        {
+            "fileName": "maps/b02.tmx",
+            "height": 176,
+            "width": 240,
+            "x": 248,
+            "y": -376
+        },
+        {
+            "fileName": "maps/b03.tmx",
+            "height": 88,
+            "width": 240,
+            "x": 248,
+            "y": -464
         }
     ],
     "onlyShowAdjacentMaps": false,

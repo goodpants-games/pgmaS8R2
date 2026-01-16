@@ -163,3 +163,14 @@ function behavior:deserialize(data)
         self.inst:deserialize(data.data)
     end
 end
+
+
+Concord.component("dialogue", function(cmp, name)
+    cmp.name = name
+
+    if type(name) ~= "string" then
+        softerror("dialogue name was not a string")
+    elseif not love.filesystem.getInfo(("res/dialogue/%s.lua"):format(name)) then
+        softerror(("dialogue '%s' does not exist"):format(name))
+    end
+end)

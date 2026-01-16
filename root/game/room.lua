@@ -92,7 +92,8 @@ function Room:new(game, map_path, tex_load_cb)
                 local y = math.round(obj.y + obj.height / 2.0)
 
                 game:new_entity()
-                    :assemble(ecsconfig.asm.entity[obj.name], game, x, y)
+                    :assemble(ecsconfig.asm.entity[obj.name], game, x, y,
+                              obj.properties or {})
             end
 
             ::continue::

@@ -40,7 +40,7 @@ function system:update(dt)
 
         if input:pressed("player_action2") then
             pctl.selected_tool = pctl.selected_tool + 1
-            pctl.selected_tool = (pctl.selected_tool - 1) % 3 + 1
+            pctl.selected_tool = (pctl.selected_tool - 1) % 2 + 1
         end
 
         if input:pressed("player_action1") then
@@ -72,63 +72,69 @@ function system:tick()
             player_control.drop_trigger = 0
         end
 
-        local mana = assert(ent.mana, "no 'mana' component")
-        if player_control.drop_trigger > 0 then
-            if player_control.selected_tool == 1 and mana.value >= 10 and actor.grounded then
-                player_control.did_spit = true
-                mana.value = math.max(0, mana.value - 10)
-                player_control.drop_trigger = 0
+        if game.dialogue:is_active() then
+            actor.move_x = 0.0
+            actor.jump_trigger = 0.0
+            player_control.drop_trigger = 0
+        else
+            local mana = assert(ent.mana, "no 'mana' component")
+            if player_control.drop_trigger > 0 then
+                if player_control.selected_tool == 1 and mana.value >= 10 and actor.grounded then
+                    player_control.did_spit = true
+                    mana.value = math.max(0, mana.value - 10)
+                    player_control.drop_trigger = 0
 
-                local droplet =
-                    game:new_entity()
-                        :give("position", position.x, position.y)
-                        :give("velocity",
-                              actor.face_dir * consts.PLAYER_SIDE_SPIT_VX,
-                              consts.PLAYER_SIDE_SPIT_VY)
-                        :give("gmult", consts.PLAYER_SPIT_G_MULT)
-                        :give("behavior", "player_droplet", "side_platform")
-                        :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
-            
-            elseif player_control.selected_tool == 2 and mana.value >= 10 and actor.grounded then
-                player_control.did_spit = true
-                mana.value = math.max(0, mana.value - 10)
-                player_control.drop_trigger = 0
+                    -- up spit
+                    if player_control.move_y < 0.0 then
+                        local droplet =
+                            game:new_entity()
+                                :give("position", position.x, position.y)
+                                :give("velocity", 0, -3.0)
+                                :give("gmult", consts.PLAYER_SPIT_G_MULT)
+                                :give("behavior", "player_droplet", "up_platform")
+                                :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
+                        
+                    -- side spit
+                    else
+                        local droplet =
+                            game:new_entity()
+                                :give("position", position.x, position.y)
+                                :give("velocity",
+                                    actor.face_dir * consts.PLAYER_SIDE_SPIT_VX,
+                                    consts.PLAYER_SIDE_SPIT_VY)
+                                :give("gmult", consts.PLAYER_SPIT_G_MULT)
+                                :give("behavior", "player_droplet", "side_platform")
+                                :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
+                    end
                 
-                local droplet =
-                    game:new_entity()
-                        :give("position", position.x, position.y)
-                        :give("velocity", 0, -3.0)
-                        :give("gmult", consts.PLAYER_SPIT_G_MULT)
-                        :give("behavior", "player_droplet", "up_platform")
-                        :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
-            
-            elseif player_control.selected_tool == 3 and mana.value >= 1 then
-                mana.value = math.max(0, mana.value - 1)
-                player_control.drop_trigger = 0
+                elseif player_control.selected_tool == 2 and mana.value >= 1 then
+                    mana.value = math.max(0, mana.value - 1)
+                    player_control.drop_trigger = 0
 
-                local vx = actor.face_dir * 4.0
-                local vy = 0.0
+                    local vx = actor.face_dir * 4.0
+                    local vy = 0.0
 
-                if player_control.move_y < -0.1 then
-                    vx = 0.0
-                    vy = -4.0
-                elseif player_control.move_y > 0.1 then
-                    vx = 0.0
-                    vy = 4.0
+                    if player_control.move_y < -0.1 then
+                        vx = 0.0
+                        vy = -4.0
+                    elseif player_control.move_y > 0.1 then
+                        vx = 0.0
+                        vy = 4.0
+                    end
+
+                    local droplet =
+                        game:new_entity()
+                            :give("position", position.x, position.y)
+                            :give("velocity", vx, vy)
+                            :give("gmult", 0.0)
+                            :give("behavior", "player_droplet", "bullet")
+                            :give("collision", 4, 4)
+                            :give("touch_monitor")
+                            :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
+
+                    droplet.collision.monitor_only = true
+                    droplet.collision.mask = bit.bnot(consts.COLGROUP_PLAYER)
                 end
-
-                local droplet =
-                    game:new_entity()
-                        :give("position", position.x, position.y)
-                        :give("velocity", vx, vy)
-                        :give("gmult", 0.0)
-                        :give("behavior", "player_droplet", "bullet")
-                        :give("collision", 4, 4)
-                        :give("touch_monitor")
-                        :give("sprite", game.res:get_image("res/graphics/game/water_droplet.png"))
-
-                droplet.collision.monitor_only = true
-                droplet.collision.mask = bit.bnot(consts.COLGROUP_PLAYER)
             end
         end
 

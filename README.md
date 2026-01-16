@@ -1,4 +1,7 @@
 # pgma s8r2 game
+name: uñus ??
+      unyus??
+
 level sizes must be multiples of:
 - X: 15
 - Y: 11
@@ -9,6 +12,7 @@ map collision types:
 | 0  | air   |
 | 1  | solid |
 | 2  | water |
+| 3  | heat  |
 
 ## preprocessing
 prerequisites:
