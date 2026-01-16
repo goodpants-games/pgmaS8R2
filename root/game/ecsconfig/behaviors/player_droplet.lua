@@ -83,11 +83,15 @@ function PlayerDroplet:tick()
             
             if col ~= 3 then
                 local x_snap = TILE_SIZE / 2.0
+                local offset = 0.0
+                if self.droplet_type == "up_platform" then
+                    offset = -0.5
+                end
 
                 local platform =
                     game:new_entity()
                         :give("position",
-                            math.floor((position.x) / x_snap) * x_snap + 4.0,
+                            math.floor((position.x) / x_snap + offset) * x_snap + 4.0,
                             math.floor(self.target_y))
                         :give("collision", 6, 2)
                         :give("sprite")

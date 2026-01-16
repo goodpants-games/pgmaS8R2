@@ -14,6 +14,6 @@ consts.PLAYER_SIDE_SPIT_VY = -3.0
 consts.PLAYER_SIDE_SPIT_TARGET_Y_OFF = 5.0
 consts.PLAYER_SPIT_G_MULT = 2.0
 
-consts.START_ROOM = "maps/b03.tmx"
+consts.START_ROOM = "maps/b01.tmx"
 
 return consts

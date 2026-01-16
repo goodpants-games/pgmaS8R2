@@ -101,7 +101,7 @@ function Player:tick()
         local vis_ty = 0
 
         if control.move_y < 0.0 then
-            vis_tx = math.floor((ent.position.x) / TILE_SIZE * 2.0) / 2.0
+            vis_tx = math.floor((ent.position.x) / TILE_SIZE * 2.0 - 0.5) / 2.0
             vis_ty = math.floor(ent.position.y / TILE_SIZE - 1.0)
         else
             local vy = consts.PLAYER_SIDE_SPIT_VY
