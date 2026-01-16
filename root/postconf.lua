@@ -130,10 +130,6 @@ MOUSE_X = 0
 MOUSE_Y = 0
 GAME_FRAME = 0
 
-Debug = {
-    enabled = false,
-}
-
 -- pico-8 palette
 -- i don't have a pico-8 but i really like how stuff in it looks
 P8_PAL = {

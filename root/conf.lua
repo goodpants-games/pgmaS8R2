@@ -47,9 +47,27 @@ if setfenv == nil then
     end
 end
 
+-- these imitate the love 12.0 names
+---@diagnostic disable-next-line
+if love._version_major < 12 then
+    love.rawGameArguments = arg
+    ---@diagnostic disable-next-line
+    love.parsedGameArguments = love.arg.parseGameArguments(arg)
+end
+
 DISPLAY_WIDTH = 120
 DISPLAY_HEIGHT = 93
 GAME_TICK_LENGTH = 1.0 / 60.0
+Debug = {
+    enabled = false
+}
+
+for _, arg in ipairs(love.parsedGameArguments) do
+    if arg == "--debug" then
+        Debug.enabled = true
+        print("enable debug")
+    end
+end
 
 ---@diagnostic disable lowercase-global
 
