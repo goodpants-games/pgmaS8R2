@@ -259,6 +259,11 @@ function system:tick()
             vel.y = vel.y * damping.y
         end
 
+        -- terminal velocity
+        if vel.y > 5.0 then
+            vel.y = 5.0
+        end
+
         if not (ent.collision and ent.collision.enabled) then
             pos.x = pos.x + vel.x
             pos.y = pos.y + vel.y
