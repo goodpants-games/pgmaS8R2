@@ -1,5 +1,6 @@
 local Concord = require("concord")
 local Input = require("input")
+local userpref = require("userpref")
 
 local system = Concord.system {
     pool = {"position", "collision", "dialogue"}
@@ -67,7 +68,15 @@ function system:draw()
     end
 
     local arrow_img = game.res:get_image("res/graphics/down_arrow_8x8.png")
-    local btn_img = game.res:get_image("res/graphics/button_x_8x8.png")
+
+    local btn_img ---@type love.Image
+    if userpref.input_mode == "arrow" then
+        btn_img = game.res:get_image("res/graphics/button_x_8x8.png")
+    elseif userpref.input_mode == "wasd" then
+        btn_img = game.res:get_image("res/graphics/button_semicolon_8x8.png")
+    else
+        error("invalid input mode??")
+    end
 
     local top = sign.position.y - sign.collision.h / 2.0
 

@@ -29,13 +29,13 @@ local function get_new_baton_config()
     tinsert(controls.down, "key:down")
 
     if input_mode == "wasd" then
-        error("wasd not supported yet")
         tinsert(controls.left, "key:a")
         tinsert(controls.right, "key:d")
         tinsert(controls.up, "key:w")
         tinsert(controls.down, "key:s")
         tinsert(controls.player_jump, "key:space")
-        tinsert(controls.player_action, "key:;")
+        tinsert(controls.player_action1, "key:;")
+        tinsert(controls.player_action2, "key:'")
     elseif input_mode == "arrow" then
         tinsert(controls.player_jump, "key:z")
         tinsert(controls.player_action1, "key:x")

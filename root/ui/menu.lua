@@ -107,6 +107,7 @@ function Menu:draw(x, y)
 
     Lg.setColor(P8_PAL.black)
     Lg.rectangle("fill", x, y, width, height)
+    Lg.setFont(self.font)
 
     local is_focused = self:query_focused()
 

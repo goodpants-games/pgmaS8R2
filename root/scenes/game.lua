@@ -1,7 +1,10 @@
-local scene = require("sceneman").scene()
+local sceneman = require("sceneman")
+local scene = sceneman.scene()
 local Game = require("game")
 local Input = require("input")
 local Menu = require("ui.menu")
+local OptionsMenu = require("ui.options_menu")
+local userpref = require("userpref")
 
 local PAUSE_OPTIONS = {"resume", "respawn", "options", "exit"}
 local RAINBOW = {
@@ -9,6 +12,20 @@ local RAINBOW = {
 }
 
 local self
+
+---@param menu ui.Menu
+local function is_menu_active(menu)
+    return self.menu_stack[#self.menu_stack] == menu
+end
+
+local function exit_confirm_signal(menu, signal)
+    if signal == "y" then
+        sceneman.switchScene("main_menu")
+    
+    elseif signal == "n" then
+        table.remove(self.menu_stack)
+    end
+end
 
 ---@param menu ui.Menu
 ---@param signal string
@@ -28,45 +45,20 @@ local function pause_menu_signal(menu, signal)
         table.insert(self.menu_stack, self.options_menu)
     
     elseif signal == "exit" then
-        softerror("'exit' unimplemented")
+        local m = Menu()
+            :add_label("exit?")
+            :add_action("YES", "y")
+            :add_action("NO", "n")
+        
+        m.query_focused = is_menu_active
+        m.on_signal = exit_confirm_signal
+
+        table.insert(self.menu_stack, m)
     end
 end
 
----@param menu ui.Menu
-local function is_menu_active(menu)
-    return self.menu_stack[#self.menu_stack] == menu
-end
-
----@param fs boolean?
----@return string
-local function fulscr_label(fs)
-    if fs == nil then
-        fs = love.window.getFullscreen()
-    end
-
-    if fs then
-        return "FULSCR  ON"
-    else
-        return "FULSCR OFF"
-    end
-end
-
----@param menu ui.Menu
----@param signal string
-local function options_menu_signal(menu, signal)
-    if signal == "back" then
-        table.remove(self.menu_stack)
-    
-    elseif signal == "fulscr" then
-        local fs = love.window.getFullscreen()
-        if fs then
-            love.window.setFullscreen(false)
-        else
-            love.window.setFullscreen(true, "desktop")
-        end
-
-        menu.items[2].label = fulscr_label()
-    end
+local function options_menu_back()
+    table.remove(self.menu_stack)
 end
 
 function scene.load()
@@ -85,14 +77,11 @@ function scene.load()
         :add_action("OPTIONS", "options")
         :add_action("EXIT", "exit")
 
-    self.options_menu = Menu()
-        :add_label("OPTIONS")
-        :add_action(fulscr_label(), "fulscr")
-        :add_action("BACK", "back")
+    self.options_menu = OptionsMenu()
 
     self.pause_menu.on_signal = pause_menu_signal
     self.pause_menu.query_focused = is_menu_active
-    self.options_menu.on_signal = options_menu_signal
+    self.options_menu.on_back = options_menu_back
     self.options_menu.query_focused = is_menu_active
 end
 

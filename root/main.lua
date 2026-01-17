@@ -113,7 +113,7 @@ function love.load(args)
 
     Lg.setFont(fontres.monogram)
 
-    sceneman.switchScene("game")
+    sceneman.switchScene("main_menu")
 end
 
 local _paused_sources
