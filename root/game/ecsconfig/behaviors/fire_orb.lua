@@ -7,19 +7,16 @@ local FireOrb = batteries.class {
     extends = Base
 }
 
-local game_prog = require("game.progression")
-
 function FireOrb:new()
     self:super()
 end
 
 function FireOrb:init(ent, game, soft_init)
     Base.init(self, ent, game, soft_init)
-    if soft_init then return end
-
+    
     local gid = self.entity:get("gid").v
 
-    if table.index_of(game_prog.collected_orbs, gid) then
+    if game:is_orb_collected(gid) then
         self.entity:destroy()
     end
 end
@@ -29,7 +26,8 @@ function FireOrb:touch_began(o_ent)
     if o_ent == game.player then
         print("fire orb collected")
         local gid = self.entity:get("gid").v
-        table.insert(game_prog.collected_orbs, gid)
+
+        game:collect_orb(gid)
         self.entity:destroy()
     end
 end

@@ -7,6 +7,7 @@ local Json = require("json")
 
 local ecsconfig = require("game.ecsconfig")
 local Dialogue = require("game.dialogue")
+local Progression = require("game.progression")
 
 ---@class game.ResourceManager: batteries.Class
 ---@overload fun():game.ResourceManager
@@ -243,6 +244,9 @@ function Game:new()
     self._restore_queued = false
     ---@type any?
     self.checkpoint_marker = nil
+    ---@private
+    ---@type string[]
+    self._collected_orbs = {}
 
     self:save_state()
 
@@ -254,6 +258,8 @@ function Game:new()
 end
 
 function Game:release()
+    self:_commit_orbs()
+    
     self.room:release()
     self.res:clear()
 
@@ -411,7 +417,8 @@ end
 function Game:save_state()
     self._save_state = {
         player = self.player:get("key").value,
-        world = self.ecs_world:serialize()
+        world = self.ecs_world:serialize(),
+        orbs = table.shallow_copy(self._collected_orbs)
     }
 
     if self._room_transition then
@@ -433,6 +440,10 @@ function Game:restore_state()
 
     local data = self._save_state
 
+    if data.orbs then
+        self._collected_orbs = table.shallow_copy(data.orbs)
+    end
+
     self.ecs_world:deserialize(data.world, true)
     self.player = self.ecs_world:getEntityByKey(data.player)
 
@@ -449,6 +460,34 @@ function Game:queue_restore()
     self._restore_queued = true
 end
 
+---@param gid string
+function Game:is_orb_collected(gid)
+    return table.index_of(self._collected_orbs, gid)
+        or table.index_of(Progression.collected_orbs, gid)
+end
+
+---@param gid string
+function Game:collect_orb(gid)
+    if not softassert(not self:is_orb_collected(gid), "orb already collected") then
+        return
+    end
+
+    table.insert(self._collected_orbs, gid)
+end
+
+---@private
+function Game:_commit_orbs()
+    local count = 0
+    for _, gid in ipairs(self._collected_orbs) do
+        table.insert(Progression.collected_orbs, gid)
+        count = count + 1
+    end
+
+    if count > 0 then
+        print(("commited %i orbs"):format(count))
+    end
+end
+
 ---@private
 function Game:_unload_room()
     for _, ent in ipairs(self.ecs_world:query({"!room_persistence"})) do
@@ -456,6 +495,8 @@ function Game:_unload_room()
     end
 
     self.checkpoint_marker = nil
+
+    self:_commit_orbs()
 
     self.room:release()
     self.room = nil
@@ -467,6 +508,8 @@ function Game:_load_room(name)
     if self.room then
         self:_unload_room()
     end
+
+    self._collected_orbs = {}
 
     self.room_name = name
     self.room = Room(self, get_real_map_path(self.room_name),
