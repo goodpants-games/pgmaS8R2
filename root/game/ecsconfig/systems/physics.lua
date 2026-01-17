@@ -490,12 +490,12 @@ function system:tick()
                     o_proc = self.ent_proc[e2]
                 end
 
-                local mass = 0
+                local mass = 0.0
                 if e1.mass then
                     mass = e1.mass.value
                 end
 
-                local o_mass = 0
+                local o_mass = 0.0
                 if not o_vel then
                     o_mass = math.huge
                 elseif e2.mass then
@@ -573,7 +573,7 @@ function system:tick()
                     end
 
                     if e2 and e2.spring then
-                        vel.y = -e2.spring.yv
+                        vel.y = -e2.spring.yv / mass
                     end
                 end
 
@@ -583,7 +583,7 @@ function system:tick()
                     end
 
                     if e1.spring and o_vel then
-                        o_vel.y = -e1.spring.yv
+                        o_vel.y = -e1.spring.yv / o_mass
                     end
                 end
 

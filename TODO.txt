@@ -13,3 +13,6 @@
 - stop entity substeps if it collides against a wall (see old collision_atom
   code)
   
+
+  - A PUZZLE EXPLOITING THE FACT THAT ACTIVATING CHECKPOINTS ERASES ALL PLATFORMS
+    BUT DOES NOT RESET ROOM STATE

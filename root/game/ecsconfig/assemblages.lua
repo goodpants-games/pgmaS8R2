@@ -88,6 +88,24 @@ function asm.entity.crawler(e, game, x, y, props)
     e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
 end
 
+function asm.entity.gun_enemy(e, game, x, y, props)
+    e:assemble(asm.actor, x, y, 6, 8)
+     :give("sprite")
+     :give("behavior", "gun_enemy", props)
+     :give("touch_monitor")
+     :give("health", 3)
+end
+
+function asm.entity.ceil_gun_enemy(e, game, x, y, props)
+    e:give("position", x, y)
+     :give("collision", 6, 8)
+     :give("sprite")
+     :give("behavior", "gun_enemy", "ceiling", props)
+     :give("health", 3)
+    
+    e.collision.group = bit.bor(consts.COLGROUP_ACTOR, consts.COLGROUP_ENEMY)
+end
+
 ---@param e any
 ---@param game game.Game
 ---@param x number
@@ -136,6 +154,26 @@ function asm.entity.blue_orb(e, game, x, y)
     init_orb(e, game, x, y)
         :give("behavior", "fire_orb", "blue")
     e.sprite.obj:play("blue")
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+function asm.entity.fragile_block(e, game, x, y, props)
+    e:give("position", x, y)
+     :give("collision", 8, 8)
+     :give("sprite", game.res:new_sprite("fragile_block"))
+     :give("health", 3)
+     :give("behavior", "fragile_block", props.static)
+
+    e.sprite.oy = -1
+
+    if not props.static then
+        e:give("velocity")
+         :give("mass", 2.0)
+         :give("damping")
+    end
 end
 
 return asm

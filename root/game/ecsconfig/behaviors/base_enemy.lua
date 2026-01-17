@@ -29,17 +29,9 @@ end
 function BaseEnemy:tick()
     local ent = self.entity
 
-    if self.dead then
-        if ent.velocity.y > 3.0 then
-            ent:destroy()
-            return
-        end
-    else
-        local actor = ent.actor
-        local dx = ent.position.x - self.home
-        if actor and (actor.touched_wall or dx * actor.move_x > self.max_dist) then
-            actor.move_x = -actor.move_x
-        end
+    if self.dead and ent.velocity.y > 3.0 then
+        ent:destroy()
+        return
     end
 end
 
@@ -47,30 +39,37 @@ function BaseEnemy:touch_began(ent2)
     local ent = self.entity
     local actor = ent.actor
 
-    if ent2 then
-        local damp = 1.0
-        if ent.damping then
-            damp = ent.damping.x
-        end
+    if ent2 and ent2 == self.game.player then
+        if actor then
+            local damp = 1.0
+            if ent.damping then
+                damp = ent.damping.x
+            end
 
-        local max_speed = 1.0
-        if damp >= 0.0 and damp < 1.0 then
-            max_speed = GameUtil.accel_damp_limit(actor.move_speed, damp)
-        end
+            local max_speed = 1.0
+            if damp >= 0.0 and damp < 1.0 then
+                max_speed = GameUtil.accel_damp_limit(actor.move_speed, damp)
+            end
 
-        GameUtil.send_message(ent2, "attacked", actor.move_x * max_speed, 0.0)
+            GameUtil.send_message(ent2, "attacked", actor.move_x * max_speed, 0.0)
+        else
+            GameUtil.send_message(ent2, "attacked", 0.0, 0.0)
+        end
     end
 end
 
 function BaseEnemy:msg_attacked(from, x, y)
     local ent = self.entity
 
-    ent.velocity.x = 0.0
-    ent.velocity.y = 0.0
+    if ent.velocity then
+        ent.velocity.x = 0.0
+        ent.velocity.y = 0.0
+    end
 
     if ent.health then
         ent.health.value = math.max(0, ent.health.value - 1)
         if ent.health.value <= 0 then
+            ent:ensure("velocity")
             ent.velocity.x = math.binsign(x) * 0.25
             ent.velocity.y = -0.8
 
