@@ -90,7 +90,7 @@ function system:_entity_added(ent)
 end
 
 function system:_entity_removed(ent)
-    print("he was Destroyed!")
+    -- print("he was Destroyed!")
 
     self.ent_ids[ent] = nil
 

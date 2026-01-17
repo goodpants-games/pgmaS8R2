@@ -529,11 +529,11 @@ function Game:_check_room_transition()
         p_move = -1.0
     elseif pl_pos.y > room_height_px then
         new_room = evaluate_connection(self.room_connections[old_room].d,
-                                       pl_pos.y)
+                                       pl_pos.x)
         trans_dir = "d"
     elseif pl_pos.y < 0 then
         new_room = evaluate_connection(self.room_connections[old_room].u,
-                                       pl_pos.y)
+                                       pl_pos.x)
         trans_dir = "u"
     end
 
