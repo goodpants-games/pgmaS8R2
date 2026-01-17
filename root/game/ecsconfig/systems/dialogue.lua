@@ -62,7 +62,7 @@ function system:draw()
     local game = self:getWorld().game --[[@as game.Game]]
     
     local sign = self.potential_sign
-    if not sign then
+    if not sign or game.dialogue:is_active() then
         return
     end
 

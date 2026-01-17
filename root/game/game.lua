@@ -231,8 +231,11 @@ function Game:update(dt)
     Debug.draw:push()
     Debug.draw:translate(-cam_x, -cam_y)
 
-    self.ecs_world:emit("update", dt)
-    self.dialogue:update()
+    if self.dialogue:is_active() then
+        self.dialogue:update()
+    else
+        self.ecs_world:emit("update", dt)
+    end
 
     Debug.draw:pop()
 end
@@ -241,6 +244,11 @@ function Game:tick()
     if self._restore_queued then
         self._restore_queued = false
         self:restore_state()
+    end
+
+    if self.dialogue:is_active() then
+        self.dialogue:tick()
+        return
     end
 
     do
@@ -285,9 +293,7 @@ function Game:tick()
     -- self.cam.x = math.floor(self.player.position.x / 120) * 120 + DISPLAY_WIDTH / 2.0
     -- self.cam.y = math.floor(self.player.position.y / 88) * 88 + DISPLAY_HEIGHT / 2.0
 
-    Debug.draw:pop()
-    
-    self.dialogue:tick()
+    Debug.draw:pop()    
     self.frame = self.frame + 1
 end
 
@@ -475,61 +481,6 @@ function Game:_check_room_transition()
             pdir = self.player.actor.face_dir,
         }
     end
-
-    -- if pl_pos.x > room_width_px then
-    --     new_room = self.room_connections[old_room].r
-    --     if new_room then
-    --         self:_load_room(new_room)
-    --         did_switch = true
-
-    --         self._level_transition = {
-    --             new_room = new_room,
-    --         }
-
-    --         local old_room_data = assert(self:_get_room_world_data(old_room))
-    --         local new_room_data = assert(self:_get_room_world_data(new_room))
-    --         pl_pos.x = 1
-    --         pl_pos.y = pl_pos.y - new_room_data.y + old_room_data.y
-    --     end
-    
-    -- elseif pl_pos.x < 0 then
-    --     local new_room = self.room_connections[old_room].l
-    --     if new_room then
-    --         self:_load_room(new_room)
-    --         did_switch = true
-            
-    --         local old_room_data = assert(self:_get_room_world_data(old_room))
-    --         local new_room_data = assert(self:_get_room_world_data(new_room))
-    --         pl_pos.x = self.room.width * consts.TILE_SIZE - 1
-    --         pl_pos.y = pl_pos.y - new_room_data.y + old_room_data.y
-    --     end
-    
-    -- elseif pl_pos.y > room_height_px then
-    --     local new_room = self.room_connections[old_room].d
-    --     if new_room then
-    --         self:_load_room(new_room)
-    --         did_switch = true
-
-    --         local old_room_data = assert(self:_get_room_world_data(old_room))
-    --         local new_room_data = assert(self:_get_room_world_data(new_room))
-    --         pl_pos.x = pl_pos.x - new_room_data.x + old_room_data.x
-    --         pl_pos.y = 1
-    --     end
-
-    -- elseif pl_pos.y < 0 then
-    --     local new_room = self.room_connections[old_room].u
-    --     if new_room then
-    --         self:_load_room(new_room)
-    --         did_switch = true
-
-    --         local old_room_data = assert(self:_get_room_world_data(old_room))
-    --         local new_room_data = assert(self:_get_room_world_data(new_room))
-    --         pl_pos.x = pl_pos.x - new_room_data.x + old_room_data.x
-    --         pl_pos.y = self.room.height * consts.TILE_SIZE - 1
-
-    --         pl_vel.y = -2.0
-    --     end
-    -- end
 
     if did_switch then
         self.cam.x = pl_pos.x
