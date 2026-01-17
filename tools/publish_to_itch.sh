@@ -1,6 +1,5 @@
-echo Game does not have a page yet!
-# cd exports
-# butler push lovejs pumkinhead/system-shutdown-imminent:html5
-# butler push win-x64 pumkinhead/system-shutdown-imminent:win-x64
-# butler push SystemShutdownImminent.love pumkinhead/system-shutdown-imminent:love
-# cd ..
+cd exports
+butler push lovejs pumkinhead/unyuland:html5 --if-changed
+butler push win-x64 pumkinhead/unyuland:win-x64 --if-changed
+butler push unyuland.love pumkinhead/unyuland:love --if-changed
+cd ..

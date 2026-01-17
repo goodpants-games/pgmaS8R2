@@ -2,12 +2,13 @@
 set -e
 
 PROJECT_ROOT=$PWD
-GAME_NAME=pgmaS8R2
+GAME_NAME=unyuland
 
 WIN64_BUILD_NAME=love-11.5-win64
 
 # create game LOVE
 echo "== LOVE PACKAGE =="
+mkdir -p exports
 cd root
 cp ../CREDITS.txt ../LICENSE .
 zip -FSr ../exports/${GAME_NAME}.love res CREDITS.txt LICENSE `find . -iname '*.lua' -not -path './res/*'`

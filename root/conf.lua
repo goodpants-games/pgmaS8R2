@@ -133,13 +133,13 @@ end
 
 function love.conf(t)
     t.version = "11.4"
-    t.identity = "PGMA Unyu Land"
+    t.identity = "PGMA Unyuland"
     t.window.width = DISPLAY_WIDTH * 5
     t.window.height = DISPLAY_HEIGHT * 5
     t.window.resizable = true
     t.window.vsync = 1
     t.window.highdpi = true
-    t.window.title = "Unyu Land"
+    t.window.title = "Unyuland"
     
     t.modules.thread = false
     t.modules.video = false
