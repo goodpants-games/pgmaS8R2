@@ -245,7 +245,7 @@ function Game:new()
     ---@type any?
     self.checkpoint_marker = nil
     ---@private
-    ---@type string[]
+    ---@type game.OrbData[]
     self._collected_orbs = {}
 
     self:save_state()
@@ -396,20 +396,49 @@ function Game:_draw_ui()
     Lg.push()
     Lg.translate(0, math.floor(DISPLAY_HEIGHT) - 5)
 
+    local water_img = self.res:get_image("res/graphics/ui/water_5x5.png")
+    local rorb_img = self.res:get_image("res/graphics/ui/red_orb_5x5.png")
+    local borb_img = self.res:get_image("res/graphics/ui/blue_orb_5x5.png")
+
     Lg.setColor(P8_PAL.black)
     Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 5)
-    Lg.setColor(P8_PAL.white)
     Lg.setFont(fontres.quinque)
-    Lg.print(("WTR:%i"):format(self.player.mana.value), 0, -1)
+
+    Lg.setColor(1, 1, 1)
+    Lg.draw(water_img, 0, 0)
+    Lg.setColor(P8_PAL.white)
+    Lg.print(tostring(self.player.mana.value), 6*1, -1)
 
     local tool = self.player.player_control.selected_tool
     Lg.setColor(P8_PAL.blue)
     Lg.setFont(fontres.quinque)
     if tool == 1 then
-        Lg.print("P", 40, -1)
+        Lg.print("P", 6*5, -1)
     elseif tool == 2 then
-        Lg.print("G", 40, -1)
+        Lg.print("G", 6*5, -1)
     end
+
+    local orb_list = self:list_collected_orbs()
+    local red_count = 0
+    local blue_count = 0
+
+    for _, v in ipairs(orb_list) do
+        if v.kind == "red" then
+            red_count = red_count + 1
+        elseif v.kind == "blue" then
+            blue_count = blue_count + 1
+        end
+    end
+
+    Lg.setColor(1, 1, 1)
+    Lg.draw(rorb_img, 6*16, 0)
+    Lg.setColor(P8_PAL.white)
+    Lg.print(tostring(red_count), 6*17, -1)
+
+    Lg.setColor(1, 1, 1)
+    Lg.draw(borb_img, 6*18, 0)
+    Lg.setColor(P8_PAL.white)
+    Lg.print(tostring(blue_count), 6*19, -1)
 
     Lg.pop()
 end
@@ -460,19 +489,51 @@ function Game:queue_restore()
     self._restore_queued = true
 end
 
----@param gid string
-function Game:is_orb_collected(gid)
-    return table.index_of(self._collected_orbs, gid)
-        or table.index_of(Progression.collected_orbs, gid)
+---@param t game.OrbData[]?
+---@return game.OrbData[]
+function Game:list_collected_orbs(t)
+    if t then
+        table.clear(t)
+    else
+        t = {}
+    end
+
+    for _, v in ipairs(Progression.collected_orbs) do
+        table.insert(t, v)
+    end
+    for _, v in ipairs(self._collected_orbs) do
+        table.insert(t, v)
+    end
+
+    return t
 end
 
 ---@param gid string
-function Game:collect_orb(gid)
+function Game:is_orb_collected(gid)
+    for _, v in ipairs(self._collected_orbs) do
+        if v.gid == gid then return true end
+    end
+
+    for _, v in ipairs(Progression.collected_orbs) do
+        if v.gid == gid then return true end
+    end
+    
+    return false
+end
+
+---@param gid string
+---@param kind "red"|"blue"
+function Game:collect_orb(gid, kind)
+    if not (kind == "red" or kind == "blue") then
+        softerror("invalid orb kind", 2)
+        return
+    end
+    
     if not softassert(not self:is_orb_collected(gid), "orb already collected") then
         return
     end
 
-    table.insert(self._collected_orbs, gid)
+    table.insert(self._collected_orbs, { gid = gid, kind = kind })
 end
 
 ---@private
@@ -600,6 +661,7 @@ function Game:_check_room_transition()
     end
 end
 
+---@private
 function Game:_finish_room_transition_phase()
     local data = self._room_transition
 

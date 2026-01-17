@@ -1,14 +1,16 @@
 local Base = require("game.ecsconfig.behaviors.base")
 
 ---@class game.behavior.FireOrb: game.behavior.Base
----@overload fun():game.behavior.FireOrb
+---@overload fun(color:"red"|"blue"):game.behavior.FireOrb
 local FireOrb = batteries.class {
     name = "game.behavior.FireOrb",
     extends = Base
 }
 
-function FireOrb:new()
+---@param color "red"|"blue"
+function FireOrb:new(color)
     self:super()
+    self.color = color
 end
 
 function FireOrb:init(ent, game, soft_init)
@@ -27,7 +29,7 @@ function FireOrb:touch_began(o_ent)
         print("fire orb collected")
         local gid = self.entity:get("gid").v
 
-        game:collect_orb(gid)
+        game:collect_orb(gid, self.color)
         self.entity:destroy()
     end
 end
