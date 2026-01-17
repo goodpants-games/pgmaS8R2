@@ -139,6 +139,13 @@
             "width": 360,
             "x": 128,
             "y": -1080
+        },
+        {
+            "fileName": "maps/room09.tmx",
+            "height": 176,
+            "width": 240,
+            "x": 848,
+            "y": -992
         }
     ],
     "onlyShowAdjacentMaps": false,
