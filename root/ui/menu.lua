@@ -32,6 +32,24 @@ function Menu:add_label(label)
     return self
 end
 
+---@param text string
+---@param wrap_width number?
+---@param align "center"|"left"|"justify"|nil
+function Menu:add_text(text, wrap_width, align)
+    wrap_width = wrap_width or math.huge
+    align = align or "left"
+
+    local max_width, lines = self.font:getWrap(text, wrap_width)
+    self.max_width = math.max(self.max_width, max_width)
+    table.insert(self.items, {
+        type = "text",
+        lines = lines,
+        align = align
+    })
+
+    return self
+end
+
 ---@param label string
 ---@param signal string?
 function Menu:add_action(label, signal)
@@ -50,14 +68,21 @@ end
 ---@return number w, number h
 function Menu:get_size()
     local line_height = self.font:getHeight()
-    local height = #self.items * line_height + 1
+    local height = 1
+    for _, item in ipairs(self.items) do
+        if item.type == "text" then
+            height = height + #item.lines * line_height
+        else
+            height = height + line_height
+        end
+    end
 
     return self.max_width + 4, height
 end
 
 function Menu:update()
     local start = self.active_item
-    while self.items[self.active_item].type == "label" do
+    while self.items[self.active_item].type ~= "action" do
         self.active_item = self.active_item % #self.items + 1
 
         if self.active_item == start then
@@ -72,7 +97,7 @@ function Menu:update()
         repeat
             self.active_item = self.active_item % #self.items + 1
         until self.active_item == start or
-              self.items[self.active_item].type ~= "label"
+              self.items[self.active_item].type == "action"
 
         self.frame_num = 0
     
@@ -81,7 +106,7 @@ function Menu:update()
         repeat
             self.active_item = (self.active_item - 2) % #self.items + 1
         until self.active_item == start or
-              self.items[self.active_item].type ~= "label"
+              self.items[self.active_item].type == "action"
         
         self.frame_num = 0
     end
@@ -110,10 +135,10 @@ function Menu:draw(x, y)
     Lg.setFont(self.font)
 
     local is_focused = self:query_focused()
+    local item_y = y
 
     for i, item in ipairs(self.items) do
         local ix
-        local iy = y + (i - 1) * line_height
 
         if item.type == "label" then
             ix = x + 1
@@ -124,7 +149,23 @@ function Menu:draw(x, y)
                 Lg.setColor(P8_PAL.dark_gray)
             end
 
-            Lg.print(item.label, ix, iy)
+            Lg.print(item.label, ix, item_y)
+            item_y = item_y + line_height
+
+        elseif item.type == "text" then
+            ix = x + 1
+
+            if is_focused then
+                Lg.setColor(P8_PAL.white)
+            else
+                Lg.setColor(P8_PAL.dark_gray)
+            end
+
+            for _, line in ipairs(item.lines) do
+                Lg.printf(line, ix, item_y, self.max_width, item.align)
+                item_y = item_y + line_height
+            end
+        
         else
             ix = x + 4
             local ci = math.floor(self.frame_num / 8)
@@ -141,10 +182,11 @@ function Menu:draw(x, y)
             end
 
             if draw_cursor then
-                Lg.rectangle("fill", x + 1, iy + math.round(line_height / 2), 2, 2)
+                Lg.rectangle("fill", x + 1, item_y + math.round(line_height / 2), 2, 2)
             end
     
-            Lg.print(item.label, ix, iy)
+            Lg.print(item.label, ix, item_y)
+            item_y = item_y + line_height
         end
     end
 end

@@ -2,6 +2,7 @@ local sceneman = require("sceneman")
 local scene = sceneman.scene()
 local Menu = require("ui.menu")
 local OptionsMenu = require("ui.options_menu")
+local ControlsMenu = require("ui.controls_menu")
 
 local self
 
@@ -18,6 +19,14 @@ local function menu_signal(menu, signal)
         end
 
         table.insert(self.menu_stack, opt_menu)
+
+    elseif signal == "controls" then
+        local new_menu = ControlsMenu(DISPLAY_WIDTH - 8)
+        new_menu.on_back = function()
+            table.remove(self.menu_stack)
+        end
+
+        table.insert(self.menu_stack, new_menu)
     
     elseif signal == "quit" then
         love.event.quit()
@@ -35,6 +44,7 @@ function scene.load()
     self.menu = Menu()
         :add_action("PLAY", "play")
         :add_action("OPTIONS", "options")
+        :add_action("CONTROLS", "controls")
     
     if not LOVEJS then
         self.menu:add_action("QUIT", "quit")

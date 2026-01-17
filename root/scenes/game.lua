@@ -4,6 +4,7 @@ local Game = require("game")
 local Input = require("input")
 local Menu = require("ui.menu")
 local OptionsMenu = require("ui.options_menu")
+local ControlsMenu = require("ui.controls_menu")
 local userpref = require("userpref")
 
 local PAUSE_OPTIONS = {"resume", "respawn", "options", "exit"}
@@ -43,6 +44,14 @@ local function pause_menu_signal(menu, signal)
     elseif signal == "options" then
         self.options_menu.active_item = 1
         table.insert(self.menu_stack, self.options_menu)
+
+    elseif signal == "controls" then
+        local new_menu = ControlsMenu(DISPLAY_WIDTH - 8)
+        new_menu.on_back = function()
+            table.remove(self.menu_stack)
+        end
+
+        table.insert(self.menu_stack, new_menu)
     
     elseif signal == "exit" then
         local m = Menu()
@@ -75,6 +84,7 @@ function scene.load()
         :add_action("RESUME", "resume")
         :add_action("RESPAWN", "respawn")
         :add_action("OPTIONS", "options")
+        :add_action("CONTROLS", "controls")
         :add_action("EXIT", "exit")
 
     self.options_menu = OptionsMenu()
@@ -136,11 +146,11 @@ function scene.draw()
         Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
         Lg.setBlendMode("alpha")
 
-        local xoff = 0
+        local yoff = 0
         for i, v in ipairs(self.menu_stack) do
-            self.menu_stack[i]:draw(2 + xoff, 2)
-            local w = self.menu_stack[i]:get_size()
-            xoff = xoff + w + 1.0
+            self.menu_stack[i]:draw(2, 2 + yoff)
+            local _, h = self.menu_stack[i]:get_size()
+            yoff = yoff + h + 1.0
         end
     end
 end
