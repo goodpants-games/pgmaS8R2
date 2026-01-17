@@ -1,27 +1,6 @@
 {
     "maps": [
         {
-            "fileName": "maps/testmap.tmx",
-            "height": 176,
-            "width": 480,
-            "x": 0,
-            "y": 0
-        },
-        {
-            "fileName": "maps/testmap2.tmx",
-            "height": 176,
-            "width": 240,
-            "x": 480,
-            "y": 0
-        },
-        {
-            "fileName": "maps/testmap3.tmx",
-            "height": 176,
-            "width": 120,
-            "x": 120,
-            "y": 176
-        },
-        {
             "fileName": "maps/b01.tmx",
             "height": 88,
             "width": 360,
@@ -69,13 +48,6 @@
             "width": 360,
             "x": 8,
             "y": -904
-        },
-        {
-            "fileName": "maps/editoronly/A_template.tmx",
-            "height": 88,
-            "width": 120,
-            "x": 880,
-            "y": -664
         },
         {
             "fileName": "maps/room02.tmx",
