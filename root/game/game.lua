@@ -77,32 +77,83 @@ end
 local function get_world_room_connections(world)
     local output = {}
 
+    local function xsort(a, b)
+        return a.x < b.x 
+    end
+
+    local function ysort(a, b)
+        return a.y < b.y
+    end
+
     for _, map1 in ipairs(world.maps) do
-        local connections = {}
+        local conn_rt = {}
+        local conn_lf = {}
+        local conn_tp = {}
+        local conn_bt = {}
 
         for _, map2 in ipairs(world.maps) do
             if map1 == map2 then
                 goto continue
             end
 
-            local map2_name = map2.fileName
-
+            -- check left/right side
             if map2.y + map2.height > map1.y and map2.y < map1.y + map1.height then
                 if map1.x + map1.width == map2.x then
-                    connections.r = map2_name
+                    table.insert(conn_rt, map2)
                 elseif map1.x == map2.x + map2.width then
-                    connections.l = map2_name
+                    table.insert(conn_lf, map2)
                 end
             
+            -- check top/bottom side
             elseif map2.x + map2.width > map1.x and map2.x < map1.x + map1.width then
                 if map1.y + map1.height == map2.y then
-                    connections.d = map2_name
+                    table.insert(conn_bt, map2)
                 elseif map1.y == map2.y + map2.height then
-                    connections.u = map2_name
+                    table.insert(conn_tp, map2)
                 end
             end
 
             ::continue::
+        end
+
+        table.insertion_sort(conn_rt, ysort)
+        table.insertion_sort(conn_lf, ysort)
+        table.insertion_sort(conn_tp, xsort)
+        table.insertion_sort(conn_bt, xsort)
+
+        local connections = {
+            r = {},
+            l = {},
+            u = {},
+            d = {}
+        }
+
+        for _, map2 in ipairs(conn_rt) do
+            table.insert(connections.r, {
+                name = map2.fileName,
+                end_pos = map2.y + map2.height - map1.y
+            })
+        end
+
+        for _, map2 in ipairs(conn_lf) do
+            table.insert(connections.l, {
+                name = map2.fileName,
+                end_pos = map2.y + map2.height - map1.y
+            })
+        end
+
+        for _, map2 in ipairs(conn_tp) do
+            table.insert(connections.u, {
+                name = map2.fileName,
+                end_pos = map2.x + map2.width - map1.x
+            })
+        end
+
+        for _, map2 in ipairs(conn_bt) do
+            table.insert(connections.d, {
+                name = map2.fileName,
+                end_pos = map2.x + map2.width - map1.x
+            })
         end
 
         output[map1.fileName] = connections
@@ -435,6 +486,20 @@ function Game:_get_room_world_data(room_name)
     return nil
 end
 
+---@param connections {name: string, end_pos: number}[]
+---@param pos number
+---@return string
+local function evaluate_connection(connections, pos)
+    for _, cn in ipairs(connections) do
+        if pos < cn.end_pos then
+            return cn.name
+        end
+    end
+
+    softerror("invalid connection")
+    return connections[#connections].name
+end
+
 ---@private
 function Game:_check_room_transition()
     local player = self.player
@@ -453,18 +518,22 @@ function Game:_check_room_transition()
     local p_move = 0.0
 
     if pl_pos.x > room_width_px then
-        new_room = self.room_connections[old_room].r
+        new_room = evaluate_connection(self.room_connections[old_room].r,
+                                       pl_pos.y)
         trans_dir = "r"
         p_move = 1.0
     elseif pl_pos.x < 0 then
-        new_room = self.room_connections[old_room].l
+        new_room = evaluate_connection(self.room_connections[old_room].l,
+                                       pl_pos.y)
         trans_dir = "l"
         p_move = -1.0
     elseif pl_pos.y > room_height_px then
-        new_room = self.room_connections[old_room].d
+        new_room = evaluate_connection(self.room_connections[old_room].d,
+                                       pl_pos.y)
         trans_dir = "d"
     elseif pl_pos.y < 0 then
-        new_room = self.room_connections[old_room].u
+        new_room = evaluate_connection(self.room_connections[old_room].u,
+                                       pl_pos.y)
         trans_dir = "u"
     end
 
