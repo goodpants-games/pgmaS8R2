@@ -85,12 +85,30 @@ function Player:tick()
         self.is_spitting = true
     end
 
-    if actor and self.is_spitting then
-        if sprite.curAnim == nil then
-            sprite:play("idle")
-            self.is_spitting = false
+    if actor then
+        csprite.sx = math.binsign(actor.face_dir)
+        if self.is_spitting then
+            if sprite.curAnim == nil then
+                sprite:play("idle")
+                self.is_spitting = false
+            else
+                actor.move_x = 0.0
+            end
         else
-            actor.move_x = 0.0
+            local anim
+            if actor.move_x ~= 0.0 and actor.grounded then
+                anim = "walk"
+            else
+                anim = "idle"
+            end
+
+            if sprite.curAnim ~= anim then
+                sprite:play(anim)
+            end
+        end
+
+        if actor.did_jump then
+            game.sound:play("jump")
         end
     end
 
@@ -148,10 +166,6 @@ function Player:tick()
     local vis_color_index = (math.floor(self.game.frame / 8.0) % #RAINBOW) + 1
     vis_ent.sprite.r, vis_ent.sprite.g, vis_ent.sprite.b =
         unpack(RAINBOW[vis_color_index])
-
-    if actor and actor.did_jump then
-        game.sound:play("jump")
-    end
 end
 
 function Player:msg_attacked(from_ent, x, y)
@@ -169,6 +183,7 @@ function Player:msg_attacked(from_ent, x, y)
 
     self.game.sound:play("player_die")
     ent.sprite.obj:play("gooped")
+    ent.sprite.sx = math.binsign(x)
     self.dead = true
     -- self.game:queue_restore()
 end
