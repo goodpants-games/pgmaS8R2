@@ -5,12 +5,7 @@ local Input = require("input")
 local Menu = require("ui.menu")
 local OptionsMenu = require("ui.options_menu")
 local ControlsMenu = require("ui.controls_menu")
-local userpref = require("userpref")
-
-local PAUSE_OPTIONS = {"resume", "respawn", "options", "exit"}
-local RAINBOW = {
-    P8_PAL.yellow, P8_PAL.white
-}
+local game_progression = require("game.progression")
 
 local self
 
@@ -72,6 +67,8 @@ end
 
 function scene.load()
     Lg.setBackgroundColor(P8_PAL.black)
+    game_progression.reset()
+
     self = {}
     self.game = Game()
     self.paused = false

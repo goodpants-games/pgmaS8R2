@@ -4,7 +4,9 @@ local progression = {}
 ---@field gid string
 ---@field kind string
 
----@type game.OrbData[]
-progression.collected_orbs = {}
+function progression.reset()
+    ---@type game.OrbData[]
+    progression.collected_orbs = {}
+end
 
 return progression

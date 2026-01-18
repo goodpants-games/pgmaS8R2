@@ -103,7 +103,6 @@ function asm.entity.crawler(e, game, x, y, props)
      :give("touch_monitor")
      :give("health", 3)
     
-    e.sprite.oy = -1
     e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
 end
 
@@ -197,6 +196,21 @@ function asm.entity.fragile_block(e, game, x, y, props)
          :give("mass", 2.0)
          :give("damping")
     end
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
+function asm.entity.home(e, game, x, y)
+    e:give("position", x, y - 2)
+     :give("sprite", game.res:get_image("res/graphics/game/home.png"))
+     :give("behavior", "home")
+     :give("collision", 8, 12)
+    
+    e.collision.monitor_only = true
+    e.sprite.oy = -6
+    e.sprite.z_index = -100
 end
 
 return asm
