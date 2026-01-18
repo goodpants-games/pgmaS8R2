@@ -94,7 +94,7 @@ function Dialogue:tick()
 end
 
 function Dialogue:update()
-    if Input.players[1]:pressed("player_action1") then
+    if Input.players[1]:pressed("player_action1") or Input.players[1]:pressed("player_jump") then
         self._action_advance = true
     end
 end

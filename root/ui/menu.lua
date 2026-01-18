@@ -15,15 +15,17 @@ function Menu:new()
     self.font = fontres.quinque
     self.items = {}
     self.active_item = 1
-    self.max_width = 0
+    self.ct_width = 0
     self.frame_num = 0
+    self.min_width = 0
+    self.centered = false
 
     self.query_focused = default_query_focused
 end
 
 ---@param label string
 function Menu:add_label(label)
-    self.max_width = math.max(self.max_width, self.font:getWidth(label))
+    self.ct_width = math.max(self.ct_width, self.font:getWidth(label))
     table.insert(self.items, {
         type = "label",
         label = label
@@ -39,8 +41,8 @@ function Menu:add_text(text, wrap_width, align)
     wrap_width = wrap_width or math.huge
     align = align or "left"
 
-    local max_width, lines = self.font:getWrap(text, wrap_width)
-    self.max_width = math.max(self.max_width, max_width)
+    local ct_width, lines = self.font:getWrap(text, wrap_width)
+    self.ct_width = math.max(self.ct_width, ct_width)
     table.insert(self.items, {
         type = "text",
         lines = lines,
@@ -55,7 +57,7 @@ end
 function Menu:add_action(label, signal)
     signal = signal or label
 
-    self.max_width = math.max(self.max_width, self.font:getWidth(label))
+    self.ct_width = math.max(self.ct_width, self.font:getWidth(label))
     table.insert(self.items, {
         type = "action",
         label = label,
@@ -77,7 +79,7 @@ function Menu:get_size()
         end
     end
 
-    return self.max_width + 4, height
+    return math.max(self.min_width, self.ct_width + 4), height
 end
 
 function Menu:update()
@@ -141,7 +143,6 @@ function Menu:draw(x, y)
         local ix
 
         if item.type == "label" then
-            ix = x + 1
 
             if is_focused then
                 Lg.setColor(P8_PAL.blue)
@@ -149,6 +150,8 @@ function Menu:draw(x, y)
                 Lg.setColor(P8_PAL.dark_gray)
             end
 
+            ix = math.round(x + (width - self.font:getWidth(item.label)) / 2.0)
+            
             Lg.print(item.label, ix, item_y)
             item_y = item_y + line_height
 
@@ -162,14 +165,19 @@ function Menu:draw(x, y)
             end
 
             for _, line in ipairs(item.lines) do
-                Lg.printf(line, ix, item_y, self.max_width, item.align)
+                Lg.printf(line, ix, item_y, width - 2, item.align)
                 item_y = item_y + line_height
             end
         
         else
-            ix = x + 4
             local ci = math.floor(self.frame_num / 8)
             local draw_cursor = false
+
+            if self.centered then
+                ix = x + math.round((width - self.font:getWidth(item.label)) / 2.0) - 2
+            else
+                ix = x + 4
+            end
 
             if not is_focused then
                 Lg.setColor(P8_PAL.dark_gray)
@@ -182,7 +190,7 @@ function Menu:draw(x, y)
             end
 
             if draw_cursor then
-                Lg.rectangle("fill", x + 1, item_y + math.round(line_height / 2), 2, 2)
+                Lg.rectangle("fill", ix - 3, item_y + math.round(line_height / 2), 2, 2)
             end
     
             Lg.print(item.label, ix, item_y)

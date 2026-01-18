@@ -31,6 +31,8 @@ function FireOrb:touch_began(o_ent)
 
         game:collect_orb(gid, self.color)
         self.entity:destroy()
+
+        self.game.dialogue:start("collect_fire_orb", self.color, game)
     end
 end
 

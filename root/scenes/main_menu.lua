@@ -10,7 +10,7 @@ local self
 ---@param signal string
 local function menu_signal(menu, signal)
     if signal == "play" then
-        sceneman.switchScene("game")
+        sceneman.switchScene("intro")
     
     elseif signal == "options" then
         local opt_menu = OptionsMenu()

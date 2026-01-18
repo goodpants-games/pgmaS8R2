@@ -27,6 +27,8 @@ ESC/` - PAUSE]]
 function ControlsMenu:new(width)
     self:super()
 
+    self.centered = true
+
     local text
     if userpref.input_mode == "arrow" then
         text = CONTROLS_TEXT_ARROW
