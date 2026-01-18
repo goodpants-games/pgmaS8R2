@@ -19,3 +19,8 @@
 
 maybe decrease side water spit speed by like 0.001 px/s or something
 add a hint: in the lake room, go UP (but it's like a riddle or smth)
+
+stolen placeholder music until i have the time to make my own:
+title music: class cracktro#15
+game music:
+win: endless dreams

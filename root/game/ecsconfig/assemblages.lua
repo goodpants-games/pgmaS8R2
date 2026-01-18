@@ -70,8 +70,8 @@ function asm.entity.player(e, game, x, y)
      :give("touch_monitor")
      :give("behavior", "player")
     
-    e.sprite.ox = -1
-    e.sprite.oy = -2
+    e.sprite.oy = -1
+    -- e.sprite.oy = -2
     e.collision.group = bit.bor(e.collision.group, consts.COLGROUP_PLAYER)
 
     game.player = e
@@ -83,12 +83,12 @@ end
 ---@param y number
 function asm.entity.water_tank(e, game, x, y)
     e:give("position", x, y)
-     :give("collision", 8.0, 8.0)
+     :give("collision", 8.0, 16.0)
      :give("sprite", game.res:new_sprite("water_tank"))
      :give("behavior", "water_tank")
     
     e.collision.monitor_only = true
-    e.sprite.oy = -9
+    e.sprite.oy = -8
     e.sprite.z_index = -100
 end
 
@@ -114,8 +114,7 @@ function asm.entity.gun_enemy(e, game, x, y, props)
      :give("touch_monitor")
      :give("health", 3)
     
-    e.sprite.oy = -3
-    e.sprite.ox = -1
+    e.sprite.oy = -2
 end
 
 function asm.entity.ceil_gun_enemy(e, game, x, y, props)
@@ -126,8 +125,7 @@ function asm.entity.ceil_gun_enemy(e, game, x, y, props)
      :give("health", 3)
     
     e.sprite.sy = -1
-    e.sprite.oy = 3
-    e.sprite.ox = -1
+    e.sprite.oy = 2
     e.collision.group = bit.bor(consts.COLGROUP_ACTOR, consts.COLGROUP_ENEMY)
 end
 

@@ -1,7 +1,7 @@
 { "frames": [
    {
     "filename": "fire_orb 0.ase",
-    "frame": { "x": 0, "y": 0, "w": 10, "h": 10 },
+    "frame": { "x": 0, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
@@ -10,7 +10,7 @@
    },
    {
     "filename": "fire_orb 1.ase",
-    "frame": { "x": 10, "y": 0, "w": 10, "h": 10 },
+    "frame": { "x": 9, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
@@ -19,7 +19,7 @@
    },
    {
     "filename": "fire_orb 2.ase",
-    "frame": { "x": 20, "y": 0, "w": 10, "h": 10 },
+    "frame": { "x": 18, "y": 0, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
@@ -28,7 +28,7 @@
    },
    {
     "filename": "fire_orb 3.ase",
-    "frame": { "x": 0, "y": 10, "w": 10, "h": 10 },
+    "frame": { "x": 0, "y": 9, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
@@ -37,7 +37,7 @@
    },
    {
     "filename": "fire_orb 4.ase",
-    "frame": { "x": 10, "y": 10, "w": 10, "h": 10 },
+    "frame": { "x": 9, "y": 9, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
@@ -46,7 +46,7 @@
    },
    {
     "filename": "fire_orb 5.ase",
-    "frame": { "x": 20, "y": 10, "w": 10, "h": 10 },
+    "frame": { "x": 18, "y": 9, "w": 8, "h": 8 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
@@ -59,7 +59,7 @@
   "version": "1.x-dev",
   "image": "fire_orb.png",
   "format": "I8",
-  "size": { "w": 30, "h": 20 },
+  "size": { "w": 26, "h": 17 },
   "scale": "1",
   "frameTags": [
    { "name": "red", "from": 0, "to": 2, "direction": "forward", "color": "#000000ff" },

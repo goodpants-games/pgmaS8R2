@@ -1,7 +1,7 @@
 { "frames": [
    {
     "filename": "water_tank 0.ase",
-    "frame": { "x": 0, "y": 21, "w": 10, "h": 17 },
+    "frame": { "x": 0, "y": 20, "w": 8, "h": 15 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 0, "y": 9, "w": 8, "h": 15 },
@@ -10,7 +10,7 @@
    },
    {
     "filename": "water_tank 1.ase",
-    "frame": { "x": 10, "y": 21, "w": 10, "h": 17 },
+    "frame": { "x": 9, "y": 20, "w": 8, "h": 15 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 0, "y": 9, "w": 8, "h": 15 },
@@ -19,7 +19,7 @@
    },
    {
     "filename": "water_tank 2.ase",
-    "frame": { "x": 0, "y": 0, "w": 10, "h": 21 },
+    "frame": { "x": 0, "y": 0, "w": 8, "h": 19 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 0, "y": 5, "w": 8, "h": 19 },
@@ -28,7 +28,7 @@
    },
    {
     "filename": "water_tank 3.ase",
-    "frame": { "x": 10, "y": 0, "w": 10, "h": 21 },
+    "frame": { "x": 9, "y": 0, "w": 8, "h": 19 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 0, "y": 5, "w": 8, "h": 19 },
@@ -41,7 +41,7 @@
   "version": "1.x-dev",
   "image": "water_tank.png",
   "format": "RGBA8888",
-  "size": { "w": 20, "h": 38 },
+  "size": { "w": 17, "h": 35 },
   "scale": "1",
   "frameTags": [
    { "name": "normal_inactive", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },

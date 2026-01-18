@@ -1,6 +1,7 @@
 local Concord = require("concord")
 local Input = require("input")
 local userpref = require("userpref")
+local GameUtil = require("game.util")
 
 local system = Concord.system {
     pool = {"position", "collision", "dialogue"}
@@ -40,7 +41,7 @@ function system:tick()
 
     if not game.dialogue:is_active() and player and player.touch_monitor then
         for _, ent in ipairs(player.touch_monitor.touching) do
-            if table.index_of(self.pool, ent) then
+            if table.index_of(self.pool, ent) or GameUtil.has_handler(ent, "interact") then
                 self.potential_sign = ent
                 break     
             end
@@ -50,7 +51,7 @@ function system:tick()
     if self.potential_sign then
         self.anim_frames = self.anim_frames + 1
 
-        if key_pressed then
+        if key_pressed and self.potential_sign.dialogue then
             local name = self.potential_sign.dialogue.name
             game.dialogue:start(name, self.potential_sign)
         end

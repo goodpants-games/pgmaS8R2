@@ -12,7 +12,7 @@ TILED_BASE_DIRECTORY = os.path.join(os.curdir, 'assets/tiled')
 TMX_BASE_DIRECTORY   = os.path.join(TILED_BASE_DIRECTORY, 'maps')
 TSX_BASE_DIRECTORY   = os.path.join(TILED_BASE_DIRECTORY, 'tilesets')
 
-ASEPRITE_ARGS = ['--sheet-pack', '--inner-padding', '1', '--trim',
+ASEPRITE_ARGS = ['--sheet-pack', '--shape-padding', '1', '--trim',
                  '--merge-duplicates', '--format', 'json-array', '--list-tags']
 
 
