@@ -3,6 +3,7 @@ local Input = require("input")
 local bit = require("bit")
 
 local consts = require("game.consts")
+local GameUtil = require("game.util")
 
 local system = Concord.system({
     pool = {"player_control"}
@@ -44,6 +45,7 @@ function system:update(dt)
         end
 
         if input:pressed("player_action1") then
+            pctl.interact_trigger = true
             pctl.drop_trigger = 8
         end
     end
@@ -67,8 +69,25 @@ function system:tick()
         end
 
         player_control.did_spit = false
+        local action_sink = player_control.action_sink
+        local interact_trigger = player_control.interact_trigger
+        player_control.interact_trigger = false
 
-        if player_control.action_sink then
+        if ent.touch_monitor then
+            for _, other_ent in ipairs(ent.touch_monitor.touching) do
+                if other_ent.dialogue or GameUtil.has_handler(other_ent, "interact") then
+                    action_sink = true
+
+                    if interact_trigger then
+                        GameUtil.send_message(other_ent, "interact", ent)
+                    end
+
+                    break
+                end
+            end
+        end
+
+        if action_sink then
             player_control.drop_trigger = 0
         end
 

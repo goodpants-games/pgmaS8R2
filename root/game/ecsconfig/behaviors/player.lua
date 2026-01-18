@@ -56,7 +56,6 @@ function Player:tick()
     local csprite = ent.sprite
     local control = ent.player_control
     local actor = ent.actor
-    local touching = ent.touch_monitor.touching
 
     if ent.collision.in_water then
         game:queue_restore()
@@ -76,19 +75,6 @@ function Player:tick()
             self.is_spitting = false
         else
             actor.move_x = 0.0
-        end
-    end
-
-    control.action_sink = false
-    for _, other_ent in ipairs(touching) do
-        if other_ent.dialogue or GameUtil.has_handler(other_ent, "interact") then
-            control.action_sink = true
-
-            if Input.players[1]:pressed("player_action1") then
-                GameUtil.send_message(other_ent, "interact", ent)
-            end
-
-            break
         end
     end
 
