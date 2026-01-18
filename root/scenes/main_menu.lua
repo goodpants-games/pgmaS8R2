@@ -34,7 +34,7 @@ local function menu_signal(menu, signal)
             :add_text("PKHEAD: CODE, ART", DISPLAY_WIDTH)
             :add_text("MAKTONE: M1-PWM.MOD", DISPLAY_WIDTH)
             :add_text("GOTO80: SLOBBAN", DISPLAY_WIDTH)
-            :add_text("DTRAX & ARACHNO: DT&AP_ED.XM", DISPLAY_WIDTH)
+            :add_text("DUALTRAX & ARACHNO: DT&AP_ED.XM", DISPLAY_WIDTH)
             :add_text("NOTE TO SELF: DON'T STEAL SONGS! :P", DISPLAY_WIDTH)
             :add_action("BACK", "back")
 

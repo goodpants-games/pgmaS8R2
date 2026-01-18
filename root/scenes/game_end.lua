@@ -43,7 +43,7 @@ function scene.load()
         sceneman.switchScene("main_menu")
     end
 
-    self.music = love.audio.newSource("res/music/DT&AP_ED.xm", "stream")
+    self.music = love.audio.newSource("res/music/DT&AP_ED.XM", "stream")
     self.music:setVolume(0.5)
     self.music:setLooping(true)
     self.music:play()

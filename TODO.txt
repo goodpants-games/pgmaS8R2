@@ -1,11 +1,3 @@
-- enemies. probably just really basic enemies.
-  the idea is that puzzle rooms/level will be broken up by like exploration
-  segments, and really enemies just exist to give you something else to worry/
-  think about, and to make the world less barren. nothing too fancy. i don't
-  think you will have a health system or anything, rather if you get hit by an
-  enemy it will reset you back to the start of the room.
-- also i guess there's "safe points" scattered frequently across the world,
-  which resets your freeze meter.
 - grapple hook?
 - if you enter down transition while a bit clipped inside the edge (because of
   collision "lee-way"), then the transition bugs out a little. fix: scan
@@ -13,12 +5,14 @@
 - stop entity substeps if it collides against a wall (see old collision_atom
   code)
   
+- maybe only have one type of fire orb, but you don't need to collect them all.
+  instead of having a "secret" system that forces you to collect those specific
+  orbs.
 
+  so you would need to collect 4/7 orbs.
   - A PUZZLE EXPLOITING THE FACT THAT ACTIVATING CHECKPOINTS ERASES ALL PLATFORMS
     BUT DOES NOT RESET ROOM STATE
 
-maybe decrease side water spit speed by like 0.001 px/s or something
-add a hint: in the lake room, go UP (but it's like a riddle or smth)
 
 stolen placeholder music until i have the time to make my own:
 title music: class cracktro#15
