@@ -35,7 +35,7 @@ function scene.load()
     self.menu = Menu()
         :add_label("CONGRATULATIONS!")
         :add_text(text, DISPLAY_WIDTH - 4.0, "center")
-        :add_action("OK", "ok")
+        :add_action("YAY!", "ok")
 
     self.menu.centered = true
     self.menu.min_width = DISPLAY_WIDTH
