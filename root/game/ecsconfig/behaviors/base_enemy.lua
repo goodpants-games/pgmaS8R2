@@ -41,19 +41,20 @@ function BaseEnemy:touch_began(ent2)
 
     if ent2 and ent2 == self.game.player then
         if actor then
-            local damp = 1.0
-            if ent.damping then
-                damp = ent.damping.x
-            end
+            -- local damp = 1.0
+            -- if ent.damping then
+            --     damp = ent.damping.x
+            -- end
 
-            local max_speed = 1.0
-            if damp >= 0.0 and damp < 1.0 then
-                max_speed = GameUtil.accel_damp_limit(actor.move_speed, damp)
-            end
+            -- local max_speed = 1.0
+            -- if damp >= 0.0 and damp < 1.0 then
+            --     max_speed = GameUtil.accel_damp_limit(actor.move_speed, damp)
+            -- end
 
-            GameUtil.send_message(ent2, "attacked", actor.move_x * max_speed, 0.0)
+            -- GameUtil.send_message(ent2, "attacked", ent, actor.face_dir * max_speed, 0.0)
+            GameUtil.send_message(ent2, "attacked", ent, math.binsign(ent2.position.x - ent.position.x), 0.0)
         else
-            GameUtil.send_message(ent2, "attacked", 0.0, 0.0)
+            GameUtil.send_message(ent2, "attacked", ent, 0.0, 0.0)
         end
     end
 end
@@ -77,6 +78,8 @@ function BaseEnemy:msg_attacked(from, x, y)
                :give("gmult", 0.6)
                :remove("damping")
             ent.collision.enabled = false
+
+            self.game.sound:play("hit")
 
             self.dead = true     
         end

@@ -90,6 +90,7 @@ Concord.component("player_control", function(cmp)
     cmp.action_sink = false
     cmp.interact_trigger = false
     cmp.state = "move"
+    cmp.enabled = true
 end)
 
 Concord.component("mana", function(cmp, max, init)

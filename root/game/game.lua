@@ -612,6 +612,10 @@ end
 ---@private
 function Game:_check_room_transition()
     local player = self.player
+    if not player.player_control or not player.player_control.enabled then
+        return
+    end
+    
     local pl_pos = player.position
     local pl_vel = player.velocity
 

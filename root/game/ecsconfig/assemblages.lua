@@ -48,6 +48,20 @@ end
 ---@param game game.Game
 ---@param x number
 ---@param y number
+function asm.entity.super_spring(e, game, x, y)
+    e:give("position", x, y)
+     :give("velocity")
+     :give("collision", 8.0, 8.0)
+     :give("mass", 2.0)
+     :give("damping", 0.9)
+     :give("spring", 6.0)
+     :give("sprite", game.res:get_image("res/graphics/game/super_spring.png"))
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
 function asm.entity.player(e, game, x, y)
     e:assemble(asm.actor, x, y, 6, 8)
      :give("player_control")

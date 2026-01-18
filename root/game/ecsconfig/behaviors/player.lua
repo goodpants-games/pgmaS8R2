@@ -19,6 +19,8 @@ local RAINBOW = {
 function Player:new()
     self:super()
     self.is_spitting = false
+    self.dead = false
+    self.death_timer = 0
 end
 
 function Player:init(ent, game, soft_init)
@@ -57,8 +59,22 @@ function Player:tick()
     local control = ent.player_control
     local actor = ent.actor
 
+    if self.dead then
+        self.vis_ent.sprite.visible = false
+        self.death_timer = self.death_timer + 1
+        if self.death_timer > 30 then
+            game:queue_restore()
+        end
+
+        return
+    end
+
     if ent.collision.in_water then
-        game:queue_restore()
+        ent.player_control.enabled = false
+        self.game.sound:play("player_die")
+        self.dead = true
+        csprite.obj:play("frozen")
+        return
     end
 
     local sprite = csprite.obj --[[@as pklove.Sprite]]
@@ -69,7 +85,7 @@ function Player:tick()
         self.is_spitting = true
     end
 
-    if self.is_spitting then
+    if actor and self.is_spitting then
         if sprite.curAnim == nil then
             sprite:play("idle")
             self.is_spitting = false
@@ -80,8 +96,7 @@ function Player:tick()
 
     local vis_ent = self.vis_ent
 
-    if     actor.grounded
-       and not control.action_sink
+    if actor and actor.grounded and not control.action_sink
        and control.selected_tool == 1
     then
         local vis_tx = 0
@@ -115,13 +130,28 @@ function Player:tick()
     vis_ent.sprite.r, vis_ent.sprite.g, vis_ent.sprite.b =
         unpack(RAINBOW[vis_color_index])
 
-    if actor.did_jump then
+    if actor and actor.did_jump then
         game.sound:play("jump")
     end
 end
 
 function Player:msg_attacked(from_ent, x, y)
-    self.game:queue_restore()
+    local ent = self.entity
+    ent.collision.enabled = false
+    ent.player_control.enabled = false
+
+    ent:ensure("velocity")
+    ent.velocity.x = math.binsign(x) * 0.25
+    ent.velocity.y = -0.8
+
+    ent:remove("actor")
+        :give("gmult", 0.6)
+        :remove("damping")
+
+    self.game.sound:play("player_die")
+    ent.sprite.obj:play("gooped")
+    self.dead = true
+    -- self.game:queue_restore()
 end
 
 return Player

@@ -48,6 +48,13 @@ function system:update(dt)
             pctl.interact_trigger = true
             pctl.drop_trigger = 8
         end
+
+        if not pctl.enabled then
+            pctl.drop_trigger = 0
+            pctl.interact_trigger = 0
+            pctl.move_x = 0.0
+            pctl.move_y = 0.0
+        end
     end
 end
 
