@@ -16,9 +16,9 @@
         },
         {
             "fileName": "maps/b03.tmx",
-            "height": 88,
+            "height": 176,
             "width": 240,
-            "x": 848,
+            "x": 608,
             "y": -816
         },
         {
@@ -39,7 +39,7 @@
             "fileName": "maps/b05.tmx",
             "height": 176,
             "width": 240,
-            "x": 608,
+            "x": 848,
             "y": -816
         },
         {
@@ -86,10 +86,10 @@
         },
         {
             "fileName": "maps/tall_room.tmx",
-            "height": 264,
+            "height": 440,
             "width": 120,
             "x": 488,
-            "y": -1168
+            "y": -1344
         },
         {
             "fileName": "maps/room07.tmx",

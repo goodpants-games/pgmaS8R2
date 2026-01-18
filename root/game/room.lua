@@ -17,10 +17,16 @@ function Room:new(game, map_path, tex_load_cb)
     assert(self.tiled.tilewidth == consts.TILE_SIZE)
     assert(self.tiled.tileheight == consts.TILE_SIZE)
 
+    local sky_bg = false
+    if self.tiled.properties then
+        sky_bg = not not self.tiled.properties.sky_bg
+    end
+
     local col_layer = self.tiled.layers[1] --[[@as pklove.tiled.TileLayer]]
     local w = self.tiled.width
     local h = self.tiled.height
 
+    self.sky_bg = sky_bg
     self.width = w
     self.height = h
     self.col_map = {}
@@ -46,13 +52,15 @@ function Room:new(game, map_path, tex_load_cb)
     for y=0, h-1 do
         for x=0, w-1 do
             local v = col_layer:get(x, y)
+            local col_id = 0
+
             if v and v > 0 then
                 local ginfo = self.tiled:getTileInfo(v)
                 assert(self.tiled.tilesets[ginfo.tilesetId] == base_tileset,
                        "tile in collision layer does not use base tileset!")
 
                 local tinfo = tile_info[ginfo.id]
-                local col_id = 1
+                col_id = 1
                 if tinfo then
                     if tinfo.type == "water" then
                         col_id = 2
@@ -62,12 +70,17 @@ function Room:new(game, map_path, tex_load_cb)
                         col_id = 0
                     end
                 end
-
-                self.col_map[i] = col_id
-            else
-                self.col_map[i] = 0
             end
 
+            if sky_bg then
+                if col_id == 3 then
+                    col_id = 0
+                elseif col_id == 0 then
+                    col_id = 3
+                end
+            end
+
+            self.col_map[i] = col_id
             i=i+1
         end
     end

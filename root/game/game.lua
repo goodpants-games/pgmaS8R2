@@ -250,6 +250,9 @@ function Game:new()
     ---@type game.OrbData[]
     self._collected_orbs = {}
 
+    ---@private
+    self._mountain_bg_sprite = self.res:new_sprite("mountain_bg")
+
     self:save_state()
 
     -- if not self.player then
@@ -261,6 +264,8 @@ end
 
 function Game:release()
     self:_commit_orbs()
+
+    self._mountain_bg_sprite:release()
     
     self.room:release()
     self.res:clear()
@@ -362,6 +367,22 @@ end
 function Game:draw()
     local cam_x = math.round(self.cam.x - DISPLAY_WIDTH / 2.0)
     local cam_y = math.round(self.cam.y - DISPLAY_HEIGHT / 2.0)
+
+    if self.room.sky_bg then
+        local draw_x = math.round(DISPLAY_WIDTH / 2)
+        local draw_y = math.round(DISPLAY_HEIGHT / 2)
+        Lg.setColor(1, 1, 1)
+
+        local mtn_y = math.round(draw_y - cam_y / 10.0 + 10.0)
+
+        self._mountain_bg_sprite:drawCel(4, draw_x, draw_y)
+        self._mountain_bg_sprite:drawCel(3, draw_x, draw_y - cam_y / 40.0)
+        self._mountain_bg_sprite:drawCel(2, draw_x, mtn_y)
+
+        Lg.setColor(P8_PAL.dark_purple)
+        Lg.rectangle("fill", 0, mtn_y + DISPLAY_HEIGHT / 2.0,
+                     DISPLAY_WIDTH, DISPLAY_HEIGHT)
+    end
 
     Lg.push()
     Lg.translate(-cam_x, -cam_y)

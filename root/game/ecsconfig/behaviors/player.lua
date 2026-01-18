@@ -110,13 +110,32 @@ function Player:tick()
             local g = game.gravity * consts.PLAYER_SPIT_G_MULT
             local y0 = -consts.PLAYER_SIDE_SPIT_TARGET_Y_OFF
 
-            local t = math.ceil((-vy + math.sqrt(vy * vy + 2.0 * g * y0)) / g)
-            -- oh my god what the hell. why so precise. maybe fp error
-            -- accumulation?
-            local dx = math.ceil(consts.PLAYER_SIDE_SPIT_VX * (t + 0.1)) * math.sign(actor.face_dir)
+            -- local t = math.ceil((-vy + math.sqrt(vy * vy + 2.0 * g * y0)) / g)
+            -- local dx = math.ceil(consts.PLAYER_SIDE_SPIT_VX * t) * math.sign(actor.face_dir)
+
+            -- okay for some reason using the model isn't 100% accurate, it's
+            -- probably fp error accumulation and i can't seem to be able to
+            -- fix it. so i'm just going to simulate the physics in a loop. that
+            -- way the fp errors will be simulated as well
+            local vx = consts.PLAYER_SIDE_SPIT_VX * math.sign(actor.face_dir)
+            local x = 0.0
+            local y = 0
+            local i = 1
+            while true do
+                if i >= 100 then
+                    softerror("platform vis took too long?? why??")
+                    break
+                end
+
+                vy = vy + g
+                x = x + vx
+                y = y + vy
+                if y > -y0 then break end
+                i=i+1
+            end
             
-            vis_tx = math.floor((ent.position.x + dx) / TILE_SIZE * 2.0) / 2.0
-            vis_ty = math.floor((ent.position.y - y0) / TILE_SIZE)
+            vis_tx = math.floor((ent.position.x + x) / TILE_SIZE * 2.0) / 2.0
+            vis_ty = math.floor((ent.position.y + y) / TILE_SIZE)
         end
 
         vis_ent.position.x = vis_tx * TILE_SIZE + 4

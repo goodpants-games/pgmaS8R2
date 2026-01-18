@@ -1,0 +1,49 @@
+{ "frames": [
+   {
+    "filename": "mountain_bg 0.ase",
+    "frame": { "x": 0, "y": 0, "w": 120, "h": 93 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 93 },
+    "sourceSize": { "w": 120, "h": 93 },
+    "duration": 100
+   },
+   {
+    "filename": "mountain_bg 1.ase",
+    "frame": { "x": 0, "y": 94, "w": 120, "h": 82 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 11, "w": 120, "h": 82 },
+    "sourceSize": { "w": 120, "h": 93 },
+    "duration": 100
+   },
+   {
+    "filename": "mountain_bg 2.ase",
+    "frame": { "x": 121, "y": 94, "w": 120, "h": 65 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 28, "w": 120, "h": 65 },
+    "sourceSize": { "w": 120, "h": 93 },
+    "duration": 100
+   },
+   {
+    "filename": "mountain_bg 3.ase",
+    "frame": { "x": 121, "y": 0, "w": 120, "h": 93 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 93 },
+    "sourceSize": { "w": 120, "h": 93 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.x-dev",
+  "image": "mountain_bg.png",
+  "format": "I8",
+  "size": { "w": 241, "h": 176 },
+  "scale": "1",
+  "frameTags": [
+  ]
+ }
+}

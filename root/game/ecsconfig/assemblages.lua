@@ -189,8 +189,6 @@ function asm.entity.fragile_block(e, game, x, y, props)
      :give("health", 3)
      :give("behavior", "fragile_block", props.static)
 
-    e.sprite.oy = -1
-
     if not props.static then
         e:give("velocity")
          :give("mass", 2.0)
