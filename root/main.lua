@@ -134,7 +134,7 @@ function love.keypressed(key)
         Debug.enabled = not Debug.enabled
     end
 
-    if Debug.enabled and key == "f12" then
+    if not IS_PACKAGED and key == "f12" then
         Lg.captureScreenshot(function(data)
             ---@cast data love.ImageData
             local fdata = data:encode("png")
