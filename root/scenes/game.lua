@@ -90,17 +90,10 @@ function scene.load()
     self.pause_menu.query_focused = is_menu_active
     self.options_menu.on_back = options_menu_back
     self.options_menu.query_focused = is_menu_active
-
-    self.music = love.audio.newSource("res/music/goto80_slobban.ogg", "stream")
-    self.music:setVolume(0.1)
-    self.music:setLooping(true)
-    self.music:play()
 end
 
 function scene.unload()
     self.game:release()
-    self.music:stop()
-    self.music:release()
     self = nil
 end
 

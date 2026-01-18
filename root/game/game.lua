@@ -165,6 +165,14 @@ local function get_world_room_connections(world)
 end
 
 function Game:new()
+    self.music = love.audio.newSource("res/music/goto80_slobban.ogg", "stream")
+    self.music:setVolume(0.1)
+    self.music:setLooping(true)
+    self.music:play()
+
+    ---@type love.Source?
+    self.wind_music = nil
+
     -- load tiled world
     self.tiled_world = Json.decode(love.filesystem.read("res/tiled_world.world"))
     self.room_connections = get_world_room_connections(self.tiled_world)
@@ -264,6 +272,13 @@ end
 
 function Game:release()
     self:_commit_orbs()
+
+    self.music:stop()
+    self.music:release()
+    if self.wind_music then
+        self.wind_music:stop()
+        self.wind_music:release()
+    end
 
     self._mountain_bg_sprite:release()
     
@@ -376,11 +391,11 @@ function Game:draw()
         local mtn_y = math.round(draw_y - cam_y / 10.0 + 10.0)
 
         self._mountain_bg_sprite:drawCel(4, draw_x, draw_y)
-        self._mountain_bg_sprite:drawCel(3, draw_x, draw_y - cam_y / 40.0)
-        self._mountain_bg_sprite:drawCel(2, draw_x, mtn_y)
+        self._mountain_bg_sprite:drawCel(3, draw_x, math.round(draw_y - cam_y / 40.0))
+        self._mountain_bg_sprite:drawCel(2, draw_x, mtn_y + 0.5)
 
         Lg.setColor(P8_PAL.dark_purple)
-        Lg.rectangle("fill", 0, mtn_y + DISPLAY_HEIGHT / 2.0,
+        Lg.rectangle("fill", 0, math.round(mtn_y + DISPLAY_HEIGHT / 2.0),
                      DISPLAY_WIDTH, DISPLAY_HEIGHT)
     end
 
@@ -601,6 +616,20 @@ function Game:_load_room(name)
     self.room_name = name
     self.room = Room(self, get_real_map_path(self.room_name),
                      self._tiled_load_texture_func)
+
+    if self.room.sky_bg then
+        self.music:stop()
+        self.wind_music = love.audio.newSource("res/music/wind.ogg", "stream")
+        self.wind_music:setVolume(0.1)
+        self.wind_music:setLooping(true)
+        self.wind_music:play()
+    elseif self.wind_music then
+        self.wind_music:stop()
+        self.wind_music:release()
+        self.wind_music = nil
+
+        self.music:play()
+    end
 end
 
 ---@private
