@@ -111,6 +111,8 @@ function PlayerDroplet:tick()
                         :give("remove_on_checkpoint")
                 platform.collision.floor_only = true
 
+                game.sound:play("platform_freeze")
+
                 -- TODO: make platform have sprite
                 platform.sprite.r, platform.sprite.g, platform.sprite.b =
                     unpack(P8_PAL.white)

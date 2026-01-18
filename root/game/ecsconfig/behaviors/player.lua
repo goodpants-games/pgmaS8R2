@@ -114,6 +114,10 @@ function Player:tick()
     local vis_color_index = (math.floor(self.game.frame / 8.0) % #RAINBOW) + 1
     vis_ent.sprite.r, vis_ent.sprite.g, vis_ent.sprite.b =
         unpack(RAINBOW[vis_color_index])
+
+    if actor.did_jump then
+        game.sound:play("jump")
+    end
 end
 
 function Player:msg_attacked(from_ent, x, y)

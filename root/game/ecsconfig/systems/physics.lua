@@ -66,6 +66,7 @@ function system:init()
     self.edge_list_y = {}
     self.x_overlaps = {}
     self.y_overlaps = {}
+    self.spring_sounds_play = {}
 
     self.ent_ids = {}
     self.next_ent_id = 1
@@ -574,6 +575,7 @@ function system:tick()
 
                     if e2 and e2.spring then
                         vel.y = -e2.spring.yv / mass
+                        table.insert(self.spring_sounds_play, { e = e1, t = 2 })
                     end
                 end
 
@@ -584,6 +586,7 @@ function system:tick()
 
                     if e1.spring and o_vel then
                         o_vel.y = -e1.spring.yv / o_mass
+                        table.insert(self.spring_sounds_play, { e = e2, t = 2 })
                     end
                 end
 
@@ -591,6 +594,20 @@ function system:tick()
             end
         end
     until is_done
+
+    -- play spring sounds from last frame, if the entity is still moving upwards
+    for i=#self.spring_sounds_play, 1, -1 do
+        local v = self.spring_sounds_play[i]
+        if v.e.velocity and v.e.velocity.y < 0.0 then
+            v.t = v.t - 1
+            if v.t == 0 then
+                game.sound:play_no_overlap("spring")
+                table.remove(self.spring_sounds_play, i)
+            end
+        else
+            table.remove(self.spring_sounds_play, i)
+        end
+    end
 
     -- dispatch touch_began/touch_ended events to entity behaviors
     for _, ent in ipairs(self.pc_pool) do

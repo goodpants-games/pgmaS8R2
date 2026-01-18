@@ -22,6 +22,8 @@ function WaterTank:msg_interact(from_ent)
                                       from_ent.actor
         assert(p_pos and p_vel, "player did not have position and velocity")
 
+        game.sound:play("water_tank")
+
         for _, e in ipairs(game.ecs_world:query({"remove_on_checkpoint"})) do
             e:destroy()    
         end
@@ -36,6 +38,7 @@ function WaterTank:msg_interact(from_ent)
         p_vel.y = 0.0
         p_pos.x = ent.position.x
         p_actor.move_x = 0
+        from_ent.player_control.drop_trigger = 0
 
         print("save world state!")
         self.game:save_state()

@@ -69,6 +69,14 @@ function GunEnemy:tick()
     if self.shoot_cooldown == 0 then
         self.shoot_cooldown = self.shoot_cooldown_length
 
+        local screen_dx = pos.x - game.cam.x
+        local screen_dy = pos.y - game.cam.y
+        local screen_dist = math.sqrt(screen_dx * screen_dx + screen_dy * screen_dy)
+        if screen_dist < 100 then
+            print(screen_dist)
+            game.sound:play_no_overlap("enemy_shoot")
+        end
+
         local count = 8
         for i=1, count do
             local ang = (math.pi * 2.0) * (i / count)

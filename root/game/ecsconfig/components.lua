@@ -71,6 +71,7 @@ Concord.component("actor", function(cmp)
     cmp.face_dir = 1
 
     cmp.jump_trigger = 0
+    cmp.did_jump = false
     
     -- px/tick
     cmp.move_speed = GameUtil.accel_damp_at_speed(1.0, 0.8)

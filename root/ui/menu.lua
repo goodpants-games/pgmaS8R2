@@ -170,7 +170,7 @@ function Menu:draw(x, y)
             end
         
         else
-            local ci = math.floor(self.frame_num / 8)
+            local ci = math.floor(self.frame_num / 15)
             local draw_cursor = false
 
             if self.centered then
@@ -182,9 +182,9 @@ function Menu:draw(x, y)
             if not is_focused then
                 Lg.setColor(P8_PAL.dark_gray)
                 draw_cursor = i == self.active_item
-            elseif i == self.active_item and ci % 2 == 0 then
+            elseif i == self.active_item then
                 Lg.setColor(P8_PAL.yellow)
-                draw_cursor = true
+                draw_cursor = ci % 2 == 0
             else
                 Lg.setColor(P8_PAL.white)
             end

@@ -102,6 +102,7 @@ function system:tick()
                     player_control.did_spit = true
                     mana.value = math.max(0, mana.value - 10)
                     player_control.drop_trigger = 0
+                    game.sound:play("player_platform_spit")
 
                     -- up spit
                     if player_control.move_y < 0.0 then
@@ -153,6 +154,8 @@ function system:tick()
 
                     droplet.collision.monitor_only = true
                     droplet.collision.mask = bit.bnot(consts.COLGROUP_PLAYER)
+
+                    game.sound:play("player_shoot")
                 end
             end
         end

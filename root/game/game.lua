@@ -8,6 +8,7 @@ local Json = require("json")
 local ecsconfig = require("game.ecsconfig")
 local Dialogue = require("game.dialogue")
 local Progression = require("game.progression")
+local SoundManager = require("game.sndmgr")
 
 ---@class game.ResourceManager: batteries.Class
 ---@overload fun():game.ResourceManager
@@ -169,6 +170,7 @@ function Game:new()
     self.room_connections = get_world_room_connections(self.tiled_world)
 
     self.res = ResourceManager()
+    self.sound = SoundManager()
     self.dialogue = Dialogue()
 
     self.ecs_world = Concord.world()
@@ -262,6 +264,7 @@ function Game:release()
     
     self.room:release()
     self.res:clear()
+    self.sound:release()
 
     for _, tex in pairs(self._tiled_tex_cache) do
         tex:release()
@@ -316,6 +319,8 @@ function Game:tick()
     end
 
     self.ecs_world:emit("tick")
+
+    self.sound:update()
 
     if self._room_transition then
         self._room_transition.ticks = self._room_transition.ticks + 1
