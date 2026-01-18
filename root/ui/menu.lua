@@ -174,7 +174,7 @@ function Menu:draw(x, y)
             local draw_cursor = false
 
             if self.centered then
-                ix = x + math.round((width - self.font:getWidth(item.label)) / 2.0) - 2
+                ix = x + math.round((width - self.font:getWidth(item.label)) / 2.0) + 1
             else
                 ix = x + 4
             end

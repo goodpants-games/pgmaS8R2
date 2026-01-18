@@ -27,6 +27,27 @@ local function menu_signal(menu, signal)
         end
 
         table.insert(self.menu_stack, new_menu)
+
+    elseif signal == "credits" then
+        local nmenu = Menu()
+            :add_label("CREDITS")
+            :add_text("PKHEAD: CODE, ART", DISPLAY_WIDTH)
+            :add_text("MAKTONE: M1-PWM.MOD", DISPLAY_WIDTH)
+            :add_text("GOTO80: SLOBBAN", DISPLAY_WIDTH)
+            :add_text("DTRAX & ARACHNO: DT&AP_ED.XM", DISPLAY_WIDTH)
+            :add_text("NOTE TO SELF: DON'T STEAL SONGS! :P", DISPLAY_WIDTH)
+            :add_action("BACK", "back")
+
+        nmenu._center_hack = true
+        nmenu.centered = true
+        
+        nmenu.on_signal = function(_, sig)
+            if sig == "back" then
+                table.remove(self.menu_stack)
+            end
+        end
+
+        table.insert(self.menu_stack, nmenu)
     
     elseif signal == "quit" then
         love.event.quit()
@@ -42,9 +63,10 @@ function scene.load()
 
     self.menu_stack = {}
     self.menu = Menu()
-        :add_action("PLAY", "play")
+        :add_action("START", "play")
         :add_action("OPTIONS", "options")
         :add_action("CONTROLS", "controls")
+        :add_action("CREDITS", "credits")
     
     if not LOVEJS then
         self.menu:add_action("QUIT", "quit")
@@ -53,9 +75,16 @@ function scene.load()
     self.menu.on_signal = menu_signal
 
     table.insert(self.menu_stack, self.menu)
+
+    self.music = love.audio.newSource("res/music/m1-pwm.mod", "stream")
+    self.music:setVolume(0.5)
+    self.music:setLooping(true)
+    self.music:play()
 end
 
 function scene.unload()
+    self.music:stop()
+    self.music:release()
     self.title_img:release()
     self = nil
 end
@@ -69,14 +98,20 @@ function scene.tick()
 end
 
 function scene.draw()
-    Lg.setColor(1, 1, 1)
-    Lg.draw(self.title_img)
-
     local menu = self.menu_stack[#self.menu_stack]
     local menu_width, menu_height = menu:get_size()
     
-    menu:draw(math.round((DISPLAY_WIDTH - menu_width) / 2.0),
-              math.round((DISPLAY_HEIGHT - menu_height) / 2.0 + DISPLAY_HEIGHT * 1/4))
+    if menu._center_hack then
+        menu:draw(math.round((DISPLAY_WIDTH - menu_width) / 2.0),
+                  math.round((DISPLAY_HEIGHT - menu_height) / 2.0)) 
+    else
+        Lg.setColor(1, 1, 1)
+        Lg.draw(self.title_img)
+
+        menu:draw(math.round((DISPLAY_WIDTH - menu_width) / 2.0),
+                  math.round((DISPLAY_HEIGHT - menu_height) / 2.0
+                    + DISPLAY_HEIGHT * 1/4))
+    end
 end
 
 return scene
