@@ -92,31 +92,42 @@ function asm.entity.water_tank(e, game, x, y)
     e.sprite.z_index = -100
 end
 
+---@param game game.Game
+---@param x number
+---@param y number
+---@param props table
 function asm.entity.crawler(e, game, x, y, props)
     e:assemble(asm.actor, x, y, 6, 8)
-     :give("sprite")
+     :give("sprite", game.res:new_sprite("crawler"))
      :give("behavior", "crawler", props)
      :give("touch_monitor")
      :give("health", 3)
     
+    e.sprite.oy = -1
     e.actor.move_speed = GameUtil.accel_damp_at_speed(0.5, 0.8)
 end
 
 function asm.entity.gun_enemy(e, game, x, y, props)
     e:assemble(asm.actor, x, y, 6, 8)
-     :give("sprite")
+     :give("sprite", game.res:new_sprite("gun_enemy"))
      :give("behavior", "gun_enemy", props)
      :give("touch_monitor")
      :give("health", 3)
+    
+    e.sprite.oy = -3
+    e.sprite.ox = -1
 end
 
 function asm.entity.ceil_gun_enemy(e, game, x, y, props)
     e:give("position", x, y)
      :give("collision", 6, 8)
-     :give("sprite")
+     :give("sprite", game.res:new_sprite("gun_enemy"))
      :give("behavior", "gun_enemy", "ceiling", props)
      :give("health", 3)
     
+    e.sprite.sy = -1
+    e.sprite.oy = 3
+    e.sprite.ox = -1
     e.collision.group = bit.bor(consts.COLGROUP_ACTOR, consts.COLGROUP_ENEMY)
 end
 

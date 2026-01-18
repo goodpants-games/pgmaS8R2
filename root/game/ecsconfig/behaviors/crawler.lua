@@ -27,17 +27,28 @@ function CrawlerEnemy:init(ent, game, soft_init)
     if ent.actor then
         ent.actor.move_x = 1
     end
+
+    if ent.sprite then
+        ent.sprite.obj:play("walk")
+    end
 end
 
 function CrawlerEnemy:tick()
     local ent = self.entity
     BaseEnemy.tick(self)
 
+    local csprite = ent.sprite
+    local sprite = csprite.obj --[[@as pklove.Sprite]]
+
     if self.dead then
+        if sprite.curAnim ~= "dead" then
+            sprite:play("dead")
+        end
         return
     end
     
     local actor = ent.actor
+    csprite.sx = actor.face_dir
 
     if self._turn_debounce == 0 then
         local dx = ent.position.x - self.home

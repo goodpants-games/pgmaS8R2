@@ -1,0 +1,42 @@
+{ "frames": [
+   {
+    "filename": "crawler 0.ase",
+    "frame": { "x": 0, "y": 10, "w": 8, "h": 10 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 1, "y": 0, "w": 6, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 266
+   },
+   {
+    "filename": "crawler 1.ase",
+    "frame": { "x": 0, "y": 0, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 266
+   },
+   {
+    "filename": "crawler 2.ase",
+    "frame": { "x": 10, "y": 0, "w": 10, "h": 10 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 8 },
+    "sourceSize": { "w": 8, "h": 8 },
+    "duration": 266
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.x-dev",
+  "image": "crawler.png",
+  "format": "I8",
+  "size": { "w": 20, "h": 20 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "dead", "from": 2, "to": 2, "direction": "forward", "color": "#000000ff" }
+  ]
+ }
+}

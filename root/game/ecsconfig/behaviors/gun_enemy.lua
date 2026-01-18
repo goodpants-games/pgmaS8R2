@@ -56,12 +56,19 @@ end
 
 function GunEnemy:tick()
     BaseEnemy.tick(self)
+    local ent = self.entity
     
     if self.dead then
+        ent.sprite.oy = 0
+        ent.sprite.sy = 1
+        
+        local spr = ent.sprite.obj --[[@as pklove.Sprite]]
+        if spr.curAnim ~= "dead" then
+            spr:play("dead")
+        end
         return
     end
     
-    local ent = self.entity
     local game = self.game
     local pos = ent.position
 
@@ -76,6 +83,8 @@ function GunEnemy:tick()
             print(screen_dist)
             game.sound:play_no_overlap("enemy_shoot")
         end
+
+        ent.sprite.obj:play("fire")
 
         local count = 8
         for i=1, count do

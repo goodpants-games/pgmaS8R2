@@ -79,8 +79,7 @@ function BaseEnemy:msg_attacked(from, x, y)
                :remove("damping")
             ent.collision.enabled = false
 
-            self.game.sound:play("hit")
-
+            self.game.sound:play("enemy_hurt")
             self.dead = true     
         end
     end
