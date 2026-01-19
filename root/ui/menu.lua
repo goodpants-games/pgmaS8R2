@@ -9,6 +9,15 @@ local Menu = batteries.class {
 local Input = require("input")
 local fontres = require("fontres")
 
+local snd_ui_select = love.audio.newSource("res/sfx/menu_select.wav", "static")
+local snd_ui_push = love.audio.newSource("res/sfx/menu_push.wav", "static")
+
+-- why is it positional by default? it should be an opt-in. wtf. whatever.
+-- god openal sucks. like why is it called setRelative instead of, like,
+-- setPositional ???
+snd_ui_select:setRelative(true)
+snd_ui_push:setRelative(true)
+
 local function default_query_focused() return true end
 
 function Menu:new()
@@ -102,6 +111,9 @@ function Menu:update()
               self.items[self.active_item].type == "action"
 
         self.frame_num = 0
+
+        snd_ui_select:seek(0)
+        snd_ui_select:play()
     
     elseif Input.players[1]:pressed("up") then
         local start = self.active_item
@@ -111,12 +123,17 @@ function Menu:update()
               self.items[self.active_item].type == "action"
         
         self.frame_num = 0
+
+        snd_ui_select:seek(0)
+        snd_ui_select:play()
     end
 
     if Input.players[1]:pressed("player_jump") then
         local item = self.items[self.active_item]
 
         if item.type == "action" then
+            snd_ui_push:seek(0)
+            snd_ui_push:play()
             if self.on_signal then self:on_signal(item.signal) end
         end
     end
