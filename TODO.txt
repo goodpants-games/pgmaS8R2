@@ -4,6 +4,13 @@
   geometry to position player correctly in the middle of the hole.
 - stop entity substeps if it collides against a wall (see old collision_atom
   code)
+
+- add secret orb in room03 (top-left of map)
+  you will need to place platforms to reach it. add a water tank in room05
+- add one more fire orb, but don't increase required count. so you are allowed
+  to skip one fire orb. maybe make it relatively easy to get. like perhaps to
+  the left of b02. maybe you need Knowsledg that was told later in the game idk.
+  like maybe there's a secret ice cube idk.
   
 - maybe only have one type of fire orb, but you don't need to collect them all.
   instead of having a "secret" system that forces you to collect those specific
