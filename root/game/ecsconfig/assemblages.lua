@@ -200,6 +200,18 @@ end
 ---@param game game.Game
 ---@param x number
 ---@param y number
+function asm.entity.static_fragile_block(e, game, x, y, props)
+    e:give("position", x, y)
+     :give("collision", 8, 8)
+     :give("sprite", game.res:new_sprite("fragile_block"))
+     :give("health", 3)
+     :give("behavior", "fragile_block", true)
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
 function asm.entity.home(e, game, x, y)
     e:give("position", x, y - 2)
      :give("sprite", game.res:get_image("res/graphics/game/home.png"))
