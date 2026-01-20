@@ -1,3 +1,5 @@
 ---@diagnostic disable
-say "close to the unyus' new home is a small pond. go left from there."
-say "shoot up thrice from where the mushroom is. a \"key\" will be unlocked..."
+say "Obscured by view resides a tiny room"
+say "To cross the pond needs hopping on some ice"
+say "Within the alcove lies a tiny shroom"
+say "I recommend to fire upwards thrice"
