@@ -6,6 +6,7 @@ local Menu = require("ui.menu")
 local OptionsMenu = require("ui.options_menu")
 local ControlsMenu = require("ui.controls_menu")
 local game_progression = require("game.progression")
+local Recorder = require("game.recorder")
 
 local self
 
@@ -131,6 +132,9 @@ function scene.load()
     self.pause_menu.query_focused = is_menu_active
     self.options_menu.on_back = options_menu_back
     self.options_menu.query_focused = is_menu_active
+
+    ---@type game.Recorder?
+    self.recorder = nil
 end
 
 function scene.unload()
@@ -144,6 +148,13 @@ function scene.keypressed(k)
             self.game:save_state()
         elseif k == "f3" then
             self.game:restore_state()
+        elseif k == "f4" then
+            if self.recorder then
+                self.recorder:finish("ignore/capture.txt")
+                self.recorder = nil
+            else
+                self.recorder = Recorder(self.game)
+            end
         end
     end
 end
@@ -170,6 +181,10 @@ end
 function scene.tick()
     if not self.paused then
         self.game:tick()
+
+        if self.recorder and self.game.frame % 2 == 0 then
+            self.recorder:capture()
+        end
     else
         self.menu_stack[#self.menu_stack]:tick()
     end
