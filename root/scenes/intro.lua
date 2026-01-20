@@ -6,13 +6,13 @@ local Menu = require("ui.menu")
 local self
 
 local TEXT = {
-[[The winters of this world are extraordinarily cold. Temperatures average -30 degrees Fahrenheit.]],
-[[During the winter months, Unyus migrate to live within the twisting caverns of The Big Mountain.]],
+[[The winters of this world are extraordinarily cold.]],
+[[During the winter months, Unyus migrate to live within the caverns of The Big Mountain.]],
 [[But that alone is not sufficient for survival.]],
-[[During the summer, fire orbs accumulate within the caverns.]],
+[[Fortunately, Fire Orbs accumulate inside the caverns during the summer.]],
 [[These mysterious, elusive objects provide a long-lasting and versatile source of heat.]],
 [[In order for Unyus to survive the winters, they must explore the caverns to find them.]],
-[[But this is no easy task. Other, bigger creatures migrate here as well.]],
+[[But this is no easy task. Other, more dangerous creatures live in the caverns.]],
 [[And, unfortunately, Unyus taste yummy. Muahaha...]],
 }
 
@@ -68,8 +68,10 @@ function scene.draw()
         self.obj_menu:draw(0, math.round((DISPLAY_HEIGHT - h) / 2.0))
         -- Lg.printf(OBJECT_TEXT, 0, math.round((DISPLAY_HEIGHT - 12) / 2.0), DISPLAY_WIDTH, "center")
     else
+        Lg.setColor(P8_PAL.red)
+        Lg.rectangle("fill", 4, 4, DISPLAY_WIDTH - 8, DISPLAY_HEIGHT - 40)
         Lg.setColor(P8_PAL.white)
-        Lg.printf(TEXT[self.page], 4, DISPLAY_HEIGHT - 36, DISPLAY_WIDTH - 4, "center")
+        Lg.printf(TEXT[self.page], 4, DISPLAY_HEIGHT - 36, DISPLAY_WIDTH - 8, "left")
     end
 end
 
