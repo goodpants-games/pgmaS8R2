@@ -1,17 +1,48 @@
 --[[
     sprite: atlas/animation loader.
+    dependencies:
+      - https://github.com/rxi/json.lua/
+        (or something with a compatible decoder API.)
 
     loading/managing sprite resources
     ----
-    call module.loadResource(path) to load a sprite resource. sprite resource data is contained in a separate png and json file,
-    in the json format used by aseprite. the path given must be the path to the json file.
+    call module.loadResource(path) to load a sprite resource. sprite resource
+    data is contained in a separate png and json file, in the json format used
+    by aseprite. the path given must be the path to the json file. it supports
+    trimmed exports as well.
 
-    to create a sprite, call module.load(resourceOrPath) with either a resource table returned from loadResource, or the path to
-    the resource file to load.
+    you can also use module.loadResourceFromMemory(data, atlas) to create
+    resources. data is the deserialized JSON data as a Lua table, and atlas is
+    the love Image containing the texture atlas.
 
-    you can clone a sprite with sprite:clone(). the cloned sprite will share the same resources as the original sprite. sprite
-    resources can also be released with sprite:release(). it will release the resource only if it is the only sprite not yet
-    garbage-collected that is using it.
+    to create a sprite, call module.load(resourceOrPath) with either a resource
+    table returned from loadResource, or the path to the resource file to load.
+
+    you can clone a sprite with sprite:clone(). the cloned sprite will share the
+    same resources as the original sprite. sprite resources can also be released
+    with sprite:release(). it will release the resource only if it is the only
+    sprite not yet garbage-collected that is using it.
+    
+    you may also use this library to load sprite resources from basic
+    spritesheets, using the module.loadSpriteSheet(atlas, params) function.
+    atlas is the love Image, and params is a table of the following format:
+        {
+            celWidth: integer
+            celHeight: integer
+            celDuration: number?, frame duration of each cel in milliseconds.
+                         if not given, defaults to 0.
+            rows: integer
+            cols: integer
+            startX: integer?, left side of the subtexture within the atlas.
+            startY: integer?, top side of the subtexture within the atlas.
+            marginX: integer?, horizontal spacing between each cel.
+            marginY: integer?, vertical spacing between each cel.
+            paddingX: integer?, number of horizontal pixels of inner padding per
+                      cel.
+            paddingY: integer?, number of vertical pixels of inner padding per
+                      cel.
+        }
+
 
     rendering
     ----
@@ -19,9 +50,22 @@
         sprite:draw(x, y, r, sx, sy, kx, ky)
         sprite:drawCel(index, x, y, r, sx, sy, kx, ky)
     
-    x and y is where the center of the cell will be located. r is rotation, sx and sy is scale,
-    kx and ky is shear factor. sprite.draw draws the current frame of the animation, and drawCel
-    draws the index of a specific cel (indexed from 1).
+    x and y is where the cell will be drawn. r is rotation, sx and sy is scale,
+    kx and ky is shear factor. sprite.draw draws the current frame of the
+    animation, and drawCel draws the index of a specific cel (indexed from 1).
+
+    you may also change the alignment of the sprite. that is, if (x, y) when
+    drawing is the center or the top-left of the sprite. each sprite and sprite
+    resource has an alignment field, which can be "center", "topleft", or nil.
+    if it nil, then it will inherit the alignment. that means sprites will
+    refer to the sprite resource's alignment, and sprite resources will refer to
+    the alignment defined in module.fallbackAlignment. the default fallback
+    alignment is "topleft".
+
+    the global fields module.defaultSpriteAlignment and
+    module.defaultResourceAlignment also exist. when creating new sprites
+    or sprite resources, their alignment fields will be set to these fields
+    respectively. they are nil by default.
 
 
     animations
@@ -35,39 +79,53 @@
     object structure
     ----
     each sprite object also has certain properties you can inspect:
-        - sprite.curAnim: a string describing the name of the currently playing animation
-        - sprite.cel: an integer describing the current cel that should be displayed
+        - sprite.curAnim: a string describing the name of the currently playing
+                          animation. nil if no animation is playing.
+        - sprite.cel: an integer describing the current cel that should be
+                      displayed
         - sprite.res: the sprite resource data
     
     in addition, each sprite resource has these properties:
         - res.atlas: the sprite atlas, as a love Image.
-        - res.animations: table of animation names paired with animation data in the following format:
+        - res.animations: table of animation names paired with animation data in
+                          the following format:
             {
                 from: integer, index of first cel in the animation
                 to: integer, index of last cel in the animation
-                loopCount: integer, number of times animation should loop before stopping
-                loopPoint: integer, start index of looping portion of the cell. always present.
+                loopCount: integer, number of times animation should loop before
+                           stopping
+                loopPoint: integer, start index of looping portion of the cell.
+                           always present.
             }
         - res.cels: the cel list. each item is a table in the following format:
             {
                 quad: the love Quad.
-                ox: offset X of drawing operations (this is why x and y are centered)
-                oy: offset Y of drawing operations
+                ox: Negated X position of the top-left corner.
+                    (important if trimmed)
+                oy: Negated Y position of the top-left corner.
+                mx: Negated X position of the sprite center.
+                my: Negated Y position of the sprite center.
                 duration: the duration of the cel in milliseconds
             }
 
 
     creating animations in aseprite
     ----
-    animations are created using the aseprite tags feature. the name of the tag is the name of the animation. the repeat
-    property of the tag works as expected in-game as well.
+    animations are created using the aseprite tags feature. the name of the tag
+    is the name of the animation. the repeat property of the tag works as
+    expected in-game as well.
 
-    this library has the ability to represent loop points -- points the animation returns to when it loops that is different than
-    the start point of the animation. however, aseprite has no mechanism for representing this, so there is a workaround:
+    this library has the ability to represent loop points -- points the
+    animation returns to when it loops that is different than the start point of
+    the animation. however, aseprite has no mechanism for representing this, so
+    there is a workaround:
     
-    if you were to create two tags that share an end point but have different start points, those two tags become part of the same animation.
-    the long tag is the one whose name gets associated with the animation, and its start point becomes the animation's initial frame. the start
-    point of the short tag (which is therefore the tag with the later start point) is the point the animation returns to when it loops.
+    if you were to create two tags that share an end point but have different
+    start points, those two tags become part of the same animation. the long tag
+    is the one whose name gets associated with the animation, and its start
+    point becomes the animation's initial frame. the start point of the short
+    tag, which is therefore the tag with the later start point, is the point the
+    animation returns to when it loops.
 
     confusing explanation? maybe a visual will help:
 
@@ -81,13 +139,14 @@
     B: point animation returns to when it loops
     C: end point
 
-    note the tag named "jump-loop" can be named anything, it only detects which tag is the looping area from shared end points.
+    note the tag named "jump-loop" can be named anything, it only detects which
+    tag is the looping area from shared end points.
     
     
     copyright notice
     ----
     
-    Copyright (c) 2025 pkhead
+    Copyright (c) 2025-2026 pkhead
 
     This software is provided 'as-is', without any express or implied
     warranty. In no event will the authors be held liable for any damages
@@ -111,6 +170,7 @@ local JSON = require("json")
 --[[
 TODO: do more testing with top-left alignment
   - does it work with non-trimmed sprites
+  - does it work with the spritesheet loader?
   - does it work with ... everything?
 --]]
 
@@ -118,6 +178,19 @@ local module = {}
 module._version = "0.2.0"
 
 ---@alias pklove.SpriteAlignment "topleft"|"center"
+
+---@class pklove.SpriteSheetLoadParams
+---@field celWidth number
+---@field celHeight number
+---@field celDuration number Frame duration of each cel in milliseconds.
+---@field rows number
+---@field cols number
+---@field startX number?
+---@field startY number?
+---@field marginX number? Horizontal spacing between each cel.
+---@field marginY number? Vertical spacing between each cel.
+---@field paddingX number? Number of horizontal pixels of inner padding per cel.
+---@field paddingY number? Number of vertical pixels of inner padding per cel.
 
 ---If a drawn Sprite and its SpriteResource both have alignment set to nil, then
 ---it should use this alignment instead.
@@ -289,6 +362,61 @@ function module.loadResource(jsonPath)
     return module.loadResourceFromMemory(data, atlas)
 end
 
+---Load a resource from a spritesheet.
+---@param atlas love.Image
+---@param params pklove.SpriteSheetLoadParams
+function module.loadSpriteSheet(atlas, params)
+    local celWidth = assert(params.celWidth, "parameters did not have required 'celWidth' property")
+    local celHeight = assert(params.celHeight, "parameters did not have required 'celHeight' property")
+    local celDuration = params.celDuration or 0
+    local rows = assert(params.rows, "parameters did not have required 'rows' property")
+    local cols = assert(params.cols, "parameters did not have required 'cols' property")
+    local startX = params.startX or 0
+    local startY = params.startY or 0
+    local marginX = params.marginX or 0
+    local marginY = params.marginY or 0
+    local paddingX = params.paddingX or 0
+    local paddingY = params.paddingY or 0
+
+    local data = {}
+    data.frames = {}
+
+    local i = 1
+    for r=1, rows do
+        for c=1, cols do
+            local celX = (c-1) * (celWidth + marginX) + startX
+            local celY = (r-1) * (celHeight + marginY) + startY
+
+            data.frames[i] = {
+                filename = tostring(i),
+                frame = {
+                    x = celX + paddingX,
+                    y = celY + paddingY,
+                    w = celWidth - paddingX,
+                    h = celHeight - paddingY
+                },
+                rotated = false,
+                trimmed = false,
+                spriteSourceSize = {
+                    x = paddingX,
+                    y = paddingY,
+                    w = celWidth - paddingX,
+                    h = celHeight - paddingY
+                },
+                sourceSize = {
+                    w = celWidth,
+                    h = celHeight
+                },
+                duration = celDuration
+            }
+
+            i = i + 1
+        end
+    end
+
+    return module.loadResourceFromMemory(data, atlas)
+end
+
 ---Create a sprite from a sprite resource. (see loadResource or loadResourceFromMemory)
 ---@param pathOrResource pklove.SpriteResource|string A sprite resource or the path to it.
 function module.new(pathOrResource)
@@ -317,13 +445,13 @@ function module.new(pathOrResource)
     return self
 end
 
----@param sprite table
+---@param sprite any?
 ---@return boolean
 function module.isSprite(sprite)
     return type(sprite) == "table" and getmetatable(sprite) == Sprite
 end
 
----@param spriteRes table
+---@param spriteRes any?
 ---@return boolean
 function module.isSpriteResource(spriteRes)
     return type(spriteRes) == "table" and
@@ -442,10 +570,10 @@ function Sprite:hasAnim(animName)
 end
 
 ---Get the index of the current frame relative to the start of the animation.
----@return integer animFrame The current frame, starting from 1. Returns 0 if no animation is playing.
+---@return integer? animFrame The current frame, starting from 1. Returns nil if no animation is playing.
 function Sprite:getAnimFrame()
     if not self.curAnim then
-        return 0
+        return nil
     end
 
     return self.cel - self.res.animations[self.curAnim].from + 1
