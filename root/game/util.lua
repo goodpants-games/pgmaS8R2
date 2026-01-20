@@ -61,4 +61,20 @@ function GameUtil.accel_damp_at_speed(max_speed, k)
     return -max_speed * (k - 1.0) / k
 end
 
+---@param orbs game.OrbData[]
+---@return number rc, number bc
+function GameUtil.count_orbs(orbs)
+    local rc, bc = 0, 0
+
+    for _, v in ipairs(orbs) do
+        if v.kind == "red" then
+            rc = rc + 1
+        elseif v.kind == "blue" then
+            bc = bc + 1
+        end
+    end
+
+    return rc, bc
+end
+
 return GameUtil

@@ -9,6 +9,7 @@ local ecsconfig = require("game.ecsconfig")
 local Dialogue = require("game.dialogue")
 local Progression = require("game.progression")
 local SoundManager = require("game.sndmgr")
+local GameUtil = require("game.util")
 
 ---@class game.ResourceManager: batteries.Class
 ---@overload fun():game.ResourceManager
@@ -340,6 +341,30 @@ function Game:tick()
 
     self.ecs_world:emit("tick")
 
+    -- debug fly
+    if Debug.enabled and love.keyboard.isDown("lshift") then
+        local player = self.player
+        local player_vel = player.velocity
+        player_vel.x = 0.0
+        player_vel.y = -self.gravity
+
+        if love.keyboard.isDown("right") then
+            player_vel.x = player_vel.x + 2
+        end
+
+        if love.keyboard.isDown("left") then
+            player_vel.x = player_vel.x - 2
+        end
+
+        if love.keyboard.isDown("up") then
+            player_vel.y = player_vel.y - 2
+        end
+
+        if love.keyboard.isDown("down") then
+            player_vel.y = player_vel.y + 2
+        end
+    end
+
     self.sound:update()
 
     if self._room_transition then
@@ -460,16 +485,7 @@ function Game:_draw_ui()
     end
 
     local orb_list = self:list_collected_orbs()
-    local red_count = 0
-    local blue_count = 0
-
-    for _, v in ipairs(orb_list) do
-        if v.kind == "red" then
-            red_count = red_count + 1
-        elseif v.kind == "blue" then
-            blue_count = blue_count + 1
-        end
-    end
+    local red_count, blue_count = GameUtil.count_orbs(orb_list)
 
     Lg.setColor(1, 1, 1)
     Lg.draw(rorb_img, 6*16, 0)
@@ -575,6 +591,26 @@ function Game:collect_orb(gid, kind)
     end
 
     table.insert(self._collected_orbs, { gid = gid, kind = kind })
+end
+
+---@param room_name string
+function Game:warp_to_room(room_name)
+    self:_load_room(room_name)
+
+    for _, obj in ipairs(self.room.tiled_obj_layer.objects) do
+        if obj.type == "entity" and obj.name == "player" then
+            assert(obj.shape == "rectangle", "entity object is not a rect")
+
+            local x = math.round(obj.x + obj.width / 2.0)
+            local y = math.round(obj.y + obj.height / 2.0)
+
+            self.player.position.x = x
+            self.player.position.y = y
+        end
+    end
+
+    self.cam.x = self.player.position.x
+    self.cam.y = self.player.position.y
 end
 
 ---@private

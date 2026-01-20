@@ -47,6 +47,43 @@ local function pause_menu_signal(menu, signal)
         end
 
         table.insert(self.menu_stack, new_menu)
+
+    elseif signal == "debug" then
+        local new_menu = Menu()
+            :add_label("DEBUG")
+            :add_action("WARP", "warp")
+            :add_action("+1 RORB", "rorb")
+            :add_action("+1 BORB", "borb")
+            :add_action("BACK", "back")
+
+        new_menu.on_signal = function(_, sig)
+            if sig == "warp" then
+                io.write("enter room: ")
+                local line = io.read("*l")
+                self.game:warp_to_room("maps/" .. line .. ".tmx")
+
+            elseif sig == "rorb" then
+                self.paused = false
+                table.clear(self.menu_stack)
+
+                table.insert(require("game.progression").collected_orbs,
+                             { kind = "red", gid = "dummy" })
+                self.game.dialogue:start("collect_fire_orb", "red", self.game)
+
+            elseif sig == "borb" then
+                self.paused = false
+                table.clear(self.menu_stack)
+
+                table.insert(require("game.progression").collected_orbs,
+                             { kind = "blue", gid = "dummy" })
+                self.game.dialogue:start("collect_fire_orb", "blue", self.game)
+            
+            elseif sig == "back" then
+                table.remove(self.menu_stack)
+            end
+        end
+
+        table.insert(self.menu_stack, new_menu)
     
     elseif signal == "exit" then
         local m = Menu()
@@ -83,6 +120,10 @@ function scene.load()
         :add_action("OPTIONS", "options")
         :add_action("CONTROLS", "controls")
         :add_action("EXIT", "exit")
+
+    if Debug.enabled then
+        self.pause_menu:add_action("DEBUG", "debug")
+    end
 
     self.options_menu = OptionsMenu()
 

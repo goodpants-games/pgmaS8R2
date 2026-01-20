@@ -17,7 +17,7 @@ local TEXT = {
 }
 
 local OBJECT_TEXT = [[OBJECTIVE:
-Find all four red fire orbs.
+Find four red fire orbs.
 ]]
 
 function scene.load()
@@ -27,7 +27,7 @@ function scene.load()
     self.page = "objective"
     self.obj_menu = Menu()
         :add_label("OBJECTIVE")
-        :add_text("Find all four red fire orbs.", DISPLAY_WIDTH, "center")
+        :add_text("Find four red fire orbs.", DISPLAY_WIDTH, "center")
         :add_action("OK", "ok")
     
     self.obj_menu.centered = true

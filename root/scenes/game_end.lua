@@ -2,6 +2,7 @@ local sceneman = require("sceneman")
 local game_prog = require("game.progression")
 local const = require("game.consts")
 local Menu = require("ui.menu")
+local GameUtil = require("game.util")
 
 local scene = sceneman.scene()
 
@@ -11,26 +12,21 @@ local TEXT =
 [[
 
 YOU BEAT THE GAME!
-YOU ALSO HAVE COLLECTED $BLUEORBS/$MAXBLUEORBS BLUE ORBS.
+RED ORBS: $RED_ORBS/$MAX_RED_ORBS
+SECRET ORBS: $BLUE_ORBS/$MAX_BLUE_ORBS
 ]]
 
 function scene.load()
     self = {}
-    local rc, bc = 0, 0
-
-    for i, v in ipairs(game_prog.collected_orbs) do
-        if v.kind == "red" then
-            rc = rc + 1
-        elseif v.kind == "blue" then
-            bc = bc + 1
-        end
-    end
+    local rc, bc = GameUtil.count_orbs(game_prog.collected_orbs)
 
     self.red_orbs = rc
     self.blue_orbs = bc
 
-    local text = TEXT:gsub("$BLUEORBS", self.blue_orbs)
-                     :gsub("$MAXBLUEORBS", const.BLUE_ORB_COUNT)
+    local text = TEXT:gsub("$BLUE_ORBS", self.blue_orbs)
+                     :gsub("$MAX_BLUE_ORBS", const.BLUE_ORB_COUNT)
+                     :gsub("$RED_ORBS", self.red_orbs)
+                     :gsub("$MAX_RED_ORBS", const.RED_ORB_COUNT)
 
     self.menu = Menu()
         :add_label("CONGRATULATIONS!")
