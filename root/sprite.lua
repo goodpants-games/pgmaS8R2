@@ -108,14 +108,40 @@
 
 local JSON = require("json")
 
+--[[
+TODO: do more testing with top-left alignment
+  - does it work with non-trimmed sprites
+  - does it work with ... everything?
+--]]
+
 local module = {}
-module._version = "0.1.0"
+module._version = "0.2.0"
+
+---@alias pklove.SpriteAlignment "topleft"|"center"
+
+---If a drawn Sprite and its SpriteResource both have alignment set to nil, then
+---it should use this alignment instead.
+---@type pklove.SpriteAlignment
+module.fallbackAlignment = "topleft"
+
+---All SpriteResources created henceforth will have this set as their alignment.
+---Set to `nil` to indicate that it should inherit from
+---`SpriteModule.fallbackAlignment` on a per-draw basis.
+---@type pklove.SpriteAlignment?
+module.defaultResourceAlignment = nil
+
+---All Sprites created henceforth will have this set as their alignment. Set
+---to `nil` to indicate that it should inherit the alignment from the sprite
+---resource on a per-draw basis.
+---@type pklove.SpriteAlignment?
+module.defaultSpriteAlignment = nil
 
 ---@class pklove.SpriteResource
 ---@field _refs {[pklove.Sprite]: boolean}
 ---@field atlas love.Image
----@field cels {quad: love.Quad, ox: number, oy: number, duration: number}[]
+---@field cels {quad: love.Quad, mx: number, my: number, ox: number, oy: number, duration: number}[]
 ---@field animations {from: integer, to: integer, loopCount: integer, loopPoint: integer}[]
+---@field alignment pklove.SpriteAlignment?
 local SpriteResource = {}
 SpriteResource.__index = SpriteResource
 
@@ -125,6 +151,7 @@ SpriteResource.__index = SpriteResource
 ---@field private _animChanged boolean
 ---@field cel integer
 ---@field res pklove.SpriteResource
+---@field alignment pklove.SpriteAlignment?
 local Sprite = {}
 Sprite.__index = Sprite
 
@@ -191,14 +218,20 @@ function module.loadResourceFromMemory(data, atlas)
     for _, cel in ipairs(data.frames) do
         local frame = cel.frame
 
-        -- frame render offset
-        local ox = cel.sourceSize.w / 2 - cel.spriteSourceSize.x
-        local oy = cel.sourceSize.h / 2 - cel.spriteSourceSize.y
+        -- frame render offset (top-left)
+        local ox = -cel.spriteSourceSize.x
+        local oy = -cel.spriteSourceSize.y
+
+        -- frame render offset (center)
+        local mx = cel.sourceSize.w / 2 - cel.spriteSourceSize.x
+        local my = cel.sourceSize.h / 2 - cel.spriteSourceSize.y
 
         table.insert(resource.cels, {
             quad = love.graphics.newQuad(frame.x, frame.y, frame.w, frame.h, atlas:getWidth(), atlas:getHeight()),
             ox = ox,
             oy = oy,
+            mx = mx,
+            my = my,
             duration = cel.duration
         })
     end
@@ -226,6 +259,8 @@ function module.loadResourceFromMemory(data, atlas)
             end
         end
     end
+
+    resource.alignment = module.defaultResourceAlignment
 
     return resource
 end
@@ -272,6 +307,8 @@ function module.new(pathOrResource)
 
     ---(Read-only) The name of the currently playing animation.
     self.curAnim = nil ---@type string?
+
+    self.alignment = module.defaultSpriteAlignment
     
     self._timeAccum = 0
     self._loopCount = 0
@@ -283,13 +320,14 @@ end
 ---@param sprite table
 ---@return boolean
 function module.isSprite(sprite)
-    return getmetatable(sprite) == Sprite
+    return type(sprite) == "table" and getmetatable(sprite) == Sprite
 end
 
 ---@param spriteRes table
 ---@return boolean
 function module.isSpriteResource(spriteRes)
-    return getmetatable(spriteRes) == SpriteResource
+    return type(spriteRes) == "table" and
+           getmetatable(spriteRes) == SpriteResource
 end
 
 ---Release this SpriteResource.
@@ -313,7 +351,8 @@ end
 --- 
 --- This will unlink it with the resource, and if it is the
 --- only sprite remaining using it, will release the resource
---- as well.
+--- as well. It uses a weak table to detect if no other Sprites are referencing
+--- the resource.
 function Sprite:release()
     self.res._refs[self] = nil
 
@@ -423,7 +462,25 @@ end
 ---@param ky? number Y skew factor
 function Sprite:drawCel(index, x, y, r, sx, sy, kx, ky)
     local cel = self.res.cels[index]
-    love.graphics.draw(self.res.atlas, cel.quad, x, y, r, sx, sy, cel.ox, cel.oy, kx, ky)
+
+    local align = self.alignment
+    if not align then
+        align = self.res.alignment
+        if not align then
+            align = module.fallbackAlignment
+        end
+    end
+
+    local ox, oy
+    if align == "topleft" then
+        ox, oy = cel.ox, cel.oy
+    elseif align == "center" then
+        ox, oy = cel.mx, cel.my
+    else
+        error(("invalid sprite alignment '%s'. expected: 'center', 'topleft"):format(tostring(align)))
+    end
+
+    love.graphics.draw(self.res.atlas, cel.quad, x, y, r, sx, sy, ox, oy, kx, ky)
 end
 
 ---Draw the sprite

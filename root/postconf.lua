@@ -106,6 +106,9 @@ function tiled.mapPath(cwd, path)
     return tpath.normalize(tpath.join(cwd, path))
 end
 
+local sprite = require("sprite")
+sprite.fallbackAlignment = "center"
+
 ---Return the sign of a number, counting zero as positive.
 ---@param v number
 ---@return integer sign 1 or -1
