@@ -147,6 +147,21 @@ end
 ---@param game game.Game
 ---@param x number
 ---@param y number
+---@param props {[string]:any}
+function asm.entity.hint_sign(e, game, x, y, props)
+    e:give("position", x, y)
+     :give("collision", 6, 8)
+     :give("sprite", game.res:get_image("res/graphics/game/hint_sign.png"))
+     :give("dialogue", props.text)
+     
+    e.collision.monitor_only = true
+    e.sprite.z_index = -100
+end
+
+---@param e any
+---@param game game.Game
+---@param x number
+---@param y number
 local function init_orb(e, game, x, y)
     e:give("position", x, y)
      :give("collision", 4, 4)
