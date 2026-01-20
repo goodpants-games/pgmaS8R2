@@ -17,6 +17,6 @@ consts.PLAYER_SPIT_G_MULT = 2.0
 consts.START_ROOM = "maps/b01.tmx"
 consts.REQUIRED_RED_ORBS = 4
 consts.RED_ORB_COUNT = 5
-consts.BLUE_ORB_COUNT = 3
+consts.BLUE_ORB_COUNT = 4
 
 return consts
