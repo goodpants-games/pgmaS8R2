@@ -105,6 +105,10 @@ function Recorder:finish(path)
     file:close()
 end
 
+local function sprite_zsort(a, b)
+    return a.sprite.z_index < b.sprite.z_index
+end
+
 function Recorder:capture()
     local tinsert = table.insert
 
@@ -113,11 +117,21 @@ function Recorder:capture()
     tinsert(self.data, math.round(self.game.cam.y))
 
     self.game.ecs_world:__flush()
+
+    local sprites = {}
     for _, ent in ipairs(self.game.ecs_world:getEntities()) do
         local pos = ent.position
         local spr = ent.sprite
 
         if not (pos and spr) then
+            goto continue
+        end
+
+        local cam_dx = pos.x - self.game.cam.x
+        local cam_dy = pos.y - self.game.cam.y
+
+        if math.abs(cam_dx) > DISPLAY_WIDTH / 2.0 + 16 or
+           math.abs(cam_dy) > DISPLAY_HEIGHT / 2.0 + 16 then
             goto continue
         end
 
@@ -135,6 +149,28 @@ function Recorder:capture()
         
         if not (is_sprite or is_img or ent.collision) then
             goto continue
+        end
+
+        table.insert(sprites, ent)
+        ::continue::
+    end
+
+    table.stable_sort(sprites, sprite_zsort)
+
+    for _, ent in ipairs(sprites) do
+        local pos = ent.position
+        local spr = ent.sprite
+
+        local draw = spr.obj
+        local is_sprite = false
+        local is_img = false
+
+        if draw then
+            if Sprite.isSprite(draw) then
+                is_sprite = true
+            elseif type(draw) == "userdata" and draw.typeOf and draw:typeOf("Texture") then
+                is_img = true
+            end
         end
 
         tinsert(self.data, "E")
