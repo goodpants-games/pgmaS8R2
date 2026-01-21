@@ -21,6 +21,9 @@ if not package.loaded["bit"] then
 	local bit32 = package.loaded["bit32"]
 	assert(bit32, "lua environment does not have bit/bit32 library!")
 	package.loaded["bit"] = bit32
+
+    ---@diagnostic disable-next-line
+    bit = require("bit")
 end
 
 if not unpack then
@@ -133,7 +136,7 @@ end
 
 function love.conf(t)
     t.version = "11.4"
-    t.identity = "PGMA Unyuland"
+    t.identity = "pkhead_unyuland"
     t.window.width = DISPLAY_WIDTH * 5
     t.window.height = DISPLAY_HEIGHT * 5
     t.window.resizable = true

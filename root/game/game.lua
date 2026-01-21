@@ -339,7 +339,9 @@ function Game:tick()
         Debug.draw:translate(-cam_x, -cam_y)
     end
 
+    Jprof.push("game tick")
     self.ecs_world:emit("tick")
+    Jprof.pop("game tick")
 
     -- debug fly
     if Debug.enabled and love.keyboard.isDown("lshift") then
@@ -430,8 +432,10 @@ function Game:draw()
     Debug.draw:push()
     Debug.draw:translate(-cam_x, -cam_y)
 
+    Jprof.push("game draw")
     self.room:draw()
     self.ecs_world:emit("draw")
+    Jprof.pop("game draw")
 
     Lg.pop()
     Debug.draw:pop()

@@ -9,6 +9,7 @@ local display_canvas = Lg.newCanvas(DISPLAY_WIDTH, DISPLAY_HEIGHT, { dpiscale = 
 local display_ox = 0.0
 local display_oy = 0.0
 local display_scale = 1.0
+local game_focused = true
 
 local font = Lg.newFont("res/fonts/monogram.ttf", 16, "mono", 1.0)
 
@@ -116,14 +117,19 @@ function love.load(args)
     sceneman.switchScene("main_menu")
 end
 
-local _paused_sources
-function love.visible(visible)
-    if visible then
-        if _paused_sources then
-            love.audio.play(_paused_sources)
+if LOVEJS then
+    local _paused_sources
+    function love.focus(focused)
+        game_focused = focused
+
+        if focused then
+            if _paused_sources then
+                love.audio.play(_paused_sources)
+                _paused_sources = nil
+            end
+        else
+            _paused_sources = love.audio.pause()
         end
-    else
-        _paused_sources = love.audio.pause()
     end
 end
 
@@ -167,9 +173,13 @@ end
 local dt_accum = 0.0
 
 function love.update(dt)
+    Jprof.push("frame")
     local start = love.timer.getTime()
 
+    Jprof.push("manual gc")
     batteries.manual_gc(1e-1)
+    Jprof.pop()
+
     anl_mem:add_sample(collectgarbage("count"))
 
     Debug.draw.enabled = Debug.enabled
@@ -179,7 +189,10 @@ function love.update(dt)
     MOUSE_Y = (love.mouse.getY() - display_oy) / display_scale
     
     Input.update()
+
+    Jprof.push("update")
     sceneman.update(dt)
+    Jprof.pop("update")
 
     -- dt snap calculation
     -- https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
@@ -202,14 +215,18 @@ function love.update(dt)
             break
         end
         
+        Jprof.push("tick")
         sceneman.dispatch("tick")
+        Jprof.pop("tick")
 
         dt_accum = dt_accum - tick_len
         iter=iter+1
         GAME_FRAME = GAME_FRAME + 1
     end
 
+    Jprof.push("post tick")
     sceneman.dispatch("post_tick")
+    Jprof.pop("post tick")
 
     anl_update:update(dt)
     anl_draw:update(dt)
@@ -227,10 +244,12 @@ function love.draw()
     local bg_r, bg_g, bg_b, bg_a = Lg.getBackgroundColor()
     Lg.clear(bg_r, bg_g, bg_b, bg_a)
 
+    Jprof.push("draw")
     sceneman.draw()
     Debug.draw:flush()
     
     -- draw display onto window
+    Jprof.push("display")
     Lg.setCanvas()
     Lg.clear(0, 0, 0, 1)
     Lg.setColor(1, 1, 1)
@@ -241,6 +260,9 @@ function love.draw()
     end
     Lg.draw(display_canvas, display_ox, display_oy, 0, display_scale, display_scale)
     Lg.setShader()
+
+    Jprof.pop("display")
+    Jprof.pop("draw")
 
     local draw_frametime = love.timer.getTime() - draw_ts
     anl_draw:add_sample(draw_frametime)
@@ -256,6 +278,8 @@ function love.draw()
         Lg.print(("frame: %.1f ms / %.1f ms"):format(anl_total.dt_avg * 1000, anl_total.dt_max * 1000), 1, 31)
         Lg.pop()
     end
+
+    Jprof.pop("frame")
 end
 
 ---@diagnostic disable
@@ -294,7 +318,7 @@ function love.run()
 		-- Update dt, as we'll be passing it to update
 		if love.timer then dt = love.timer.step() end
 
-        if not LOVEJS or love.window.isVisible() then
+        if game_focused then
             -- Call update and draw
             if love.update then love.update(dt) end -- will pass 0 if love.timer is disabled
 

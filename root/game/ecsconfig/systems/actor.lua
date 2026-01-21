@@ -4,6 +4,8 @@ local system = Concord.system({
 })
 
 function system:tick()
+    Jprof.push("tick actors")
+
     for _, ent in ipairs(self.pool) do
         local velocity = ent.velocity
         local actor = ent.actor
@@ -27,6 +29,8 @@ function system:tick()
             end
         end
     end
+
+    Jprof.pop("tick actors")
 end
 
 return system

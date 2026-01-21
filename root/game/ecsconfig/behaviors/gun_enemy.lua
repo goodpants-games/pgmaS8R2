@@ -1,6 +1,7 @@
 local BaseEnemy = require("game.ecsconfig.behaviors.base_enemy")
 local const = require("game.consts")
 local bit = require("bit")
+local Concord = require("concord")
 
 ---@class game.behavior.GunEnemy: game.behavior.BaseEnemy
 ---@overload fun(props:table):game.behavior.GunEnemy
@@ -47,7 +48,7 @@ function GunEnemy:_shoot(dx, dy)
             :give("touch_monitor")
             :give("sprite", game.res:get_image("res/graphics/game/bullet.png"))
             :give("behavior", "enemy_bullet", ent)
-        
+
     bullet.collision.monitor_only = true
     bullet.collision.mask = bit.bor(const.COLGROUP_DEFAULT, const.COLGROUP_ACTOR)
 
@@ -80,7 +81,6 @@ function GunEnemy:tick()
         local screen_dy = pos.y - game.cam.y
         local screen_dist = math.sqrt(screen_dx * screen_dx + screen_dy * screen_dy)
         if screen_dist < 100 then
-            print(screen_dist)
             game.sound:play_no_overlap("enemy_shoot")
         end
 

@@ -81,17 +81,27 @@ function system:init()
 end
 
 function system:_entity_added(ent)
-    table.insert(self.edge_list_x, { ent = ent, pos = 0.0, left = true })
-    table.insert(self.edge_list_x, { ent = ent, pos = 0.0, left = false })
-    table.insert(self.edge_list_y, { ent = ent, pos = 0.0, left = true })
-    table.insert(self.edge_list_y, { ent = ent, pos = 0.0, left = false })
+    Jprof.push("phys new ent")
 
     self.ent_ids[ent] = self.next_ent_id
     self.next_ent_id = self.next_ent_id + 1
+
+    local pos = ent.position
+    local col = ent.collision
+
+    local pl = pos.x - col.w / 2.0
+    local pr = pos.x + col.w / 2.0
+    local pt = pos.y - col.h / 2.0    
+    local pb = pos.y + col.h / 2.0
+
+    self:_insert_edge_list(self.edge_list_x, self.x_overlaps, ent, pl, pr)
+    self:_insert_edge_list(self.edge_list_y, self.y_overlaps, ent, pt, pb)
+
+    Jprof.pop()
 end
 
 function system:_entity_removed(ent)
-    -- print("he was Destroyed!")
+    Jprof.push("phys del ent")
 
     self.ent_ids[ent] = nil
 
@@ -112,6 +122,62 @@ function system:_entity_removed(ent)
 
     remove_from_overlap_list(self.x_overlaps, ent)
     remove_from_overlap_list(self.y_overlaps, ent)
+
+    Jprof.pop()
+end
+
+do
+    local overlaps = {}
+    function system:_insert_edge_list(list, out, ent, pstart, pend)
+        local ids = self.ent_ids
+        table.clear(overlaps)
+
+        local new_l = { ent = ent, pos = pstart, left = true }
+        local new_r = { ent = ent, pos = pend, left = false }
+
+        local si
+        for i=1, #list do
+            local item = list[i]
+
+            if item.pos > pstart then
+                si = i
+                table.insert(list, i, new_l)
+                break
+            else
+                if item.left then
+                    overlaps[item.ent] = true
+                else
+                    overlaps[item.ent] = nil
+                end
+            end            
+        end
+
+        if not si then
+            table.insert(list, new_l)
+            table.insert(list, new_r)
+        else
+            for e, _ in pairs(overlaps) do
+                local k = upair2u(ids[e], ids[ent])
+                out[k] = {e, ent}
+            end
+
+            for i=si+1, #list do
+                local item = list[i]
+
+                if item.pos > pend then
+                    table.insert(list, i, new_r)
+                    return
+                else
+                    if item.left then
+                        local k = upair2u(ids[item.ent], ids[ent])
+                        out[k] = {item.ent, ent}
+                    end
+                end
+            end
+
+            table.insert(list, new_r)
+        end
+    end
 end
 
 function system:_sort_edge_list(list, out)
@@ -128,7 +194,6 @@ function system:_sort_edge_list(list, out)
             -- R-L -> L-R
             local k = upair2u(ids[edge1.ent], ids[edge2.ent])
             if edge1.left and not edge2.left then
-                -- print("new overlap", ids[edge1.ent], ids[edge2.ent])
                 local t = out[k]
                 if t then
                     t[1] = edge1.ent
@@ -139,7 +204,6 @@ function system:_sort_edge_list(list, out)
             
             -- L-R > R-L
             elseif not edge1.left and edge2.left then
-                -- print("remove overlap", ids[edge1.ent], ids[edge2.ent])
                 out[k] = nil
             end
 
@@ -152,8 +216,9 @@ end
 function system:_update_edge_lists()
     local xedges = self.edge_list_x
     local yedges = self.edge_list_y
-
+    
     -- update edge positions
+    Jprof.push("sync edges")
     for _, edge in ipairs(xedges) do
         local ent = edge.ent
         local pos = ent.position
@@ -177,9 +242,14 @@ function system:_update_edge_lists()
             edge.pos = pos.y + col.h / 2.0
         end
     end
+    Jprof.pop()
 
+    Jprof.push("sort x edges")
     self:_sort_edge_list(xedges, self.x_overlaps)
+    Jprof.pop()
+    Jprof.push("sort y edges")
     self:_sort_edge_list(yedges, self.y_overlaps)
+    Jprof.pop()
 end
 
 ---@param pos {x: number, y: number}
@@ -236,10 +306,13 @@ function system:_entity_new_substep(ent)
 end
 
 function system:tick()
+    Jprof.push("tick physics")
+
     local game = self:getWorld().game --[[@as game.Game]]
     self.ent_proc = {}
 
     -- apply gravity, damping, and perform movement for non-colliding entities
+    Jprof.push("1: kinematics")
     for _, ent in ipairs(self.pv_pool) do
         local pos = ent.position
         local vel = ent.velocity
@@ -268,8 +341,10 @@ function system:tick()
             pos.y = pos.y + vel.y
         end
     end
+    Jprof.pop()
 
     -- begin collision
+    Jprof.push("2: collision setup")
     for _, ent in ipairs(self.pvc_pool) do
         local vel = ent.velocity
 
@@ -304,6 +379,7 @@ function system:tick()
         self:_entity_new_substep(ent)
         -- assert(col._iter == 1 and col._substep_idx == 1)
     end
+    Jprof.pop()
 
     -- local ilist = {}
     local ents_to_proc = table.copy(self.pvc_pool) --[[@as (table[])]]
@@ -322,7 +398,10 @@ function system:tick()
         end
     end
 
+    Jprof.push("3: collision")
     repeat
+        Jprof.push("collision pass")
+
         local is_done = true
 
         for i=#ents_to_proc, 1, -1 do
@@ -335,7 +414,9 @@ function system:tick()
         end
 
         for _=1, 8 do
+            Jprof.push("update edge lists")
             self:_update_edge_lists()
+            Jprof.pop()
 
             -- reset collision pass data
             -- for _, ent in ipairs(ents_to_proc) do
@@ -347,6 +428,7 @@ function system:tick()
             table.clear(moved)
 
             -- collect entity/entity collisions
+            Jprof.push("collect ent contacts")
             for k, dat in pairs(self.x_overlaps) do
                 if self.y_overlaps[k] then
                     local e1, e2 = dat[1], dat[2]
@@ -414,8 +496,10 @@ function system:tick()
 
                 ::continue::
             end
+            Jprof.pop()
 
             -- collect entity/tile collisions
+            Jprof.push("collect tile contacts")
             for _, ent in ipairs(self.pvc_pool) do
                 local pos = ent.position
                 local collider = ent.collision
@@ -462,11 +546,13 @@ function system:tick()
 
                 ::continue::
             end
+            Jprof.pop()
 
             if col_queue:is_empty() then
                 break
             end
 
+            Jprof.push("resolve contacts")
             for item in col_queue:iter() do
                 local e1, e2, pn, nx, ny = item[1], item[2], item[3], item[4], item[5]
                 if moved[e1] or (e2 and moved[e2]) then
@@ -592,8 +678,12 @@ function system:tick()
 
                 ::continue::
             end
+            Jprof.pop()
         end
+
+        Jprof.pop()
     until is_done
+    Jprof.pop()
 
     -- play spring sounds from last frame, if the entity is still moving upwards
     for i=#self.spring_sounds_play, 1, -1 do
@@ -682,6 +772,8 @@ function system:tick()
             vel.y = vel.y - game.gravity - 0.06 / mass
         end
     end
+
+    Jprof.pop("tick physics")
 end
 
 return system

@@ -109,6 +109,32 @@ end
 local sprite = require("sprite")
 sprite.fallbackAlignment = "center"
 
+if Debug.enabled then
+    local args = love.parsedGameArguments
+    for i=1, #args do
+        if args[i] == "--jprof" then
+            local path = args[i+1]
+            print( ("start love \"%s\" listen"):format(path) )
+            local s = os.execute(("start love \"%s\" listen"):format(path))
+            if s then
+                PROF_CAPTURE = Debug.enabled
+            else
+                print("could not start profiler")
+            end
+
+            love.timer.sleep(1)
+            love.window.requestAttention()
+
+            break
+        end
+    end
+end
+
+Jprof = require("jprof")
+if PROF_CAPTURE then
+    Jprof.connect()
+end
+
 ---Return the sign of a number, counting zero as positive.
 ---@param v number
 ---@return integer sign 1 or -1

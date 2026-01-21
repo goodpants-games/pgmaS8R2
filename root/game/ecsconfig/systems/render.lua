@@ -22,6 +22,8 @@ local function z_index_sort_less(a, b)
 end
 
 function system:tick()
+    Jprof.push("tick render")
+
     local game = self:getWorld().game --[[@as game.Game]]
 
     table.insertion_sort(self._render_list, z_index_sort_less)
@@ -35,9 +37,13 @@ function system:tick()
             drawable:update(GAME_TICK_LENGTH)
         end
     end
+
+    Jprof.pop("tick render")
 end
 
 function system:draw()
+    Jprof.push("draw render")
+
     for _, ent in ipairs(self._render_list) do
         local sprite = ent.sprite
         if not sprite.visible then
@@ -84,6 +90,8 @@ function system:draw()
         
         ::continue::
     end
+
+    Jprof.pop("draw render")
 end
 
 return system
