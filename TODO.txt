@@ -5,14 +5,6 @@
 - stop entity substeps if it collides against a wall (see old collision_atom
   code)
 
-- investigate performance issue when many bullets are being spawned on the
-  same frame
-  
-- maybe only have one type of fire orb, but you don't need to collect them all.
-  instead of having a "secret" system that forces you to collect those specific
-  orbs.
-
-  so you would need to collect 4/7 orbs.
   - A PUZZLE EXPLOITING THE FACT THAT ACTIVATING CHECKPOINTS ERASES ALL PLATFORMS
     BUT DOES NOT RESET ROOM STATE
 
