@@ -35,7 +35,12 @@ function scene.load()
     self = {}
     Lg.setBackgroundColor(P8_PAL.black)
 
-    self.page = 1
+    if Debug.enabled then
+        self.page = "objective"
+    else
+        self.page = 1
+    end
+
     self.obj_menu = Menu()
         :add_label("OBJECTIVE")
         :add_text("Find four red fire orbs.", DISPLAY_WIDTH, "center")
@@ -56,9 +61,11 @@ function scene.load()
     self.music = love.audio.newSource("res/music/DT_DAY.XM", "stream")
     self.music:setLooping(true)
     self.music:setVolume(0.4)
-    self.music:play()
 
-    load_page()
+    if type(self.page) == "number" then
+        self.music:play()
+        load_page()
+    end
 end
 
 function scene.unload()
@@ -70,7 +77,7 @@ end
 function scene.update(dt)
     if self.page == "objective" then
         self.obj_menu:update()
-    elseif Input.players[1]:pressed("player_jump") then
+    elseif Input.players[1]:pressed("ui_confirm") then
         self.trigger_advance = true
     end
 end

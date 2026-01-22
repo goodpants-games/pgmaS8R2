@@ -26,6 +26,7 @@ local function menu_signal(menu, signal)
             table.remove(self.menu_stack)
         end
 
+        new_menu._center_hack = true
         table.insert(self.menu_stack, new_menu)
 
     elseif signal == "credits" then

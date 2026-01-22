@@ -55,10 +55,21 @@ function Menu:add_text(text, wrap_width, align)
     table.insert(self.items, {
         type = "text",
         lines = lines,
+        wrap_width = wrap_width,
         align = align
     })
 
     return self
+end
+
+function Menu:replace_text_item(idx, text)
+    local item = self.items[idx]
+    
+    local wrap_width = item.wrap_width
+    local ct_width, lines = self.font:getWrap(text, wrap_width)
+    self.ct_width = math.max(self.ct_width, ct_width)
+
+    item.lines = lines
 end
 
 ---@param label string
@@ -128,7 +139,7 @@ function Menu:update()
         snd_ui_select:play()
     end
 
-    if Input.players[1]:pressed("player_jump") then
+    if Input.players[1]:pressed("ui_confirm") then
         local item = self.items[self.active_item]
 
         if item.type == "action" then

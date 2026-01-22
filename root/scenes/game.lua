@@ -184,7 +184,14 @@ function scene.draw()
         Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
         Lg.setBlendMode("alpha")
 
-        local yoff = 0
+        local total_height = 2.0
+        local menu_spacing = 1.0
+        for _, v in ipairs(self.menu_stack) do
+            local _, h = v:get_size()
+            total_height = total_height + h + menu_spacing
+        end
+
+        local yoff = math.min(0, DISPLAY_HEIGHT - total_height)
         for i, v in ipairs(self.menu_stack) do
             self.menu_stack[i]:draw(2, 2 + yoff)
             local _, h = self.menu_stack[i]:get_size()

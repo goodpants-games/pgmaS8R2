@@ -14,7 +14,9 @@ local base_controls = {
     player_action1 = {'button:b'},
     player_action2 = {'button:x'},
     player_lb = {"button:leftshoulder"},
-    player_rb = {"button:rightshoulder"}
+    player_rb = {"button:rightshoulder"},
+
+    ui_confirm = {'button:a'},
 }
 
 local function get_new_baton_config()
@@ -36,12 +38,17 @@ local function get_new_baton_config()
         tinsert(controls.player_jump, "key:space")
         tinsert(controls.player_action1, "key:;")
         tinsert(controls.player_action2, "key:'")
+
+        tinsert(controls.ui_confirm, "key:space")
+        tinsert(controls.ui_confirm, "key:return")
     elseif input_mode == "arrow" then
         tinsert(controls.player_jump, "key:z")
         tinsert(controls.player_action1, "key:x")
         tinsert(controls.player_action2, "key:c")
         tinsert(controls.player_lb, "key:a")
         tinsert(controls.player_rb, "key:s")
+
+        tinsert(controls.ui_confirm, "key:z")
     else
         error("invalid input mode " .. input_mode)
     end
