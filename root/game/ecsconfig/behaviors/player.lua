@@ -135,7 +135,12 @@ function Player:tick()
             -- probably fp error accumulation and i can't seem to be able to
             -- fix it. so i'm just going to simulate the physics in a loop. that
             -- way the fp errors will be simulated as well
-            local vx = consts.PLAYER_SIDE_SPIT_VX * math.sign(actor.face_dir)
+            local vx = consts.PLAYER_SIDE_SPIT_VX
+            if control.move_y > 0.0 then
+                vx = consts.PLAYER_SIDE_SPIT_CLOSE_VX
+            end
+            vx = vx * math.sign(actor.face_dir)
+            
             local x = 0.0
             local y = 0
             local i = 1

@@ -1,6 +1,7 @@
 ---@diagnostic disable
-say "Did you know?"
+say "Did you know? Pushable objects can bounce on springs too, not just you!"
 say "..."
-say "Dangit, I forgot what I wanted to write. Sorry."
-say "Ugh, I can't seem to figure out how to bring that spring over here though. It would be useful."
-say "Anyway, sorry that I don't have any useful information... What a waste of wood."
+say "Nevermind. Obviously!"
+say "Why would only living beings be able to bounce on springs?"
+say "It's not like this is a game."
+say "Ugh, sorry. I don't have any useful information. What a waste of wood."

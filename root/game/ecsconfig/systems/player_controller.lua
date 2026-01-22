@@ -51,7 +51,7 @@ function system:update(dt)
 
         if not pctl.enabled then
             pctl.drop_trigger = 0
-            pctl.interact_trigger = 0
+            pctl.interact_trigger = false
             pctl.move_x = 0.0
             pctl.move_y = 0.0
         end
@@ -123,11 +123,16 @@ function system:tick()
                         
                     -- side spit
                     else
+                        local vx = consts.PLAYER_SIDE_SPIT_VX
+                        if player_control.move_y > 0.0 then
+                            vx = consts.PLAYER_SIDE_SPIT_CLOSE_VX
+                        end
+
                         local droplet =
                             game:new_entity()
                                 :give("position", position.x, position.y)
                                 :give("velocity",
-                                    actor.face_dir * consts.PLAYER_SIDE_SPIT_VX,
+                                    actor.face_dir * vx,
                                     consts.PLAYER_SIDE_SPIT_VY)
                                 :give("gmult", consts.PLAYER_SPIT_G_MULT)
                                 :give("behavior", "player_droplet", "side_platform")
