@@ -180,7 +180,6 @@ function SoundManager:update()
         local snd = self._active[i]
 
         if snd._is_released and not snd.src:isPlaying() then
-            print("release sound from sound mgr")
             snd.src:release()
             table.remove(self._active, i)
         else
