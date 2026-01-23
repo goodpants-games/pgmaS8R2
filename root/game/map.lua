@@ -112,6 +112,17 @@ end
 
 function Map:tick()
     local move_x, move_y = Input.players[1]:get("move")
+    
+    -- normalize move_x, move_y vector to always touch the perimeter of
+    -- a square with side length 2 centered at the origin. this is so that
+    -- holding up/down does not make the camera move slower per-axis.
+    if move_x * move_x + move_y * move_y > 1e-3 then
+        local slope = move_y / move_x
+        local slope_inv = move_x / move_y
+        local d = math.sqrt(math.min(1.0 + slope * slope, math.min(1.0 + slope_inv * slope_inv)))
+        move_x, move_y = move_x * d, move_y * d
+    end
+
     self.cam_x = self.cam_x + move_x
     self.cam_y = self.cam_y + move_y
 end
