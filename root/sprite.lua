@@ -8,8 +8,8 @@
     ----
     call module.loadResource(path) to load a sprite resource. sprite resource
     data is contained in a separate png and json file, in the json format used
-    by aseprite. the path given must be the path to the json file. it supports
-    trimmed exports as well.
+    by aseprite. the path given must be the path to the json file. it looks at
+    the given png image path inside the json file to load the atlas texture.
 
     you can also use module.loadResourceFromMemory(data, atlas) to create
     resources. data is the deserialized JSON data as a Lua table, and atlas is
@@ -33,25 +33,29 @@
                          if not given, defaults to 0.
             rows: integer
             cols: integer
-            startX: integer?, left side of the subtexture within the atlas.
-            startY: integer?, top side of the subtexture within the atlas.
-            marginX: integer?, horizontal spacing between each cel.
-            marginY: integer?, vertical spacing between each cel.
+            originX: integer?, left side of the subtexture within the atlas.
+            originY: integer?, top side of the subtexture within the atlas.
+            spacingX: integer?, horizontal spacing between each cel.
+            spacingY: integer?, vertical spacing between each cel.
             paddingX: integer?, number of horizontal pixels of inner padding per
                       cel.
             paddingY: integer?, number of vertical pixels of inner padding per
                       cel.
         }
+    
+    the resource (obviously) is created with no animations. if you want to add
+    animations, refer to the "object structure" section of this documentation.
 
 
     rendering
     ----
     once you have a sprite, you can render it using the following two functions:
-        sprite:draw(x, y, r, sx, sy, kx, ky)
-        sprite:drawCel(index, x, y, r, sx, sy, kx, ky)
+        sprite:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+        sprite:drawCel(index, x, y, r, sx, sy, ox, oy, kx, ky)
     
-    x and y is where the cell will be drawn. r is rotation, sx and sy is scale,
-    kx and ky is shear factor. sprite.draw draws the current frame of the
+    x and y is where the cel will be drawn. r is rotation, sx and sy is scale,
+    kx and ky is shear factor, ox and oy is the origin offset. all of those
+    parameters are optional. sprite.draw draws the current frame of the
     animation, and drawCel draws the index of a specific cel (indexed from 1).
 
     you may also change the alignment of the sprite. that is, if (x, y) when
@@ -65,7 +69,7 @@
     the global fields module.defaultSpriteAlignment and
     module.defaultResourceAlignment also exist. when creating new sprites
     or sprite resources, their alignment fields will be set to these fields
-    respectively. they are nil by default.
+    respectively. they are nil (inherit) by default.
 
 
     animations
@@ -87,24 +91,23 @@
     
     in addition, each sprite resource has these properties:
         - res.atlas: the sprite atlas, as a love Image.
-        - res.animations: table of animation names paired with animation data in
-                          the following format:
+        - res.animations: key-value table of animation names paired with
+                          animation data in the following format:
             {
                 from: integer, index of first cel in the animation
                 to: integer, index of last cel in the animation
                 loopCount: integer, number of times animation should loop before
                            stopping
-                loopPoint: integer, start index of looping portion of the cell.
+                loopPoint: integer, start index of looping portion of the cel.
                            always present.
             }
         - res.cels: the cel list. each item is a table in the following format:
             {
                 quad: the love Quad.
-                ox: Negated X position of the top-left corner.
-                    (important if trimmed)
-                oy: Negated Y position of the top-left corner.
-                mx: Negated X position of the sprite center.
-                my: Negated Y position of the sprite center.
+                ox: X offset to use when rendering from the top-left.
+                oy: Y offset to use when rendering from the top-left
+                cx: X offset to use when rendering from the center.
+                cy: Y offset to use when rendering from the center.
                 duration: the duration of the cel in milliseconds
             }
 
@@ -141,6 +144,60 @@
 
     note the tag named "jump-loop" can be named anything, it only detects which
     tag is the looping area from shared end points.
+
+
+    atlas data format
+    ----
+    this is what the atlas data table (aka, the aseprite .json export format)
+    should look like. note that the meta field is optional.
+
+    {
+        frames: Cel[],
+        meta = {
+            frameTags: Tag[]
+        }
+    }
+
+    type Cel = {
+        filename: string,
+            this field is ignored.
+        
+        frame: {x: number, y: number, w: number, h: number},
+            these are the coordinates that will be passed to
+            love.graphics.newQuad
+
+        rotated: boolean,
+            aseprite always sets this to false. nonetheless, this atlas loader
+            does not support rotated frames.
+        
+        trimmed: boolean,
+            true if the cel or sprite was exported with trimming enabled. this
+            field is ignored.
+        
+        spriteSourceSize: {x: number, y: number, w: number, h: number},
+            (x, y) is the top-left corner of the cel relative to the cel's
+            original frame. this will be (0, 0) if the cel/sprite is not
+            trimmed. this is not dependent on cel padding. (w, h) is the inner
+            size of the frame according to cel padding.
+        
+        sourceSize: {w: number, h: number},
+            the original size of the cel. it will be different than the frame
+            size and the size of spriteSourceSize if the cel or sprite was
+            trimmed, or if the cel was padded.
+        
+        duration: number
+            frame duration, in milliseconds.
+    }
+
+    type Tag = {
+        name: string,
+        from: integer,
+            cel index. 0-indexed
+        to: integer,
+            cel index. inclusive, 0-indexed
+        repeat: integer?
+            if omitted, the animation will repeat infinitely.
+    }
     
     
     copyright notice
@@ -167,13 +224,6 @@
 
 local JSON = require("json")
 
---[[
-TODO: do more testing with top-left alignment
-  - does it work with non-trimmed sprites
-  - does it work with the spritesheet loader?
-  - does it work with ... everything?
---]]
-
 local module = {}
 module._version = "0.2.0"
 
@@ -182,13 +232,13 @@ module._version = "0.2.0"
 ---@class pklove.SpriteSheetLoadParams
 ---@field celWidth number
 ---@field celHeight number
----@field celDuration number Frame duration of each cel in milliseconds.
+---@field celDuration number? Frame duration of each cel in milliseconds.
 ---@field rows number
 ---@field cols number
----@field startX number?
----@field startY number?
----@field marginX number? Horizontal spacing between each cel.
----@field marginY number? Vertical spacing between each cel.
+---@field originX number?
+---@field originY number?
+---@field spacingX number? Horizontal spacing between each cel.
+---@field spacingY number? Vertical spacing between each cel.
 ---@field paddingX number? Number of horizontal pixels of inner padding per cel.
 ---@field paddingY number? Number of vertical pixels of inner padding per cel.
 
@@ -212,7 +262,7 @@ module.defaultSpriteAlignment = nil
 ---@class pklove.SpriteResource
 ---@field _refs {[pklove.Sprite]: boolean}
 ---@field atlas love.Image
----@field cels {quad: love.Quad, mx: number, my: number, ox: number, oy: number, duration: number}[]
+---@field cels {quad: love.Quad, cx: number, cy: number, ox: number, oy: number, duration: number}[]
 ---@field animations {from: integer, to: integer, loopCount: integer, loopPoint: integer}[]
 ---@field alignment pklove.SpriteAlignment?
 local SpriteResource = {}
@@ -296,22 +346,22 @@ function module.loadResourceFromMemory(data, atlas)
         local oy = -cel.spriteSourceSize.y
 
         -- frame render offset (center)
-        local mx = cel.sourceSize.w / 2 - cel.spriteSourceSize.x
-        local my = cel.sourceSize.h / 2 - cel.spriteSourceSize.y
+        local cx = cel.sourceSize.w / 2 - cel.spriteSourceSize.x
+        local cy = cel.sourceSize.h / 2 - cel.spriteSourceSize.y
 
         table.insert(resource.cels, {
             quad = love.graphics.newQuad(frame.x, frame.y, frame.w, frame.h, atlas:getWidth(), atlas:getHeight()),
             ox = ox,
             oy = oy,
-            mx = mx,
-            my = my,
+            cx = cx,
+            cy = cy,
             duration = cel.duration
         })
     end
 
     -- load animation data
     resource.animations = {}
-    if data.meta.frameTags then
+    if data.meta and data.meta.frameTags then
         for _, anim in ipairs(data.meta.frameTags) do
             resource.animations[anim.name] = {
                 from = anim.from + 1,
@@ -371,10 +421,10 @@ function module.loadSpriteSheet(atlas, params)
     local celDuration = params.celDuration or 0
     local rows = assert(params.rows, "parameters did not have required 'rows' property")
     local cols = assert(params.cols, "parameters did not have required 'cols' property")
-    local startX = params.startX or 0
-    local startY = params.startY or 0
-    local marginX = params.marginX or 0
-    local marginY = params.marginY or 0
+    local originX = params.originX or 0
+    local originY = params.originY or 0
+    local spacingX = params.spacingX or 0
+    local spacingY = params.spacingY or 0
     local paddingX = params.paddingX or 0
     local paddingY = params.paddingY or 0
 
@@ -384,8 +434,8 @@ function module.loadSpriteSheet(atlas, params)
     local i = 1
     for r=1, rows do
         for c=1, cols do
-            local celX = (c-1) * (celWidth + marginX) + startX
-            local celY = (r-1) * (celHeight + marginY) + startY
+            local celX = (c-1) * (celWidth + spacingX) + originX
+            local celY = (r-1) * (celHeight + spacingY) + originY
 
             data.frames[i] = {
                 filename = tostring(i),
@@ -586,9 +636,11 @@ end
 ---@param r? number Rotation in radians
 ---@param sx? number X scale factor
 ---@param sy? number Y scale factor
+---@param ox? number X origin offset
+---@param oy? number Y origin offset
 ---@param kx? number X skew factor
 ---@param ky? number Y skew factor
-function Sprite:drawCel(index, x, y, r, sx, sy, kx, ky)
+function Sprite:drawCel(index, x, y, r, sx, sy, ox, oy, kx, ky)
     local cel = self.res.cels[index]
 
     local align = self.alignment
@@ -599,11 +651,13 @@ function Sprite:drawCel(index, x, y, r, sx, sy, kx, ky)
         end
     end
 
-    local ox, oy
+    if ox == nil then ox = 0 end
+    if oy == nil then oy = 0 end
+    
     if align == "topleft" then
-        ox, oy = cel.ox, cel.oy
+        ox, oy = ox + cel.ox, oy + cel.oy
     elseif align == "center" then
-        ox, oy = cel.mx, cel.my
+        ox, oy = ox + cel.cx, oy + cel.cy
     else
         error(("invalid sprite alignment '%s'. expected: 'center', 'topleft"):format(tostring(align)))
     end
