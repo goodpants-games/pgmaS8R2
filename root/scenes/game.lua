@@ -6,6 +6,7 @@ local Menu = require("ui.menu")
 local OptionsMenu = require("ui.options_menu")
 local ControlsMenu = require("ui.controls_menu")
 local game_progression = require("game.progression")
+local Map = require("game.map")
 
 local self
 
@@ -35,6 +36,10 @@ local function pause_menu_signal(menu, signal)
         -- respawn
         self.game:restore_state()
         self.paused = false
+
+    elseif signal == "map" then
+        self.map:reset()
+        self.show_map = true
     
     elseif signal == "options" then
         self.options_menu.active_item = 1
@@ -52,6 +57,7 @@ local function pause_menu_signal(menu, signal)
         local new_menu = Menu()
             :add_label("DEBUG")
             :add_action("WARP", "warp")
+            :add_action("FILL MAP", "fill_map")
             :add_action("+1 RORB", "rorb")
             :add_action("+1 BORB", "borb")
             :add_action("BACK", "back")
@@ -61,6 +67,16 @@ local function pause_menu_signal(menu, signal)
                 io.write("enter room: ")
                 local line = io.read("*l")
                 self.game:warp_to_room("maps/" .. line .. ".tmx")
+
+            elseif sig == "fill_map" then
+                local orig_room = self.game.room_name
+                
+                for _, room in ipairs(self.map.rooms) do
+                    self.game:warp_to_room(room.name)
+                    self.map:visit_tick(true)
+                end
+
+                self.game:warp_to_room(orig_room)
 
             elseif sig == "rorb" then
                 self.paused = false
@@ -109,6 +125,7 @@ function scene.load()
     self = {}
     self.game = Game()
     self.paused = false
+    self.show_map = false
 
     ---@type ui.Menu[]
     self.menu_stack = {}
@@ -117,6 +134,7 @@ function scene.load()
         :add_label("PAUSED")
         :add_action("RESUME", "resume")
         :add_action("RESPAWN", "respawn")
+        :add_action("MAP", "map")
         :add_action("OPTIONS", "options")
         :add_action("CONTROLS", "controls")
         :add_action("EXIT", "exit")
@@ -131,10 +149,13 @@ function scene.load()
     self.pause_menu.query_focused = is_menu_active
     self.options_menu.on_back = options_menu_back
     self.options_menu.query_focused = is_menu_active
+    
+    self.map = Map(self.game, require("game.consts").START_ROOM)
 end
 
 function scene.unload()
     self.game:release()
+    self.map:release()
     self = nil
 end
 
@@ -156,11 +177,19 @@ function scene.update(dt)
             table.clear(self.menu_stack)
             self.pause_menu.active_item = 1
             table.insert(self.menu_stack, self.pause_menu)
+        else
+            self.show_map = false
         end
     end
 
     if not self.paused then
         self.game:update(dt)
+    elseif self.show_map then
+        self.map:update(dt)
+
+        if Input.players[1]:pressed("player_action1") then
+            self.show_map = false
+        end
     else
         self.menu_stack[#self.menu_stack]:update()
     end
@@ -170,6 +199,9 @@ end
 function scene.tick()
     if not self.paused then
         self.game:tick()
+        self.map:visit_tick()
+    elseif self.show_map then
+        self.map:tick()
     else
         self.menu_stack[#self.menu_stack]:tick()
     end
@@ -179,23 +211,27 @@ function scene.draw()
     self.game:draw()
 
     if self.paused then
-        Lg.setBlendMode("multiply", "premultiplied")
-        Lg.setColor(0.5, 0.5, 0.5)
-        Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
-        Lg.setBlendMode("alpha")
+        if self.show_map then
+            self.map:draw()
+        else
+            Lg.setBlendMode("multiply", "premultiplied")
+            Lg.setColor(0.5, 0.5, 0.5)
+            Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
+            Lg.setBlendMode("alpha")
 
-        local total_height = 2.0
-        local menu_spacing = 1.0
-        for _, v in ipairs(self.menu_stack) do
-            local _, h = v:get_size()
-            total_height = total_height + h + menu_spacing
-        end
+            local total_height = 2.0
+            local menu_spacing = 1.0
+            for _, v in ipairs(self.menu_stack) do
+                local _, h = v:get_size()
+                total_height = total_height + h + menu_spacing
+            end
 
-        local yoff = math.min(0, DISPLAY_HEIGHT - total_height)
-        for i, v in ipairs(self.menu_stack) do
-            self.menu_stack[i]:draw(2, 2 + yoff)
-            local _, h = self.menu_stack[i]:get_size()
-            yoff = yoff + h + 1.0
+            local yoff = math.min(0, DISPLAY_HEIGHT - total_height)
+            for i, v in ipairs(self.menu_stack) do
+                self.menu_stack[i]:draw(2, 2 + yoff)
+                local _, h = self.menu_stack[i]:get_size()
+                yoff = yoff + h + 1.0
+            end
         end
     end
 end
