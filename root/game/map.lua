@@ -16,11 +16,19 @@ local Map = batteries.class {
 
 local const = require("game.consts")
 local Input = require("input")
+local Sprite = require("sprite")
+local fontres = require("fontres")
+local userpref = require("userpref")
 
 local MAP_SCREEN_WIDTH = 15 * 8
 local MAP_SCREEN_HEIGHT = 11 * 8
 local MAP_GRID_SIZE = 16
 local MAP_SCREEN_SUBDIV = 2
+
+local ICON_MIN_X = 11
+local ICON_MAX_X = DISPLAY_WIDTH - 11
+local ICON_MIN_Y = 11 + 5
+local ICON_MAX_Y = DISPLAY_HEIGHT - 11
 
 ---@param game game.Game
 ---@param start_room_name string
@@ -76,10 +84,13 @@ function Map:new(game, start_room_name)
 
     self.cam_x = 0.0
     self.cam_y = 0.0
+    self.ticki = 0
+
+    self.icons = Sprite.new("res/sprites/map_icons.json")
 end
 
 function Map:release()
-    
+    self.icons:release()
 end
 
 ---@private
@@ -103,6 +114,7 @@ function Map:reset()
 
     self.cam_x = (room.x + room.width / 2.0) * MAP_GRID_SIZE
     self.cam_y = (room.y + room.height / 2.0) * MAP_GRID_SIZE
+    self.ticki = 0
 end
 
 ---@param dt number
@@ -125,12 +137,15 @@ function Map:tick()
 
     self.cam_x = self.cam_x + move_x
     self.cam_y = self.cam_y + move_y
+
+    self.ticki = self.ticki + 1
 end
 
 ---@param room game._MapRoom
 ---@param ox number
 ---@param oy number
-local function draw_room(room, ox, oy)
+---@param color number[]
+local function draw_room(room, ox, oy, color)
     local grid_size = MAP_GRID_SIZE / MAP_SCREEN_SUBDIV
     local rw = room.width * MAP_SCREEN_SUBDIV
     local rh = room.height * MAP_SCREEN_SUBDIV
@@ -142,7 +157,7 @@ local function draw_room(room, ox, oy)
                 local draw_x = ox + (x - 1) * grid_size
                 local draw_y = oy + (y - 1) * grid_size
 
-                Lg.setColor(P8_PAL.red)
+                Lg.setColor(color)
                 Lg.rectangle("fill", draw_x, draw_y, grid_size, grid_size)
 
                 local adj_l = x > 1
@@ -228,6 +243,52 @@ local function draw_room(room, ox, oy)
     end
 end
 
+---@private
+---@param icon integer
+---@param x number
+---@param y number
+function Map:_draw_icon(icon, x, y)
+    x = math.round(x)
+    y = math.round(y)
+
+    local flags = 0
+    local dx = 0
+    local dy = 0
+
+    if x > ICON_MAX_X then
+        x = ICON_MAX_X
+        flags = bit.bor(flags, 1)
+        dx = 1
+    end
+
+    if y > ICON_MAX_Y then
+        y = ICON_MAX_Y
+        flags = bit.bor(flags, 2)
+        dy = 1
+    end
+
+    if x < ICON_MIN_X then
+        x = ICON_MIN_X
+        flags = bit.bor(flags, 4)
+        dx = -1
+    end
+
+    if y < ICON_MIN_Y then
+        y = ICON_MIN_Y
+        flags = bit.bor(flags, 8)
+        dy = -1
+    end
+
+    -- x = math.clamp(x, 8, DISPLAY_WIDTH - 8)
+    -- y = math.clamp(y, 8, DISPLAY_HEIGHT - 8)
+
+    self.icons:drawCel(icon, x, y)
+
+    if flags ~= 0 then
+       self.icons:drawCel(8 + flags, x + dx * 7, y + dy * 7) 
+    end
+end
+
 function Map:draw()
     Lg.setColor(P8_PAL.black)
     Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -235,26 +296,64 @@ function Map:draw()
     local ox = math.round(DISPLAY_WIDTH / 2.0)
     local oy = math.round(DISPLAY_HEIGHT / 2.0)
 
-    Lg.push()
-    Lg.translate(-math.round(self.cam_x), -math.round(self.cam_y))
+    local cam_x = math.round(self.cam_x)
+    local cam_y = math.round(self.cam_y)
 
+    if self.ticki % 2 == 0 then
+        Lg.setColor(P8_PAL.dark_blue)
+
+        for x=0, DISPLAY_WIDTH + MAP_GRID_SIZE, MAP_GRID_SIZE do
+            Lg.rectangle("fill", x - cam_x % 16 - 4, 0, 1, DISPLAY_HEIGHT)
+        end
+
+        for y=0, DISPLAY_HEIGHT + MAP_GRID_SIZE, MAP_GRID_SIZE do
+            Lg.rectangle("fill", 0, y - cam_y % 16 - 1, DISPLAY_WIDTH, 1)
+        end
+    end
+    
     for _, room in ipairs(self.rooms) do
         if room.visited then
             local draw_x = room.x * MAP_GRID_SIZE + ox
             local draw_y = room.y * MAP_GRID_SIZE + oy
 
-            draw_room(room, draw_x, draw_y)
-
-            -- Lg.setColor(P8_PAL.red)
-            -- Lg.rectangle("fill", draw_x, draw_y, draw_w, draw_h)
-
-            -- Lg.setColor(P8_PAL.white)
-            -- Lg.setLineWidth(1.0)
-            -- Lg.rectangle("line", draw_x + 0.5, draw_y + 0.5, draw_w - 1.0, draw_h - 1.0)
+            if room.name == self.game.room_name and self.ticki % 60 < 30 then
+                draw_room(room, draw_x - cam_x, draw_y - cam_y, P8_PAL.red)
+            else
+                draw_room(room, draw_x - cam_x, draw_y - cam_y, P8_PAL.dark_blue)
+            end
         end
     end
 
-    Lg.pop()
+    do
+        local room = assert(self:_get_room_by_name(const.START_ROOM))
+        local draw_x = (room.x + room.width / 2.0) * MAP_GRID_SIZE + ox
+        local draw_y = (room.y + room.height / 2.0) * MAP_GRID_SIZE + oy
+        self:_draw_icon(1, draw_x - cam_x, draw_y - cam_y)
+        
+    end
+
+    if self.game.player then
+        local room = assert(self:_get_room_by_name(self.game.room_name))
+        local draw_x = room.x * MAP_GRID_SIZE + ox
+        local draw_y = room.y * MAP_GRID_SIZE + oy
+        local pos = self.game.player.position
+
+        local x = math.round(draw_x + pos.x / MAP_SCREEN_WIDTH * MAP_GRID_SIZE)
+        local y = math.round(draw_y + pos.y / MAP_SCREEN_HEIGHT * MAP_GRID_SIZE)
+        self:_draw_icon(2, x - cam_x, y - cam_y)
+    end
+
+    Lg.setColor(P8_PAL.black)
+    Lg.rectangle("fill", 0, 0, DISPLAY_WIDTH, 5)
+
+    Lg.setColor(P8_PAL.white)
+    Lg.setFont(fontres.quinque)
+
+    if userpref.input_mode == "arrow" then
+        Lg.print("X: BACK", 0, -1)
+    else
+        Lg.print(";: BACK", 0, -1)
+    end
 end
 
 ---@param room game._MapRoom
