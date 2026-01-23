@@ -10,10 +10,10 @@
    },
    {
     "filename": "mountain_bg 1.ase",
-    "frame": { "x": 0, "y": 94, "w": 120, "h": 82 },
+    "frame": { "x": 0, "y": 94, "w": 120, "h": 81 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 0, "y": 11, "w": 120, "h": 82 },
+    "spriteSourceSize": { "x": 0, "y": 12, "w": 120, "h": 81 },
     "sourceSize": { "w": 120, "h": 93 },
     "duration": 100
    },
@@ -41,7 +41,7 @@
   "version": "1.x-dev",
   "image": "mountain_bg.png",
   "format": "I8",
-  "size": { "w": 241, "h": 176 },
+  "size": { "w": 241, "h": 175 },
   "scale": "1",
   "frameTags": [
   ]
