@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="45" height="33" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="11">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="45" height="33" tilewidth="8" tileheight="8" infinite="0" nextlayerid="3" nextobjectid="12">
  <tileset firstgid="1" source="../tilesets/tileset.tsx"/>
  <layer id="1" name="Tiles" width="45" height="33">
   <data encoding="base64">
@@ -13,6 +13,11 @@
   <object id="10" name="sign" type="entity" x="176" y="152" width="8" height="8">
    <properties>
     <property name="text" value="room11_hint"/>
+   </properties>
+  </object>
+  <object id="11" name="sign" type="entity" x="96" y="192" width="8" height="8">
+   <properties>
+    <property name="text" value="room01_hint"/>
    </properties>
   </object>
   <object id="4" name="ceil_gun_enemy" type="entity" x="64" y="176" width="8" height="8"/>
