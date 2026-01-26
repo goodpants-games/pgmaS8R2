@@ -103,7 +103,8 @@ local function pause_menu_signal(menu, signal)
     
     elseif signal == "exit" then
         local m = Menu()
-            :add_label("exit?")
+            :add_label("EXIT TO TITLE?")
+            :add_label("THERE IS NO SAVING!")
             :add_action("YES", "y")
             :add_action("NO", "n")
         
