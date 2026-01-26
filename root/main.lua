@@ -78,6 +78,11 @@ vec4 effect(vec4 color, Image tex, vec2 texture_coords, vec2 screen_coords)
 }
 ]])
 
+local perf_heavy_frame = false
+function Mark_perf_heavy_frame()
+    perf_heavy_frame = true
+end
+
 function love.load(args)
     love.keyboard.setTextInput(false)
     love.mouse.setVisible(false)
@@ -207,7 +212,13 @@ function love.update(dt)
     end
 
     local iter = 1
-    dt_accum = dt_accum + dt_to_accum
+
+    if perf_heavy_frame then
+        perf_heavy_frame = false
+    else
+        dt_accum = dt_accum + dt_to_accum
+    end
+
     while dt_accum >= tick_len do
         if iter > 8 then
             print("too many ticks in one frame!")

@@ -10,6 +10,8 @@ local ecsconfig = require("game.ecsconfig")
 ---@param map_path string
 ---@param tex_load_cb nil|fun(path:string):love.Image
 function Room:new(game, map_path, tex_load_cb)
+    Mark_perf_heavy_frame()
+
     self.tiled = Tiled.loadMap(map_path, {
         loadTexture = tex_load_cb
     })
