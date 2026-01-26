@@ -24,6 +24,8 @@ local MAP_SCREEN_WIDTH = 15 * 8
 local MAP_SCREEN_HEIGHT = 11 * 8
 local MAP_GRID_SIZE = 16
 local MAP_SCREEN_SUBDIV = 2
+local MAP_SCREEN_MARGIN_X = 2
+local MAP_SCREEN_MARGIN_Y = 2
 
 local ICON_MIN_X = 11
 local ICON_MAX_X = DISPLAY_WIDTH - 11
@@ -366,12 +368,12 @@ function Map:_fill_collision_data(room)
 
     local i = 1
     for r=1, room.height * MAP_SCREEN_SUBDIV do
-        local start_y = math.floor((r-1) * cell_h)
-        local end_y = math.floor(start_y + cell_h)
+        local start_y = math.floor((r-1) * cell_h) + MAP_SCREEN_MARGIN_Y
+        local end_y = math.floor(start_y + cell_h) - MAP_SCREEN_MARGIN_Y
 
         for c=1, room.width * MAP_SCREEN_SUBDIV do
-            local start_x = math.floor((c-1) * cell_w) + 2
-            local end_x = math.floor(start_x + cell_w) - 2
+            local start_x = math.floor((c-1) * cell_w) + MAP_SCREEN_MARGIN_X
+            local end_x = math.floor(start_x + cell_w) - MAP_SCREEN_MARGIN_X
 
             assert(room.screens[i] ~= nil)
 

@@ -26,9 +26,9 @@
    </properties>
   </object>
   <object id="10" name="gun_enemy" type="entity" x="176" y="56" width="8" height="8"/>
-  <object id="9" name="sign" type="entity" x="24" y="152" width="8" height="8">
+  <object id="9" name="sign" type="entity" x="20" y="152" width="8" height="8">
    <properties>
-    <property name="text" value="sign_beware"/>
+    <property name="text" value="sign_room_reset"/>
    </properties>
   </object>
  </objectgroup>
