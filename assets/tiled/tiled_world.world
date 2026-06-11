@@ -30,10 +30,10 @@
         },
         {
             "fileName": "maps/d01.tmx",
-            "height": 440,
+            "height": 264,
             "width": 240,
             "x": 368,
-            "y": -904
+            "y": -728
         },
         {
             "fileName": "maps/b05.tmx",
@@ -139,6 +139,13 @@
             "width": 240,
             "x": -112,
             "y": -1256
+        },
+        {
+            "fileName": "maps/d01upper.tmx",
+            "height": 176,
+            "width": 240,
+            "x": 368,
+            "y": -904
         }
     ],
     "onlyShowAdjacentMaps": false,
