@@ -32,15 +32,28 @@
  <tile id="52" type="heat"/>
  <tile id="53" type="heat"/>
  <tile id="54" type="heat"/>
+ <tile id="55" type="decor"/>
+ <tile id="56" type="decor"/>
+ <tile id="58" type="decor"/>
+ <tile id="59" type="decor"/>
+ <tile id="60" type="decor"/>
+ <tile id="61" type="decor"/>
  <tile id="66" type="decor"/>
  <tile id="67" type="decor"/>
  <tile id="68" type="decor"/>
  <tile id="69" type="heat"/>
  <tile id="70" type="heat"/>
+ <tile id="71" type="decor"/>
+ <tile id="72" type="decor"/>
+ <tile id="73" type="decor"/>
+ <tile id="74" type="decor"/>
+ <tile id="75" type="decor"/>
+ <tile id="76" type="decor"/>
  <tile id="82" type="decor"/>
  <tile id="83" type="decor"/>
  <tile id="84" type="decor"/>
  <tile id="85" type="heat"/>
+ <tile id="93" type="decor"/>
  <tile id="98" type="decor"/>
  <tile id="99" type="decor"/>
  <tile id="100" type="decor"/>
